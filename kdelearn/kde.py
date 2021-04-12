@@ -4,6 +4,21 @@ from .kernels import gaussian
 
 
 def estimate_bandwidth(x_train, kernel='gaussian'):
+    """
+    Bandwidth estimation.
+
+    Parameters
+    ----------
+    x_train : ndarray of shape (m, n)
+        Input.
+    kernel : {'uniform', 'gaussian', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Kernel name.
+
+    Returns
+    -------
+    bandwidth : array_like of shape (n,)
+        Bandwidth (smoothing) parameter.
+    """
     m_train = x_train.shape[0]
     std_x = np.std(x_train, axis=0, ddof=1)
     if m_train == 1:
