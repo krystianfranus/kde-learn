@@ -3,3 +3,5 @@ notebook>=6.3.0
 matplotlib>=3.4.0
 jupyter_contrib_nbextensions>=0.5.1
 scipy>=1.6.2
+sphinx>=3.5.4
+sphinx-rtd-theme>=0.5.2

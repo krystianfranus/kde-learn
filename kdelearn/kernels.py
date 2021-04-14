@@ -7,7 +7,7 @@ def uniform(x):
 
     Parameters
     ----------
-    x : ndarray
+    x : :obj:`ndarray`
         Function argument.
 
     Returns
