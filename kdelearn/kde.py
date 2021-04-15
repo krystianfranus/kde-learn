@@ -7,11 +7,17 @@ from .utils import estimate_bandwidth
 class Kde:
 
     def __init__(self):
+        self.x_train = None
+        self.m_train = None
+        self.n = None
+        self.weights_train = None
+        self.bandwidth = None
+        self.s = None
         self.kernel = gaussian
 
     def fit(self, x_train, weights_train=None, bandwidth=None):
-        self.m_train, self.n = x_train.shape
         self.x_train = np.copy(x_train)
+        self.m_train, self.n = self.x_train.shape
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
