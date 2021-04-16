@@ -37,9 +37,9 @@ class Ckde:
         self.s = np.ones(self.m_train)
         return self
 
-    def score_samples(self, y_test, w_star):
-        kernel_w_values = self.kernel((w_star - self.w_train[:, None]) / (self.bandwidth_w * self.s[:, None, None]))
-        self.d = np.prod(kernel_w_values, axis=2)
+    def score_samples(self, y_test, w_test):
+        kernel_w_values = self.kernel((w_test - self.w_train[:, None]) / (self.bandwidth_w * self.s[:, None, None]))
+        self.d = np.prod(kernel_w_values, axis=1)
         self.d = self.m_train * self.d / np.sum(self.d, axis=0)
 
         kernel_y_values = self.kernel((y_test - self.y_train[:, None]) / (self.bandwidth_y * self.s[:, None, None]))
