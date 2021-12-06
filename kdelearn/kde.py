@@ -5,7 +5,6 @@ from .utils import estimate_bandwidth
 
 
 class Kde:
-
     def __init__(self):
         self.x_train = None
         self.m_train = None
@@ -28,14 +27,19 @@ class Kde:
         if bandwidth is None:
             self.bandwidth = estimate_bandwidth(self.x_train)
         else:
-            assert bandwidth.any() > 0, f'Bandwidth needs to be greater than zero. Got {bandwidth}.'
+            if bandwidth.any() <= 0:
+                raise ValueError(
+                    f"Bandwidth needs to be greater than zero. Got {bandwidth}."
+                )
             self.bandwidth = np.copy(bandwidth)
 
         self.s = np.ones(self.m_train)
         return self
 
     def score_samples(self, x_test):
+        # fmt: off
         kernel_values = self.kernel((x_test - self.x_train[:, None]) / (self.bandwidth * self.s[:, None, None]))
         scores = 1 / (np.prod(self.bandwidth)) * np.sum(
             (self.weights_train / (self.s ** self.n))[:, None] * np.prod(kernel_values, axis=2), axis=0)
+        # fmt: on
         return scores
