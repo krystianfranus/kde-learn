@@ -5,6 +5,9 @@ jupyter_contrib_nbextensions==0.5.1
 scipy==1.7.3
 sphinx==4.3.1
 sphinx-rtd-theme==1.0.0
-black==21.12b0
-flake8==4.0.1
-isort==5.10.1
+
+# --------- linters --------- #
+pre-commit==2.16.0      # hooks for applying linters on commit
+black==21.12b0          # code formatting
+isort==5.10.1           # import sorting
+flake8==4.0.1           # code analysis
