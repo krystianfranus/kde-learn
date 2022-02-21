@@ -13,3 +13,5 @@ black {source_file_or_directory}
 flake8 {source_file_or_directory}
 isort {source_file_or_directory}
 ```
+
+Pre-commit works with 'git commit'
