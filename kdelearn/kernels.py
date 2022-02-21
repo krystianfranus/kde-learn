@@ -32,7 +32,7 @@ def gaussian(x):
     ndarray
         Values of the function for the given arguments.
     """
-    return np.exp(-x ** 2 / 2) / np.sqrt(2 * np.pi)
+    return np.exp(-(x ** 2) / 2) / np.sqrt(2 * np.pi)
 
 
 def epanechnikov(x):

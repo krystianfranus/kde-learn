@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def estimate_bandwidth(x_train, kernel='gaussian'):
+def estimate_bandwidth(x_train, kernel="gaussian"):
     """
     Bandwidth estimation.
 
@@ -23,16 +23,16 @@ def estimate_bandwidth(x_train, kernel='gaussian'):
         std_x = np.std(x_train, axis=0)
     std_x[std_x == 0] = 1
 
-    if kernel == 'gaussian':
+    if kernel == "gaussian":
         W, U = 1 / (2 * np.sqrt(np.pi)), 1
-    elif kernel == 'uniform':
+    elif kernel == "uniform":
         W, U = 1 / 2, 1 / 3
-    elif kernel == 'cauchy':
+    elif kernel == "cauchy":
         W, U = 5 / (4 * np.pi), 1
-    elif kernel == 'epanechnikov':
+    elif kernel == "epanechnikov":
         W, U = 0.6, 0.2
     else:
-        raise ValueError(f'invalid kernel: {kernel}')
+        raise ValueError(f"invalid kernel: {kernel}")
     WU2 = W / (U ** 2)
     Z = 3 / (8 * np.sqrt(np.pi))
 

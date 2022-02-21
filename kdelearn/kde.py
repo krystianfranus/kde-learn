@@ -28,9 +28,7 @@ class Kde:
             self.bandwidth = estimate_bandwidth(self.x_train)
         else:
             if bandwidth.any() <= 0:
-                raise ValueError(
-                    f"Bandwidth needs to be greater than zero. Got {bandwidth}."
-                )
+                raise ValueError(f"Bandwidth needs to be greater than zero. Got {bandwidth}.")
             self.bandwidth = np.copy(bandwidth)
 
         self.s = np.ones(self.m_train)
