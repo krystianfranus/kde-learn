@@ -1,7 +1,8 @@
 import numpy as np
+from numpy import ndarray
 
 
-def estimate_bandwidth(x_train, kernel_name="gaussian"):
+def estimate_bandwidth(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
     """
     Bandwidth estimation.
 
@@ -9,7 +10,7 @@ def estimate_bandwidth(x_train, kernel_name="gaussian"):
     ----------
     x_train : ndarray of shape (m, n)
         Input.
-    kernel : {'uniform', 'gaussian', 'epanechnikov', 'cauchy'}, default='gaussian'
+    kernel_name : {'uniform', 'gaussian', 'epanechnikov', 'cauchy'}, default='gaussian'
         Kernel name.
 
     Returns
