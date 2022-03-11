@@ -134,8 +134,9 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# Cython debug symbols
+# Cython
 cython_debug/
+kdelearn/*.c
 
 # PyCharm
 #  JetBrains specific template is maintainted in a separate JetBrains.gitignore that can
