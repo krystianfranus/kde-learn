@@ -18,7 +18,6 @@ class Kde:
         self.x_train = np.copy(x_train)
         m_train = self.x_train.shape[0]
 
-        # TODO: check whether weights are positive numbers
         if weights_train is None:
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
