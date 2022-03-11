@@ -16,9 +16,9 @@ class Kde:
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
         self.x_train = np.copy(x_train)
-        m_train = self.x_train.shape[0]
 
         if weights_train is None:
+            m_train = self.x_train.shape[0]
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if len(weights_train.shape) != 1:
