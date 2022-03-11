@@ -6,7 +6,7 @@ from libc.math cimport abs, exp, pi, sqrt
 
 
 cdef double gaussian(double x):
-    return 1 / sqrt(2 * pi) * exp(-0.5 * x**2)
+    return 1.0 / sqrt(2.0 * pi) * exp(-0.5 * x ** 2)
 
 
 cdef double uniform(double x):
@@ -18,14 +18,20 @@ cdef double uniform(double x):
 
 cdef double epanechnikov(double x):
     if abs(x) <= 1.0:
-        return 3.0 / 4.0 * (1.0 - x**2.0)
+        return 3.0 / 4.0 * (1.0 - x ** 2.0)
     else:
         return 0.0
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def compute_kde(double[:, :] x_train, double[:] weights_train, double[:] bandwidth, double[:, :] x_test, str kernel_name):
+def compute_kde(
+        double[:, :] x_train,
+        double[:] weights_train,
+        double[:] bandwidth,
+        double[:, :] x_test,
+        str kernel_name,
+):
     cdef Py_ssize_t m_train = x_train.shape[0]
     cdef Py_ssize_t m_test = x_test.shape[0]
     cdef Py_ssize_t n = x_train.shape[1]
