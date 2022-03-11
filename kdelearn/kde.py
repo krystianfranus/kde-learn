@@ -10,9 +10,6 @@ from .utils import estimate_bandwidth
 
 class Kde:
     def __init__(self, kernel_name: str):
-        self.x_train = None
-        self.weights_train = None
-        self.bandwidth = None
         self.kernel_name = kernel_name
 
     def fit(self, x_train: ndarray, weights_train: Optional[ndarray] = None):
