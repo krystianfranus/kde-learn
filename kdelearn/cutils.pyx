@@ -27,9 +27,9 @@ cdef double epanechnikov(double x):
 @cython.cdivision(True)
 def compute_kde(
         double[:, :] x_train,
+        double[:, :] x_test,
         double[:] weights_train,
         double[:] bandwidth,
-        double[:, :] x_test,
         str kernel_name,
 ):
     cdef Py_ssize_t m_train = x_train.shape[0]
