@@ -21,4 +21,4 @@ python:
     - method: pip
       path: .
     - method: setuptools
-      path: package
+      path: kdelearn
