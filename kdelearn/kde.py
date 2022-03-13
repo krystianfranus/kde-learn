@@ -17,6 +17,30 @@ def kde_classifier(
     shared_bandwidth: bool = True,
     prior: Optional[ndarray] = None,
 ) -> ndarray:
+    """Tmp.
+
+    Parameters
+    ----------
+    x_train : :obj:`ndarray`
+        Tmp.
+    labels_train : :obj:`ndarray`
+        Tmp.
+    x_test : :obj:`ndarray`
+        Tmp.
+    weights_train : :obj:`ndarray`, optional
+        Tmp.
+    kernel_name : str, optional
+        Tmp.
+    shared_bandwidth : bool, optional
+        Tmp.
+    prior : :obj:`ndarray`, optional
+        Tmp.
+
+    Returns
+    -------
+    :obj:`ndarray`
+        Tmp.
+    """
     ulabels = np.unique(labels_train)  # sorted unique labels
     if prior is None:
         prior = np.zeros(ulabels.shape)
@@ -30,15 +54,56 @@ def kde_classifier(
     for idx, label in enumerate(ulabels):
         mask = labels_train == label
         weights = None if weights_train is None else weights_train[mask]
-        kde = Kde(kernel_name=kernel_name).fit(
-            x_train[mask],
-            weights_train=weights,
-            bandwidth=bandwidth,
-        )
+        kde = Kde(kernel_name).fit(x_train[mask], weights, bandwidth)
         scores[:, idx] = kde.score_samples(x_test)
 
     labels_pred = ulabels[np.argmax(scores * prior, axis=1)]
     return labels_pred
+
+
+def kde_outliers(
+    x_train: ndarray,
+    x_test: ndarray,
+    weights_train: Optional[ndarray] = None,
+    r: float = 0.1,
+    kernel_name: str = "gaussian",
+    bandwidth: ndarray = None,
+) -> ndarray:
+    """Tmp.
+
+    Parameters
+    ----------
+    x_train : :obj:`ndarray`
+        Tmp.
+    x_test : :obj:`ndarray`
+        Tmp.
+    weights_train : :obj:`ndarray`, optional
+        Tmp.
+    r : float, optional
+        Tmp.
+    kernel_name : str, optional
+        Tmp.
+    bandwidth : :obj:`ndarray`, optional
+        Tmp.
+
+    Returns
+    -------
+    :obj:`ndarray`
+        Tmp.
+    """
+    m_train = x_train.shape[0]
+    scores_train = np.empty(m_train)
+    for i in range(m_train):
+        tmp_x = np.delete(x_train, i, axis=0)
+        tmp_weights = np.delete(weights_train, i) if weights_train is not None else None
+        kde = Kde(kernel_name).fit(tmp_x, tmp_weights, bandwidth)
+        scores_train[i] = kde.score_samples(x_train[[i]])
+    q = np.quantile(scores_train, r)
+
+    kde = Kde(kernel_name).fit(x_train, weights_train, bandwidth)
+    scores_test = kde.score_samples(x_test)
+    outliers = np.where(scores_test <= q)[0]
+    return outliers
 
 
 class Kde:

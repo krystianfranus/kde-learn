@@ -29,6 +29,7 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
    :caption: Api Reference
    :maxdepth: 2
 
+   kde.rst
    kernels.rst
    cutils.rst
 
