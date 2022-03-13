@@ -30,12 +30,21 @@ cdef double cauchy(double x):
 @cython.wraparound(False)
 @cython.cdivision(True)
 def compute_kde(
-        double[:, :] x_train,
-        double[:, :] x_test,
-        double[:] weights_train,
-        double[:] bandwidth,
-        str kernel_name,
+    double[:, :] x_train,
+    double[:, :] x_test,
+    double[:] weights_train,
+    double[:] bandwidth,
+    str kernel_name,
 ):
+    """function description
+
+    Parameters
+    ----------
+    x_train : :obj:`ndarray`
+        Function argument.
+    x_test : :obj:`ndarray`
+        Function argument.
+    """
     cdef Py_ssize_t m_train = x_train.shape[0]
     cdef Py_ssize_t m_test = x_test.shape[0]
     cdef Py_ssize_t n = x_train.shape[1]

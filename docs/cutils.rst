@@ -1,7 +1,7 @@
-Kernels
+Cutils
 ===============
 
 .. currentmodule:: kdelearn
 
-.. automodule:: kdelearn.kernels
+.. automodule:: kdelearn.cutils
    :members:

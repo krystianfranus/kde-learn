@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. _index:
-
 Welcome to kde-learn's documentation!
 =====================================
+
+.. currentmodule:: kdelearn
 
 Morbi laoreet dui neque, id ultrices tortor lacinia ac. Nullam ornare tempor aliquam.
 Ut congue a arcu malesuada mollis. In tortor nisi, convallis ac tempus non, hendrerit sit amet tortor.
@@ -29,7 +29,8 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
    :caption: Api Reference
    :maxdepth: 2
 
-   kernels
+   kernels.rst
+   cutils.rst
 
 Indices and tables
 ==================

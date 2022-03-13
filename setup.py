@@ -1,4 +1,3 @@
-# https://stackoverflow.com/questions/4505747/how-should-i-structure-a-python-package-that-contains-cython-code
 from setuptools import Extension, find_packages, setup
 
 use_cython = True
@@ -15,6 +14,10 @@ if use_cython:
     cmdclass.update({"build_ext": build_ext})
 else:
     ext_modules.append(Extension("kdelearn.cutils", ["kdelearn/cutils.c"]))
+
+# Related to docstrings in cython code
+for e in ext_modules:
+    e.cython_directives = {"binding": True}
 
 with open("VERSION", "r") as f:
     version = f.read().strip()
