@@ -28,6 +28,7 @@ Pre-commit works with 'git commit'
 ### Create the documentation
 
 ```
+cd docs/
 make html
 ```
 
