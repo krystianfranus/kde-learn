@@ -22,6 +22,10 @@ cdef double epanechnikov(double x):
     else:
         return 0.0
 
+
+cdef double cauchy(double x):
+    return 2.0 / (pi * (x ** 2 + 1.0) ** 2)
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
@@ -42,6 +46,8 @@ def compute_kde(
         kernel = uniform
     elif kernel_name == "epanechnikov":
         kernel = epanechnikov
+    elif kernel_name == "cauchy":
+        kernel = cauchy
     else:
         raise RuntimeError("invalid kernel name")
 
