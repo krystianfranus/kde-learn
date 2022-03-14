@@ -17,29 +17,35 @@ def kde_classifier(
     shared_bandwidth: bool = True,
     prior: Optional[ndarray] = None,
 ) -> ndarray:
-    """Tmp.
+    """
+    Bayes' classifier based on kernel density estimation.
+
+    .. math::
+        P(C=c|X=x) \\propto \\alpha_c \\hat{f}_c(X=x)
+    .. math::
+        \\underset{c}{\\mathrm{argmax}} \\ P(C=c|X=x)
 
     Parameters
     ----------
-    x_train : :obj:`ndarray`
-        Tmp.
-    labels_train : :obj:`ndarray`
-        Tmp.
-    x_test : :obj:`ndarray`
-        Tmp.
-    weights_train : :obj:`ndarray`, optional
-        Tmp.
-    kernel_name : str, optional
-        Tmp.
-    shared_bandwidth : bool, optional
-        Tmp.
-    prior : :obj:`ndarray`, optional
-        Tmp.
+    x_train : `ndarray`
+        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+    labels_train : `ndarray`
+        Data points as a 1D array containing data with `int` type. Must have shape (m_train,).
+    x_test : `ndarray`
+        Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+    weights_train : `ndarray`, default=None
+        Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
+    shared_bandwidth : bool, default=True
+        Determines whether all classes should have common bandwidth. If False, each class gets own bandwidth.
+    prior : `ndarray`, default=None
+        Prior probability.
 
     Returns
     -------
-    :obj:`ndarray`
-        Tmp.
+    labels_pred : `ndarray`
+        Predicted labels.
     """
     ulabels = np.unique(labels_train)  # sorted unique labels
     if prior is None:
@@ -55,7 +61,7 @@ def kde_classifier(
         mask = labels_train == label
         weights = None if weights_train is None else weights_train[mask]
         kde = Kde(kernel_name).fit(x_train[mask], weights, bandwidth)
-        scores[:, idx] = kde.score_samples(x_test)
+        scores[:, idx] = kde.pdf(x_test)
 
     labels_pred = ulabels[np.argmax(scores * prior, axis=1)]
     return labels_pred
@@ -69,27 +75,28 @@ def kde_outliers(
     kernel_name: str = "gaussian",
     bandwidth: ndarray = None,
 ) -> ndarray:
-    """Tmp.
+    """
+    Outliers detection based on kernel density estimation.
 
     Parameters
     ----------
-    x_train : :obj:`ndarray`
-        Tmp.
-    x_test : :obj:`ndarray`
-        Tmp.
-    weights_train : :obj:`ndarray`, optional
-        Tmp.
-    r : float, optional
-        Tmp.
-    kernel_name : str, optional
-        Tmp.
-    bandwidth : :obj:`ndarray`, optional
-        Tmp.
+    x_train : `ndarray`
+        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+    x_test : `ndarray`
+        Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+    weights_train : `ndarray`, default=None
+        Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+    r : float, default=0.1
+        Threshold.
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
+    bandwidth : `ndarray`, optional
+        Smoothing parameter. Must have shape (n,).
 
     Returns
     -------
-    :obj:`ndarray`
-        Tmp.
+    outliers : `ndarray`
+        Indices of detected outliers.
     """
     m_train = x_train.shape[0]
     scores_train = np.empty(m_train)
@@ -107,6 +114,30 @@ def kde_outliers(
 
 
 class Kde:
+    """
+    Kernel density estimator:
+
+    .. math::
+        \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j} K(\\frac{x_{j} - x_{i, j}}{h_j})
+
+    Parameters
+    ----------
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
+
+    Examples
+    --------
+    >>> x_train = np.random.normal(0, 1, (1000, 1))
+    >>> x_test = np.random.uniform(-1, 1, (10, 1))
+    >>> kde = Kde(kernel_name="gaussian").fit(x_train)
+    >>> scores = kde.pdf(x_test)
+
+    References
+    ----------
+    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+      Boca Raton: Chapman and Hall, 1986.
+    """
+
     def __init__(self, kernel_name: str = "gaussian"):
         self.kernel_name = kernel_name
 
@@ -116,6 +147,35 @@ class Kde:
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
     ):
+        """
+        Fit kernel density estymator to the data (x_train). This method computes bandwidth.
+
+        Parameters
+        ----------
+        x_train : `ndarray`
+            Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+        weights_train : `ndarray`, optional
+            Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+        bandwidth : `ndarray`, optional
+            Smoothing parameter. Must have shape (n,).
+
+        Returns
+        -------
+        self : Kde
+            Self instance of `Kde`.
+
+        Examples
+        --------
+        >>> x_train = np.random.normal(0, 1, size=(1000, 1))
+        >>> # with no weights
+        >>> kde = Kde(kernel_name="gaussian").fit(x_train, weights_train=None)
+        >>> # with weighted data points
+        >>> weights_train = np.random.randint(1, 10, size=(1000,))
+        >>> kde = Kde(kernel_name="gaussian").fit(x_train, weights_train=weights_train)
+        >>> # fixed bandwidth
+        >>> bandwidth = np.random.normal(0, 1, size=(1,))
+        >>> kde = Kde(kernel_name="gaussian").fit(x_train, bandwidth=bandwidth)
+        """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
         self.x_train = np.copy(x_train)
@@ -143,7 +203,27 @@ class Kde:
 
         return self
 
-    def score_samples(self, x_test: ndarray) -> ndarray:
+    def pdf(self, x_test: ndarray) -> ndarray:
+        """
+        Compute estimation of probability density function.
+
+        Parameters
+        ----------
+        x_test : `ndarray`
+            Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+
+        Returns
+        -------
+        scores : `ndarray`
+            Values of kernel density estimator.
+
+        Examples
+        --------
+        >>> x_train = np.random.normal(0, 1, (1000, 1))
+        >>> x_test = np.random.uniform(-1, 1, (10, 1))
+        >>> kde = Kde(kernel_name="gaussian").fit(x_train)
+        >>> scores = kde.pdf(x_test)
+        """
         scores = compute_kde(
             self.x_train,
             x_test,
