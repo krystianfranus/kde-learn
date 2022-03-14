@@ -1,7 +1,8 @@
-Cutils
-===============
+Kernels
+=======
 
 .. currentmodule:: kdelearn
 
 .. automodule:: kdelearn.cutils
-   :members:
+    :members:
+    :exclude-members: compute_kde

@@ -1,5 +1,5 @@
-Kde functions
-===============
+Procedures
+==========
 
 .. currentmodule:: kdelearn
 

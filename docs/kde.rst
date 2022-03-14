@@ -1,5 +1,5 @@
-Kde
-===============
+Kernel density estimator
+========================
 
 .. currentmodule:: kdelearn
 

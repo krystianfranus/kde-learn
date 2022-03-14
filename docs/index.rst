@@ -17,22 +17,21 @@ Cras a magna at tortor posuere bibendum nec in diam.
 Nunc libero tellus, finibus a vehicula sit amet, tempus in ante.
 Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt nisl.
 
-
 .. toctree::
    :caption: Contents
    :maxdepth: 2
 
-   getting_started
-
+   getting_started.rst
+   kernels.rst
 
 .. toctree::
    :caption: Api Reference
    :maxdepth: 2
 
    kde.rst
+   cutils.rst
    kde_funcs.rst
    utils.rst
-   cutils.rst
 
 Indices and tables
 ==================
