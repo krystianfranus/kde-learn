@@ -26,7 +26,7 @@ Comparison plot
 
     from kdelearn.cutils import gaussian, uniform, epanechnikov, cauchy
     m_test = 1000
-    x_test = np.linspace(-4, 4, m_test)
+    x_test = np.linspace(-3, 3, m_test)
 
     plt.figure(figsize=(6, 4))
     for kernel in [gaussian, uniform, epanechnikov, cauchy]:
