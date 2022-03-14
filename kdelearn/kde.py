@@ -73,7 +73,7 @@ class Kde:
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
-        self.x_train = np.copy(x_train)
+        self.x_train = x_train
 
         if weights_train is None:
             m_train = self.x_train.shape[0]
@@ -83,7 +83,7 @@ class Kde:
                 raise RuntimeError("weights_train must be 1d ndarray")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
-            self.weights_train = np.copy(weights_train)
+            self.weights_train = weights_train
             self.weights_train = self.weights_train / self.weights_train.sum()
 
         if bandwidth is None:
@@ -91,7 +91,7 @@ class Kde:
         else:
             if not (bandwidth > 0).all():
                 raise ValueError("bandwidth must be positive")
-            self.bandwidth = np.copy(bandwidth)
+            self.bandwidth = bandwidth
 
         return self
 
