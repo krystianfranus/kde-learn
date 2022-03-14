@@ -41,6 +41,19 @@ def kde_classifier(
     prior : `ndarray`, default=None
         Prior probability.
 
+    Examples
+    --------
+    >>> # Prepare data points and labels for two classes
+    >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
+    >>> labels_train1 = np.full(10_000 // 2, 1)
+    >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
+    >>> labels_train2 = np.full(10_000 // 2, 2)
+    >>> x_train = np.concatenate((x_train1, x_train2))
+    >>> labels_train = np.concatenate((labels_train1, labels_train2))
+    >>> # Classify
+    >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
+    >>> labels_pred = kde_classifier(x_train, labels_train, x_test)
+
     Returns
     -------
     labels_pred : `ndarray`
@@ -92,6 +105,14 @@ def kde_outliers(
     bandwidth : `ndarray`, optional
         Smoothing parameter. Must have shape (n,).
 
+    Examples
+    --------
+    >>> # Prepare data points
+    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+    >>> # Detect outliers
+    >>> x_test = np.random.uniform(-2, 2, size=(1000, 1))
+    >>> outliers = kde_outliers(x_train, x_test, r=0.1)
+
     Returns
     -------
     outliers : `ndarray`
@@ -103,10 +124,10 @@ def kde_outliers(
         tmp_x = np.delete(x_train, i, axis=0)
         tmp_weights = np.delete(weights_train, i) if weights_train is not None else None
         kde = Kde(kernel_name).fit(tmp_x, tmp_weights, bandwidth)
-        scores_train[i] = kde.score_samples(x_train[[i]])
+        scores_train[i] = kde.pdf(x_train[[i]])
     q = np.quantile(scores_train, r)
 
     kde = Kde(kernel_name).fit(x_train, weights_train, bandwidth)
-    scores_test = kde.score_samples(x_test)
+    scores_test = kde.pdf(x_test)
     outliers = np.where(scores_test <= q)[0]
     return outliers
