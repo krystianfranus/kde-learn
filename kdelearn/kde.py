@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_kde
 
-from .utils import estimate_bandwidth
+from .utils import scotts_rule
 
 
 class Kde:
@@ -87,10 +87,7 @@ class Kde:
             self.weights_train = self.weights_train / self.weights_train.sum()
 
         if bandwidth is None:
-            self.bandwidth = estimate_bandwidth(
-                self.x_train,
-                self.kernel_name,
-            )
+            self.bandwidth = scotts_rule(self.x_train, self.kernel_name)
         else:
             if not (bandwidth > 0).all():
                 raise ValueError("bandwidth must be positive")

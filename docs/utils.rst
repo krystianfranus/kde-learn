@@ -1,7 +1,7 @@
-Kernels
+Utils
 ===============
 
 .. currentmodule:: kdelearn
 
-.. automodule:: kdelearn.kernels
+.. automodule:: kdelearn.utils
    :members:

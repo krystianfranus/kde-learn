@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 from .kde import Kde
-from .utils import estimate_bandwidth
+from .utils import scotts_rule
 
 
 def kde_classifier(
@@ -66,7 +66,7 @@ def kde_classifier(
             mask = labels_train == label
             prior[idx] = labels_train[mask].shape[0] / x_train.shape[0]
 
-    bandwidth = estimate_bandwidth(x_train) if shared_bandwidth else None
+    bandwidth = scotts_rule(x_train) if shared_bandwidth else None
 
     scores = np.zeros((x_test.shape[0], ulabels.shape[0]))
     for idx, label in enumerate(ulabels):

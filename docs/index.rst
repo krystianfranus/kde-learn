@@ -31,7 +31,7 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
 
    kde.rst
    kde_funcs.rst
-   kernels.rst
+   utils.rst
    cutils.rst
 
 Indices and tables
