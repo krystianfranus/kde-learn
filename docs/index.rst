@@ -30,6 +30,7 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
    :maxdepth: 2
 
    kde.rst
+   kde_funcs.rst
    kernels.rst
    cutils.rst
 
