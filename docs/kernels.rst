@@ -13,7 +13,7 @@ Formulas
     Kernel name     Formula
     ==============  =============================================================================
     Gaussian        :math:`\frac{1}{\sqrt{2 \pi}} \exp \left( \frac{x^2}{2} \right)`
-    Uniform         :math:`1 \quad \text{if } |x| \leq 0 \quad \text{else } 0`
+    Uniform         :math:`0.5 \quad \text{if } |x| \leq 0 \quad \text{else } 0`
     Epanechnikov    :math:`\frac{3}{4} (1-x^2) \quad \text{if } |x| \leq 0 \quad \text{else } 0`
     Cauchy          :math:`\frac{2}{\pi (x^2 + 1)^2}`
     ==============  =============================================================================

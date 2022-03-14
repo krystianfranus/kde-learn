@@ -34,7 +34,7 @@ def uniform(x: float) -> float:
     Uniform kernel function.
 
     .. math::
-        K(x) = 1 \\quad \\text{if } |x| \\leq 0 \\quad  \\text{else } 0
+        K(x) = 0.5 \\quad \\text{if } |x| \\leq 0 \\quad  \\text{else } 0
     """
     return cuniform(x)
 
