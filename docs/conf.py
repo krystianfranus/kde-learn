@@ -31,8 +31,11 @@ author = "Krystian Franus"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "matplotlib.sphinxext.plot_directive",
+    "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "numpydoc",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -45,6 +48,13 @@ master_doc = "index"
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+plot_pre_code = r"""
+from matplotlib import pyplot as plt
+import numpy as np
+np.random.seed(0)
+plt.figure(figsize=(6, 4))
+"""
 
 
 # -- Options for HTML output -------------------------------------------------

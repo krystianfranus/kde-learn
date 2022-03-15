@@ -23,6 +23,7 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
 
    getting_started.rst
    kernels.rst
+   procedures.rst
 
 .. toctree::
    :caption: Api Reference
