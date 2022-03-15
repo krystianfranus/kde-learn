@@ -8,6 +8,11 @@ kde classifier
 
 Classifier description
 
+.. math::
+    P(C=c|X=x) \propto \alpha_c \hat{f}_c(X=x)
+.. math::
+    \underset{c}{\mathrm{argmax}} \quad P(C=c|X=x)
+
 Example:
 
 .. plot::
@@ -38,7 +43,7 @@ Example:
     x2p = x2v.reshape(-1, 1)
     x_test = np.hstack((x1p, x2p))  # shape (10000, 2)
 
-    # Classifier
+    # Classify grid points
     labels_pred = kde_classifier(x_train, labels_train, x_test)
 
     for label, color in zip(np.unique(labels_train), ["cornflowerblue", "goldenrod"]):

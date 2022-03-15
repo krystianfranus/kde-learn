@@ -22,7 +22,7 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
    :maxdepth: 2
 
    getting_started.rst
-   kernels.rst
+   kde_desc.rst
    procedures.rst
 
 .. toctree::

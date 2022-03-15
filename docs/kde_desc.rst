@@ -1,10 +1,24 @@
+Kernel density estimation
+=========================
+
+Kernel density estimator
+------------------------
+
+.. math::
+    \hat{f}(x) = \sum_{i=1}^m w_{i} \prod_{j=i}^n \frac{1}{h_j} K \left( \frac{x_{j} - x_{i, j}}{h_j} \right) \text{,} \quad x \in \mathbb{R}^n
+
+.. hlist::
+    :columns: 2
+
+    - :math:`m` - size of dataset
+
+    - :math:`K(x)` - kernel function
+    - :math:`n` - dimensionality
+    - :math:`w` - weights of dataset
+
+
 Kernels
-=======
-
-Available kernel functions :math:`K(x)`
-
-Formulas
---------
+-------
 
 .. table:: Formulas for available kernel functions
     :widths: auto
@@ -19,7 +33,6 @@ Formulas
     ==============  =============================================================================
 
 Comparison plot
----------------
 
 .. plot::
     :include-source:

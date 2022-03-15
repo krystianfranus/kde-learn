@@ -13,7 +13,7 @@ class Kde:
     Kernel density estimator:
 
     .. math::
-        \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j} K(\\frac{x_{j} - x_{i, j}}{h_j})
+        \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j} K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
 
     Parameters
     ----------
