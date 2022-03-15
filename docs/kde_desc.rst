@@ -1,8 +1,8 @@
 Kernel density estimation
 =========================
 
-Kernel density estimator
-------------------------
+Formula
+-------
 
 .. math::
     \hat{f}(x) = \sum_{i=1}^m w_{i} \prod_{j=i}^n \frac{1}{h_j} K \left( \frac{x_{j} - x_{i, j}}{h_j} \right) \text{,} \quad x \in \mathbb{R}^n
@@ -11,10 +11,10 @@ Kernel density estimator
     :columns: 2
 
     - :math:`m` - size of dataset
-
-    - :math:`K(x)` - kernel function
-    - :math:`n` - dimensionality
     - :math:`w` - weights of dataset
+    - :math:`h` - bandwidth (smoothing parameter)
+    - :math:`n` - dimensionality
+    - :math:`K(x)` - kernel function
 
 
 Kernels
@@ -27,8 +27,8 @@ Kernels
     Kernel name     Formula
     ==============  =============================================================================
     Gaussian        :math:`\frac{1}{\sqrt{2 \pi}} \exp \left( \frac{x^2}{2} \right)`
-    Uniform         :math:`0.5 \quad \text{if } |x| \leq 0 \quad \text{else } 0`
-    Epanechnikov    :math:`\frac{3}{4} (1-x^2) \quad \text{if } |x| \leq 0 \quad \text{else } 0`
+    Uniform         :math:`0.5 \quad \text{if } |x| \leq 0 \quad \text{otherwise } 0`
+    Epanechnikov    :math:`\frac{3}{4} (1-x^2) \quad \text{if } |x| \leq 0 \quad \text{otherwise } 0`
     Cauchy          :math:`\frac{2}{\pi (x^2 + 1)^2}`
     ==============  =============================================================================
 
