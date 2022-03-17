@@ -56,14 +56,14 @@ class KdeClassifier:
         labels_train : `ndarray`
             Labels of data points as a 1D array containing data with `int` type. Must have shape (m_train,).
         shared_bandwidth : bool, default=True
-            Determines whether all classes should have common bandwidth. If False, each class gets own bandwidth.
+            Determines whether all classes should have common bandwidth. If False, each class gets its own bandwidth.
         prior : `ndarray`, default=None
-            Prior probabilities.
+            Prior probabilities of each class. Must have shape (n_classes,).
 
         Returns
         -------
         self : KdeClassifier
-            Self instance of `KdeClassifier`.
+            Fitted self instance of `KdeClassifier`.
         """
         self.x_train = x_train
         self.labels_train = labels_train
@@ -98,7 +98,7 @@ class KdeClassifier:
         Returns
         -------
         labels_pred : `ndarray`
-            Predicted labels. Shape (m_test,).
+            Predicted labels as a 1D array containing data with `int` type. Shape (m_test,).
 
         Examples
         --------
@@ -112,13 +112,13 @@ class KdeClassifier:
         >>> # Classify
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
         >>> model = KdeClassifier().fit(x_train, labels_train)
-        >>> labels_pred = model.predict(x_test)
+        >>> labels_pred = model.predict(x_test)  # labels_pred shape (1000,)
         """
         labels_pred, _ = self._compute(x_test)
         return labels_pred
 
-    def predict_proba(self, x_test: ndarray):
-        """Predict probabilities.
+    def score(self, x_test: ndarray):
+        """Compute pdf of each class.
 
         Parameters
         ----------
@@ -128,7 +128,7 @@ class KdeClassifier:
         Returns
         -------
         scores : `ndarray`
-            Predicted labels. Shape (m_test,).
+            Predicted scores as a 2D array containing data with `float` type. Shape (m_test, n_classes).
 
         Examples
         --------
@@ -142,7 +142,7 @@ class KdeClassifier:
         >>> # Classify
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
         >>> model = KdeClassifier().fit(x_train, labels_train)
-        >>> scores = model.predict_proba(x_test)
+        >>> scores = model.score(x_test)  # scores shape (1000, 2)
         """
         _, scores = self._compute(x_test)
         return scores

@@ -57,7 +57,7 @@ class Kde:
         Returns
         -------
         self : Kde
-            Self instance of `Kde`.
+            Fitted self instance of `Kde`.
 
         Examples
         --------
