@@ -9,8 +9,7 @@ from .utils import scotts_rule
 
 
 class Kde:
-    """
-    Kernel density estimator:
+    """Kernel density estimator:
 
     .. math::
         \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j} K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
@@ -42,8 +41,7 @@ class Kde:
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
     ):
-        """
-        Fit kernel density estymator to the data (x_train). This method computes bandwidth.
+        """Fit kernel density estymator to the data (x_train). This method computes bandwidth.
 
         Parameters
         ----------
@@ -56,7 +54,7 @@ class Kde:
 
         Returns
         -------
-        self : Kde
+        self : `Kde`
             Fitted self instance of `Kde`.
 
         Examples
@@ -96,8 +94,7 @@ class Kde:
         return self
 
     def pdf(self, x_test: ndarray) -> ndarray:
-        """
-        Compute estimation of probability density function.
+        """Compute estimation of probability density function.
 
         Parameters
         ----------
