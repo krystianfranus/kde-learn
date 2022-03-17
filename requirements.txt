@@ -15,3 +15,7 @@ pre-commit==2.17.0      # hooks for applying linters on commit
 black==22.1.0           # code formatting
 isort==5.10.1           # import sorting
 flake8==4.0.1           # code analysis
+
+# --------- for comparison --------- #
+scikit-learn==1.0.2
+statsmodels==0.13.2

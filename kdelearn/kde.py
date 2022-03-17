@@ -124,3 +124,7 @@ class Kde:
             self.kernel_name,
         )
         return scores
+
+    # TODO: https://stats.stackexchange.com/questions/43674/simple-sampling-method-for-a-kernel-density-estimator
+    def sample(self):
+        raise NotImplementedError
