@@ -18,7 +18,7 @@ Example:
 .. plot::
     :include-source:
 
-    from kdelearn.kde_funcs import kde_classifier
+    from kdelearn.kde_funcs import KdeClassifier
 
     # Prepare train data
     m_train = 1000
@@ -44,7 +44,8 @@ Example:
     x_test = np.hstack((x1p, x2p))  # shape (10000, 2)
 
     # Classify grid points
-    labels_pred = kde_classifier(x_train, labels_train, x_test)
+    model = KdeClassifier().fit(x_train, labels_train)
+    labels_pred = model.predict(x_test)
 
     for label, color in zip(np.unique(labels_train), ["cornflowerblue", "goldenrod"]):
         mask1 = (labels_train == label)
