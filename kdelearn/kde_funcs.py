@@ -34,8 +34,8 @@ class KdeClassifier:
     >>> labels_train2 = np.full(10_000 // 2, 2)
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
-    >>> # Fit classifier
-    >>> model = KdeClassifier().fit(x_train, labels_train)
+    >>> # Fit the classifier
+    >>> classifier = KdeClassifier(kernel_name="gaussian").fit(x_train, labels_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -50,7 +50,7 @@ class KdeClassifier:
         share_bandwidth: bool = False,
         prior_prob: Optional[ndarray] = None,
     ):
-        """Fit model.
+        """Fit the classifier.
 
         Parameters
         ----------
@@ -81,8 +81,8 @@ class KdeClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> # Fit classifier
-        >>> model = KdeClassifier().fit(x_train, labels_train, weights_train, share_bandwidth=True, prior_prob=prior_prob)
+        >>> # Fit the classifier
+        >>> classifier = KdeClassifier().fit(x_train, labels_train, weights_train, share_bandwidth=True, prior_prob=prior_prob)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -119,7 +119,7 @@ class KdeClassifier:
         return self
 
     def predict(self, x_test: ndarray):
-        """Predict labels.
+        """Predict the labels.
 
         Parameters
         ----------
@@ -140,11 +140,11 @@ class KdeClassifier:
         >>> labels_train2 = np.full(10_000 // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> # Fit classifier
+        >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
-        >>> model = KdeClassifier().fit(x_train, labels_train)
-        >>> # Predict labels
-        >>> labels_pred = model.predict(x_test)  # labels_pred shape (1000,)
+        >>> classifier = KdeClassifier().fit(x_train, labels_train)
+        >>> # Predict the labels
+        >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (1000,)
         """
         if not self.fitted:
             raise RuntimeError("fit the model first")
@@ -173,14 +173,14 @@ class KdeClassifier:
         >>> labels_train2 = np.full(10_000 // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> # Fit classifier
+        >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
-        >>> model = KdeClassifier().fit(x_train, labels_train)
-        >>> # Compute pdfs
-        >>> scores = model.score(x_test)  # scores shape (1000, 2)
+        >>> classifier = KdeClassifier().fit(x_train, labels_train)
+        >>> # Compute pdf of each class
+        >>> scores = classifier.score(x_test)  # scores shape (1000, 2)
         """
         if not self.fitted:
-            raise RuntimeError("fit the model first")
+            raise RuntimeError("fit the classifier first")
         _, scores = self._classify(x_test)
         return scores
 
@@ -217,7 +217,7 @@ class KdeOutliersDetector:
     --------
     >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-    >>> # Fit outliers detector
+    >>> # Fit the outliers detector
     >>> outliers_detector = KdeOutliersDetector().fit(x_train)
     """
 
@@ -226,7 +226,7 @@ class KdeOutliersDetector:
         self.fitted = False
 
     def fit(self, x_train: ndarray, weights_train: Optional[ndarray] = None):
-        """Fit model.
+        """Fit the outliers detector.
 
         Parameters
         ----------
@@ -245,7 +245,7 @@ class KdeOutliersDetector:
         >>> # Prepare data
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
-        >>> # Fit outliers detector
+        >>> # Fit the outliers detector
         >>> outliers_detector = KdeOutliersDetector().fit(x_train, weights_train)
         """
         if len(x_train.shape) != 2:
@@ -265,7 +265,7 @@ class KdeOutliersDetector:
         return self
 
     def predict(self, x_test: ndarray, r: float = 0.1):
-        """Predict labels.
+        """Predict the labels.
 
         Parameters
         ----------
@@ -284,13 +284,13 @@ class KdeOutliersDetector:
         >>> # Prepare data
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> x_test = np.random.uniform(-3, 3, size=(1000, 1))
-        >>> # Fit outliers detector
+        >>> # Fit the outliers detector
         >>> outliers_detector = KdeOutliersDetector().fit(x_train)
-        >>> # Predict labels
+        >>> # Predict the labels
         >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (1000,)
         """
         if not self.fitted:
-            raise RuntimeError("fit the model first")
+            raise RuntimeError("fit the outliers detector first")
 
         if r < 0:
             raise RuntimeError("r must be positive")
