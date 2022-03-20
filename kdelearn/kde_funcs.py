@@ -87,17 +87,22 @@ class KdeClassifier:
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
         self.x_train = x_train
+        self.m_train = self.x_train.shape[0]
 
         if len(labels_train.shape) != 1:
             raise RuntimeError("labels_train must be 1d ndarray")
         self.labels_train = labels_train
 
-        if weights_train is not None:
+        if weights_train is None:
+            self.weights_train = np.full(self.m_train, 1 / self.m_train)
+        else:
             if len(weights_train.shape) != 1:
                 raise RuntimeError("weights_train must be 1d ndarray")
-        self.weights_train = weights_train
+            if not (weights_train > 0).all():
+                raise ValueError("weights_train must be positive")
+            self.weights_train = weights_train / weights_train.sum()
 
-        self.ulabels = np.unique(labels_train)  # sorted unique labels
+        self.ulabels = np.unique(labels_train)  # Sorted unique labels
         self.n_classes = self.ulabels.shape[0]
 
         if prior_prob is None:
@@ -107,7 +112,7 @@ class KdeClassifier:
                 raise RuntimeError("prior_prob must be 1d ndarray")
             if prior_prob.shape[0] != self.n_classes:
                 raise RuntimeError(f"prior_prob must contain {self.n_classes} values")
-            self.prior = prior_prob / prior_prob.sum()  # l1 norm
+            self.prior = prior_prob / prior_prob.sum()
 
         self.bandwidth = scotts_rule(x_train) if share_bandwidth else None
         self.fitted = True
@@ -286,6 +291,9 @@ class KdeOutliersDetector:
         """
         if not self.fitted:
             raise RuntimeError("fit the model first")
+
+        if r < 0:
+            raise RuntimeError("r must be positive")
 
         scores_train = np.empty(self.m_train)
         for i in range(self.m_train):

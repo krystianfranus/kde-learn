@@ -21,10 +21,10 @@ class Kde:
 
     Examples
     --------
+    >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, (1000, 1))
-    >>> x_test = np.random.uniform(-1, 1, (10, 1))
+    >>> # Fit the estimator
     >>> kde = Kde(kernel_name="gaussian").fit(x_train)
-    >>> scores = kde.pdf(x_test)
 
     References
     ----------
@@ -59,15 +59,12 @@ class Kde:
 
         Examples
         --------
+        >>> # Prepare data
         >>> x_train = np.random.normal(0, 1, size=(1000, 1))
-        >>> # with no weights
-        >>> kde = Kde(kernel_name="gaussian").fit(x_train, weights_train=None)
-        >>> # with weighted data points
         >>> weights_train = np.random.randint(1, 10, size=(1000,))
-        >>> kde = Kde(kernel_name="gaussian").fit(x_train, weights_train=weights_train)
-        >>> # fixed bandwidth
-        >>> bandwidth = np.random.normal(0, 1, size=(1,))
-        >>> kde = Kde(kernel_name="gaussian").fit(x_train, bandwidth=bandwidth)
+        >>> bandwidth = np.random.uniform(0, 1, size=(1,))
+        >>> # Fit the estimator
+        >>> kde = Kde().fit(x_train, weights_train, bandwidth)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -107,9 +104,12 @@ class Kde:
 
         Examples
         --------
-        >>> x_train = np.random.normal(0, 1, (1000, 1))
-        >>> x_test = np.random.uniform(-1, 1, (10, 1))
-        >>> kde = Kde(kernel_name="gaussian").fit(x_train)
+        >>> # Prepare data
+        >>> x_train = np.random.normal(0, 1, (10_000, 1))
+        >>> x_test = np.random.uniform(-3, 3, (1000, 1))
+        >>> # Fit the estimator.
+        >>> kde = Kde().fit(x_train)
+        >>> # Compute pdf
         >>> scores = kde.pdf(x_test)
         """
         scores = compute_kde(
