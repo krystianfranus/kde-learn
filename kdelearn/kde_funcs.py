@@ -35,7 +35,7 @@ class KdeClassifier:
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit the classifier
-    >>> classifier = KdeClassifier(kernel_name="gaussian").fit(x_train, labels_train)
+    >>> classifier = KdeClassifier("gaussian").fit(x_train, labels_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -80,9 +80,10 @@ class KdeClassifier:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
-        >>> prior_prob = np.array([0.3, 0.7])
         >>> # Fit the classifier
-        >>> classifier = KdeClassifier().fit(x_train, labels_train, weights_train, share_bandwidth=True, prior_prob=prior_prob)
+        >>> share_bandwidth = True
+        >>> prior_prob = np.array([0.3, 0.7])
+        >>> classifier = KdeClassifier().fit(x_train, labels_train, weights_train, share_bandwidth, prior_prob)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -218,7 +219,7 @@ class KdeOutliersDetector:
     >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
     >>> # Fit the outliers detector
-    >>> outliers_detector = KdeOutliersDetector().fit(x_train)
+    >>> outliers_detector = KdeOutliersDetector("gaussian").fit(x_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):

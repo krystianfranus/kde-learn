@@ -24,7 +24,7 @@ class Kde:
     >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, (1000, 1))
     >>> # Fit the estimator
-    >>> kde = Kde(kernel_name="gaussian").fit(x_train)
+    >>> kde = Kde("gaussian").fit(x_train)
 
     References
     ----------
