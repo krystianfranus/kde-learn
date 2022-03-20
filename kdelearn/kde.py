@@ -81,8 +81,7 @@ class Kde:
                 raise RuntimeError("weights_train must be 1d ndarray")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
-            self.weights_train = weights_train
-            self.weights_train = self.weights_train / self.weights_train.sum()
+            self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
             self.bandwidth = scotts_rule(self.x_train, self.kernel_name)

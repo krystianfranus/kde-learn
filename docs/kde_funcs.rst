@@ -9,7 +9,8 @@ KdeClassifier
 .. autoclass:: KdeClassifier
    :members:
 
-kde_outliers
-------------
+KdeOutliersDetector
+-------------------
 
-.. autofunction:: kde_outliers
+.. autoclass:: KdeOutliersDetector
+   :members:

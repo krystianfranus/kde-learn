@@ -27,14 +27,14 @@ class KdeClassifier:
 
     Examples
     --------
-    >>> # Prepare data points and labels for two classes
+    >>> # Prepare data for two classes
     >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
     >>> labels_train1 = np.full(10_000 // 2, 1)
     >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
     >>> labels_train2 = np.full(10_000 // 2, 2)
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
-    >>> # Classifier
+    >>> # Fit classifier
     >>> model = KdeClassifier().fit(x_train, labels_train)
     """
 
@@ -72,7 +72,7 @@ class KdeClassifier:
 
         Examples
         --------
-        >>> # Prepare data points and labels for two classes
+        >>> # Prepare data for two classes
         >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
         >>> labels_train1 = np.full((10_000 // 2,), 1)
         >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
@@ -81,7 +81,7 @@ class KdeClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> # Classifier
+        >>> # Fit classifier
         >>> model = KdeClassifier().fit(x_train, labels_train, weights_train, share_bandwidth=True, prior_prob=prior_prob)
         """
         if len(x_train.shape) != 2:
@@ -128,16 +128,17 @@ class KdeClassifier:
 
         Examples
         --------
-        >>> # Prepare data points and labels for two classes
+        >>> # Prepare data for two classes
         >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
         >>> labels_train1 = np.full(10_000 // 2, 1)
         >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
         >>> labels_train2 = np.full(10_000 // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> # Classify
+        >>> # Fit classifier
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
         >>> model = KdeClassifier().fit(x_train, labels_train)
+        >>> # Predict labels
         >>> labels_pred = model.predict(x_test)  # labels_pred shape (1000,)
         """
         if not self.fitted:
@@ -160,16 +161,17 @@ class KdeClassifier:
 
         Examples
         --------
-        >>> # Prepare data points and labels for two classes
+        >>> # Prepare data for two classes
         >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
         >>> labels_train1 = np.full(10_000 // 2, 1)
         >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
         >>> labels_train2 = np.full(10_000 // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> # Classify
+        >>> # Fit classifier
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
         >>> model = KdeClassifier().fit(x_train, labels_train)
+        >>> # Compute pdfs
         >>> scores = model.score(x_test)  # scores shape (1000, 2)
         """
         if not self.fitted:
@@ -198,55 +200,102 @@ class KdeClassifier:
         return labels_pred, scores
 
 
-def kde_outliers(
-    x_train: ndarray,
-    x_test: ndarray,
-    weights_train: Optional[ndarray] = None,
-    r: float = 0.1,
-    kernel_name: str = "gaussian",
-    bandwidth: ndarray = None,
-) -> ndarray:
-    """
-    Outliers detection based on kernel density estimation.
+class KdeOutliersDetector:
+    """Outliers Detector.
 
     Parameters
     ----------
-    x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
-    x_test : `ndarray`
-        Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
-    weights_train : `ndarray`, default=None
-        Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
-    r : float, default=0.1
-        Threshold.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
-    bandwidth : `ndarray`, optional
-        Smoothing parameter. Must have shape (n,).
 
     Examples
     --------
-    >>> # Prepare data points
+    >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-    >>> # Detect outliers
-    >>> x_test = np.random.uniform(-2, 2, size=(1000, 1))
-    >>> outliers = kde_outliers(x_train, x_test, r=0.1)
-
-    Returns
-    -------
-    outliers : `ndarray`
-        Indices of detected outliers.
+    >>> # Fit outliers detector
+    >>> outliers_detector = KdeOutliersDetector().fit(x_train)
     """
-    m_train = x_train.shape[0]
-    scores_train = np.empty(m_train)
-    for i in range(m_train):
-        tmp_x = np.delete(x_train, i, axis=0)
-        tmp_weights = np.delete(weights_train, i) if weights_train is not None else None
-        kde = Kde(kernel_name).fit(tmp_x, tmp_weights, bandwidth)
-        scores_train[i] = kde.pdf(x_train[[i]])
-    q = np.quantile(scores_train, r)
 
-    kde = Kde(kernel_name).fit(x_train, weights_train, bandwidth)
-    scores_test = kde.pdf(x_test)
-    outliers = np.where(scores_test <= q)[0]
-    return outliers
+    def __init__(self, kernel_name: str = "gaussian"):
+        self.kernel_name = kernel_name
+        self.fitted = False
+
+    def fit(self, x_train: ndarray, weights_train: Optional[ndarray] = None):
+        """Fit model.
+
+        Parameters
+        ----------
+        x_train : `ndarray`
+            Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+        weights_train : `ndarray`, default=None
+            Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+
+        Returns
+        -------
+        self : `KdeOutliersDetector`
+            Fitted self instance of `KdeOutliersDetector`.
+
+        Examples
+        --------
+        >>> # Prepare data
+        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+        >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
+        >>> # Fit outliers detector
+        >>> outliers_detector = KdeOutliersDetector().fit(x_train, weights_train)
+        """
+        if len(x_train.shape) != 2:
+            raise RuntimeError("x_train must be 2d ndarray")
+        self.x_train = x_train
+        self.m_train = self.x_train.shape[0]
+
+        if weights_train is None:
+            self.weights_train = np.full(self.m_train, 1 / self.m_train)
+        else:
+            if len(weights_train.shape) != 1:
+                raise RuntimeError("weights_train must be 1d ndarray")
+            if not (weights_train > 0).all():
+                raise ValueError("weights_train must be positive")
+            self.weights_train = weights_train / weights_train.sum()
+        self.fitted = True
+        return self
+
+    def predict(self, x_test: ndarray, r: float = 0.1):
+        """Predict labels.
+
+        Parameters
+        ----------
+        x_test : `ndarray`
+            Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+        r : `float`
+            Threshold.
+
+        Returns
+        -------
+        labels_pred : `ndarray`
+            Predicted labels (0 - inlier, 1 - outlier) as a 1D array containing data with `int` type. Shape (m_test,).
+
+        Examples
+        --------
+        >>> # Prepare data
+        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+        >>> x_test = np.random.uniform(-3, 3, size=(1000, 1))
+        >>> # Fit outliers detector
+        >>> outliers_detector = KdeOutliersDetector().fit(x_train)
+        >>> # Predict labels
+        >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (1000,)
+        """
+        if not self.fitted:
+            raise RuntimeError("fit the model first")
+
+        scores_train = np.empty(self.m_train)
+        for i in range(self.m_train):
+            tmp_x_train = np.delete(self.x_train, i, axis=0)
+            tmp_weights_train = np.delete(self.weights_train, i)
+            tmp_kde = Kde(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
+            scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
+        q = np.quantile(scores_train, r)
+
+        kde = Kde(self.kernel_name).fit(self.x_train)
+        scores_test = kde.pdf(x_test)
+        labels_pred = np.where(scores_test <= q, 1, 0)
+        return labels_pred
