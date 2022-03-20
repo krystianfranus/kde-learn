@@ -3,8 +3,7 @@ from numpy import ndarray
 
 
 def scotts_rule(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
-    """
-    Scott's rule of bandwidth estimation.
+    """Scott's rule of bandwidth estimation.
 
     Parameters
     ----------
@@ -16,7 +15,7 @@ def scotts_rule(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
     Examples
     --------
     >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-    >>> bandwidth = scotts_rule(x_train, kernel_name="gaussian")
+    >>> bandwidth = scotts_rule(x_train, "gaussian")
 
     Returns
     -------
