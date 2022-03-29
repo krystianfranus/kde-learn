@@ -1,7 +1,7 @@
-KDE
-===
+CKDE
+====
 
 .. currentmodule:: kdelearn
 
-.. automodule:: kdelearn.kde
+.. automodule:: kdelearn.ckde
    :members:

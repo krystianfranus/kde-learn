@@ -56,4 +56,4 @@ Example:
                     color=color, marker=".", alpha=0.15)
     plt.xlim(-6, 8); plt.ylim(-6, 8);
     plt.xlabel("$x_1$", fontsize=11); plt.ylabel("$x_2$", rotation=0, fontsize=11);
-    plt.legend(); plt.title("Decision boundry determined by kde classifier", fontsize=11);
+    plt.legend(); plt.title("Decision boundry determined by KdeClassifier", fontsize=11);

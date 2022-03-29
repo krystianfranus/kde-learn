@@ -1,56 +1,59 @@
+from typing import Optional
+
 import numpy as np
+from numpy import ndarray
 
-from .kernels import gaussian
-from .utils import estimate_bandwidth
+from kdelearn.cutils import compute_ckde
+
+from .utils import scotts_rule
 
 
-class Ckde:
-    def __init__(self):
-        self.y_train = None
-        self.w_train = None
-        self.m_train = None
-        self.n_y = None
-        self.n_w = None
-        self.bandwidth_y = None
-        self.bandwidth_w = None
-        self.s = None
-        self.d = None
-        self.kernel = gaussian
+class CKDE:
+    """Conditional kernel density estimator."""
 
-    def fit(self, y_train, w_train, bandwidth=None):
-        self.y_train = np.copy(y_train)
-        self.w_train = np.copy(w_train)
-        self.m_train = self.y_train.shape[0]
-        self.n_y, self.n_w = self.y_train.shape[1], self.w_train.shape[1]
-        n_y, n_w = self.n_y, self.n_w
+    def __init__(self, kernel_name: str = "gaussian"):
+        self.kernel_name = kernel_name
 
-        if bandwidth is None:
-            x_train = np.concatenate((self.y_train, self.w_train), axis=1)
-            bandwidth = estimate_bandwidth(x_train)
-            self.bandwidth_y = bandwidth[:n_y]
-            self.bandwidth_w = bandwidth[n_y:]
+    def fit(
+        self,
+        x_train: ndarray,
+        w_train: ndarray,
+        weights_train: Optional[ndarray] = None,
+        bandwidth_x: Optional[ndarray] = None,
+        bandwidth_w: Optional[ndarray] = None,
+    ):
+        self.x_train = x_train
+        self.w_train = w_train
+
+        if weights_train is None:
+            m_train = self.x_train.shape[0]
+            self.weights_train = np.full(m_train, 1 / m_train)
         else:
-            assert (
-                bandwidth.any() > 0
-            ), f"Bandwidth needs to be greater than zero. Got {bandwidth}."
-            self.bandwidth_y = bandwidth[:n_y]
-            self.bandwidth_w = bandwidth[n_y:]
+            self.weights_train = weights_train / weights_train.sum()
 
-        self.s = np.ones(self.m_train)
+        if bandwidth_x is None and bandwidth_w is None:
+            self.bandwidth_x = scotts_rule(self.x_train, self.kernel_name)
+            self.bandwidth_w = scotts_rule(self.w_train, self.kernel_name)
+        else:
+            self.bandwidth_x = bandwidth_x
+            self.bandwidth_w = bandwidth_w
+
         return self
 
-    def score_samples(self, y_test, w_test):
-        kernel_w_values = self.kernel(
-            (w_test - self.w_train[:, None]) / (self.bandwidth_w * self.s[:, None, None])
+    def pdf(self, x_test: ndarray, w_test: ndarray) -> ndarray:
+        """Compute estimation of conditional probability density function."""
+        scores = compute_ckde(
+            self.x_train,
+            self.w_train,
+            x_test,
+            w_test,
+            self.weights_train,
+            self.bandwidth_x,
+            self.bandwidth_w,
+            self.kernel_name,
         )
-        self.d = np.prod(kernel_w_values, axis=1)
-        self.d = self.m_train * self.d / np.sum(self.d, axis=0)
-
-        kernel_y_values = self.kernel(
-            (y_test - self.y_train[:, None]) / (self.bandwidth_y * self.s[:, None, None])
-        )
-        # fmt: off
-        scores = 1 / (self.m_train * np.prod(self.bandwidth_y)) * np.sum(
-            (self.d / (self.s[:, None] ** self.n_y)) * np.prod(kernel_y_values, axis=2), axis=0)
-        # fmt: on
         return scores
+
+    # TODO: https://stats.stackexchange.com/questions/43674/simple-sampling-method-for-a-kernel-density-estimator
+    def sample(self):
+        raise NotImplementedError

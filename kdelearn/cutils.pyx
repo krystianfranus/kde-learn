@@ -110,3 +110,57 @@ def compute_kde(
                 tmp *= 1.0 / bandwidth[j] * kernel((x_test[k, j] - x_train[i, j]) / bandwidth[j])
             scores_view[k] += weights_train[i] * tmp
     return scores
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def compute_ckde(
+    double[:, :] x_train,
+    double[:, :] w_train,
+    double[:, :] x_test,
+    double[:, :] w_test,
+    double[:] weights_train,
+    double[:] bandwidth_x,
+    double[:] bandwidth_w,
+    str kernel_name,
+):
+    cdef Py_ssize_t m_train = x_train.shape[0]
+    cdef Py_ssize_t m_test = x_test.shape[0]
+    cdef Py_ssize_t n_x = x_train.shape[1]
+    cdef Py_ssize_t n_w = w_train.shape[1]
+
+    if kernel_name == "gaussian":
+        kernel = cgaussian
+    elif kernel_name == "uniform":
+        kernel = cuniform
+    elif kernel_name == "epanechnikov":
+        kernel = cepanechnikov
+    elif kernel_name == "cauchy":
+        kernel = ccauchy
+    else:
+        raise RuntimeError("invalid kernel name")
+
+    scores = np.zeros(m_test, dtype=np.float64)
+    cdef double[:] scores_view = scores
+
+    cdef Py_ssize_t k, i, j
+    cdef double tmp, scores_x, scores_w
+
+    for k in range(m_test):
+        scores_z, scores_w = 0.0, 0.0
+        for i in range(m_train):
+            tmp = 1.0
+            for j in range(n_x):
+                tmp *= 1.0 / bandwidth_x[j] * kernel((x_test[k, j] - x_train[i, j]) / bandwidth_x[j])
+            for j in range(n_w):
+                tmp *= 1.0 / bandwidth_w[j] * kernel((w_test[k, j] - w_train[i, j]) / bandwidth_w[j])
+            scores_z += weights_train[i] * tmp
+
+        for i in range(m_train):
+            tmp = 1.0
+            for j in range(n_w):
+                tmp *= 1.0 / bandwidth_w[j] * kernel((w_test[k, j] - w_train[i, j]) / bandwidth_w[j])
+            scores_w += weights_train[i] * tmp
+        scores_view[k] = scores_z / scores_w
+    return scores
