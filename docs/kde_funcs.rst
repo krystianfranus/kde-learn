@@ -3,14 +3,14 @@ Procedures
 
 .. currentmodule:: kdelearn.kde_funcs
 
-KdeClassifier
+KDEClassifier
 -------------
 
-.. autoclass:: KdeClassifier
+.. autoclass:: KDEClassifier
    :members:
 
-KdeOutliersDetector
+KDEOutliersDetector
 -------------------
 
-.. autoclass:: KdeOutliersDetector
+.. autoclass:: KDEOutliersDetector
    :members:

@@ -5,4 +5,4 @@ Kernels
 
 .. automodule:: kdelearn.cutils
     :members:
-    :exclude-members: compute_kde
+    :exclude-members: compute_kde, compute_ckde

@@ -3,11 +3,11 @@ from typing import Optional
 import numpy as np
 from numpy import ndarray
 
-from .kde import Kde
+from .kde import KDE
 from .utils import scotts_rule
 
 
-class KdeClassifier:
+class KDEClassifier:
     """Bayes' classifier based on kernel density estimation.
 
     Probability that :math:`x` belongs to class :math:`c`:
@@ -35,7 +35,7 @@ class KdeClassifier:
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit the classifier
-    >>> classifier = KdeClassifier("gaussian").fit(x_train, labels_train)
+    >>> classifier = KDEClassifier("gaussian").fit(x_train, labels_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -67,8 +67,8 @@ class KdeClassifier:
 
         Returns
         -------
-        self : `KdeClassifier`
-            Fitted self instance of `KdeClassifier`.
+        self : `KDEClassifier`
+            Fitted self instance of `KDEClassifier`.
 
         Examples
         --------
@@ -83,7 +83,7 @@ class KdeClassifier:
         >>> # Fit the classifier
         >>> share_bandwidth = True
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> classifier = KdeClassifier().fit(x_train, labels_train, weights_train, share_bandwidth, prior_prob)
+        >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, share_bandwidth, prior_prob)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -143,7 +143,7 @@ class KdeClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
-        >>> classifier = KdeClassifier().fit(x_train, labels_train)
+        >>> classifier = KDEClassifier().fit(x_train, labels_train)
         >>> # Predict the labels
         >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (1000,)
         """
@@ -176,7 +176,7 @@ class KdeClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
-        >>> classifier = KdeClassifier().fit(x_train, labels_train)
+        >>> classifier = KDEClassifier().fit(x_train, labels_train)
         >>> # Compute pdf of each class
         >>> scores = classifier.score(x_test)  # scores shape (1000, 2)
         """
@@ -199,14 +199,14 @@ class KdeClassifier:
             weights = self.weights_train
             if self.weights_train is not None:
                 weights = self.weights_train[mask]
-            kde = Kde(self.kernel_name).fit(self.x_train[mask], weights, self.bandwidth)
+            kde = KDE(self.kernel_name).fit(self.x_train[mask], weights, self.bandwidth)
             scores[:, idx] = kde.pdf(x_test)
 
         labels_pred = self.ulabels[np.argmax(self.prior * scores, axis=1)]
         return labels_pred, scores
 
 
-class KdeOutliersDetector:
+class KDEOutliersDetector:
     """Outliers Detector.
 
     Parameters
@@ -219,7 +219,7 @@ class KdeOutliersDetector:
     >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
     >>> # Fit the outliers detector
-    >>> outliers_detector = KdeOutliersDetector("gaussian").fit(x_train)
+    >>> outliers_detector = KDEOutliersDetector("gaussian").fit(x_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -238,8 +238,8 @@ class KdeOutliersDetector:
 
         Returns
         -------
-        self : `KdeOutliersDetector`
-            Fitted self instance of `KdeOutliersDetector`.
+        self : `KDEOutliersDetector`
+            Fitted self instance of `KDEOutliersDetector`.
 
         Examples
         --------
@@ -247,7 +247,7 @@ class KdeOutliersDetector:
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
         >>> # Fit the outliers detector
-        >>> outliers_detector = KdeOutliersDetector().fit(x_train, weights_train)
+        >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -286,7 +286,7 @@ class KdeOutliersDetector:
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> x_test = np.random.uniform(-3, 3, size=(1000, 1))
         >>> # Fit the outliers detector
-        >>> outliers_detector = KdeOutliersDetector().fit(x_train)
+        >>> outliers_detector = KDEOutliersDetector().fit(x_train)
         >>> # Predict the labels
         >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (1000,)
         """
@@ -300,11 +300,11 @@ class KdeOutliersDetector:
         for i in range(self.m_train):
             tmp_x_train = np.delete(self.x_train, i, axis=0)
             tmp_weights_train = np.delete(self.weights_train, i)
-            tmp_kde = Kde(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
+            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
             scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
         q = np.quantile(scores_train, r)
 
-        kde = Kde(self.kernel_name).fit(self.x_train)
+        kde = KDE(self.kernel_name).fit(self.x_train)
         scores_test = kde.pdf(x_test)
         labels_pred = np.where(scores_test <= q, 1, 0)
         return labels_pred

@@ -18,7 +18,7 @@ Example:
 .. plot::
     :include-source:
 
-    from kdelearn.kde_funcs import KdeClassifier
+    from kdelearn.kde_funcs import KDEClassifier
 
     # Prepare train data
     m_train = 1000
@@ -44,7 +44,7 @@ Example:
     x_test = np.hstack((x1p, x2p))  # shape (10000, 2)
 
     # Classify grid points
-    model = KdeClassifier().fit(x_train, labels_train)
+    model = KDEClassifier().fit(x_train, labels_train)
     labels_pred = model.predict(x_test)
 
     for label, color in zip(np.unique(labels_train), ["cornflowerblue", "goldenrod"]):
@@ -56,4 +56,4 @@ Example:
                     color=color, marker=".", alpha=0.15)
     plt.xlim(-6, 8); plt.ylim(-6, 8);
     plt.xlabel("$x_1$", fontsize=11); plt.ylabel("$x_2$", rotation=0, fontsize=11);
-    plt.legend(); plt.title("Decision boundry determined by KdeClassifier", fontsize=11);
+    plt.legend(); plt.title("Decision boundry determined by KDEClassifier", fontsize=11);

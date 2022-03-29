@@ -8,7 +8,7 @@ from kdelearn.cutils import compute_kde
 from .utils import scotts_rule
 
 
-class Kde:
+class KDE:
     """Kernel density estimator:
 
     .. math::
@@ -24,7 +24,7 @@ class Kde:
     >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, (1000, 1))
     >>> # Fit the estimator
-    >>> kde = Kde("gaussian").fit(x_train)
+    >>> kde = KDE("gaussian").fit(x_train)
 
     References
     ----------
@@ -54,8 +54,8 @@ class Kde:
 
         Returns
         -------
-        self : `Kde`
-            Fitted self instance of `Kde`.
+        self : `KDE`
+            Fitted self instance of `KDE`.
 
         Examples
         --------
@@ -64,7 +64,7 @@ class Kde:
         >>> weights_train = np.random.randint(1, 10, size=(1000,))
         >>> bandwidth = np.random.uniform(0, 1, size=(1,))
         >>> # Fit the estimator
-        >>> kde = Kde().fit(x_train, weights_train, bandwidth)
+        >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -108,7 +108,7 @@ class Kde:
         >>> x_train = np.random.normal(0, 1, (10_000, 1))
         >>> x_test = np.random.uniform(-3, 3, (1000, 1))
         >>> # Fit the estimator.
-        >>> kde = Kde().fit(x_train)
+        >>> kde = KDE().fit(x_train)
         >>> # Compute pdf
         >>> scores = kde.pdf(x_test)
         """
