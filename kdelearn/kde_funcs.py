@@ -226,7 +226,7 @@ class KDEOutliersDetector:
         self.kernel_name = kernel_name
         self.fitted = False
 
-    def fit(self, x_train: ndarray, weights_train: Optional[ndarray] = None):
+    def fit(self, x_train: ndarray, weights_train: Optional[ndarray] = None, r: float = 0.1):
         """Fit the outliers detector.
 
         Parameters
@@ -235,6 +235,8 @@ class KDEOutliersDetector:
             Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
         weights_train : `ndarray`, default=None
             Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+        r : `float`
+            Threshold.
 
         Returns
         -------
@@ -247,7 +249,7 @@ class KDEOutliersDetector:
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
         >>> # Fit the outliers detector
-        >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train)
+        >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train, r=0.1)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -262,18 +264,31 @@ class KDEOutliersDetector:
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
+
+        if r < 0:
+            raise ValueError("r must be positive")
+        self.threshold = self._compute_threshold(r)
+
         self.fitted = True
         return self
 
-    def predict(self, x_test: ndarray, r: float = 0.1):
+    def _compute_threshold(self, r):
+        scores_train = np.empty(self.m_train)
+        for i in range(self.m_train):
+            tmp_x_train = np.delete(self.x_train, i, axis=0)
+            tmp_weights_train = np.delete(self.weights_train, i)
+            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
+            scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
+        threshold = np.quantile(scores_train, r)
+        return threshold
+
+    def predict(self, x_test: ndarray):
         """Predict the labels.
 
         Parameters
         ----------
         x_test : `ndarray`
             Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
-        r : `float`
-            Threshold.
 
         Returns
         -------
@@ -286,25 +301,25 @@ class KDEOutliersDetector:
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> x_test = np.random.uniform(-3, 3, size=(1000, 1))
         >>> # Fit the outliers detector
-        >>> outliers_detector = KDEOutliersDetector().fit(x_train)
+        >>> outliers_detector = KDEOutliersDetector().fit(x_train, r=0.1)
         >>> # Predict the labels
         >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (1000,)
         """
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
 
-        if r < 0:
-            raise RuntimeError("r must be positive")
+        # if r < 0:
+        #     raise RuntimeError("r must be positive")
 
-        scores_train = np.empty(self.m_train)
-        for i in range(self.m_train):
-            tmp_x_train = np.delete(self.x_train, i, axis=0)
-            tmp_weights_train = np.delete(self.weights_train, i)
-            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
-            scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
-        q = np.quantile(scores_train, r)
+        # scores_train = np.empty(self.m_train)
+        # for i in range(self.m_train):
+        #     tmp_x_train = np.delete(self.x_train, i, axis=0)
+        #     tmp_weights_train = np.delete(self.weights_train, i)
+        #     tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
+        #     scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
+        # threshold = np.quantile(scores_train, r)
 
         kde = KDE(self.kernel_name).fit(self.x_train)
         scores_test = kde.pdf(x_test)
-        labels_pred = np.where(scores_test <= q, 1, 0)
+        labels_pred = np.where(scores_test <= self.threshold, 1, 0)
         return labels_pred
