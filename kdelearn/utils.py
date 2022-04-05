@@ -23,7 +23,6 @@ def scotts_rule(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
         Smoothing parameter. Must have shape (n,).
     """
     m_train = x_train.shape[0]
-    n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
 
     if kernel_name == "gaussian":
@@ -38,7 +37,7 @@ def scotts_rule(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
         raise ValueError(f"invalid kernel name: {kernel_name}")
     zf = 3 / (8 * np.sqrt(np.pi))
 
-    bandwidth = std_x * ((n * wk) / (uk ** 2 * zf * m_train)) ** (1 / (n + 4))
+    bandwidth = std_x * (wk / (uk ** 2 * zf * m_train)) ** (1 / 5)
     return bandwidth
 
 
