@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -185,14 +185,14 @@ class KDEClassifier:
         _, scores = self._classify(x_test)
         return scores
 
-    def _compute_prior(self):
+    def _compute_prior(self) -> ndarray:
         prior = np.empty(self.ulabels.shape)
         for idx, label in enumerate(self.ulabels):
             mask = self.labels_train == label
             prior[idx] = self.labels_train[mask].shape[0] / self.x_train.shape[0]
         return prior
 
-    def _classify(self, x_test: ndarray):
+    def _classify(self, x_test: ndarray) -> Tuple[ndarray, ndarray]:
         scores = np.empty((x_test.shape[0], self.n_classes))
         for idx, label in enumerate(self.ulabels):
             mask = self.labels_train == label
@@ -272,17 +272,7 @@ class KDEOutliersDetector:
         self.fitted = True
         return self
 
-    def _compute_threshold(self, r):
-        scores_train = np.empty(self.m_train)
-        for i in range(self.m_train):
-            tmp_x_train = np.delete(self.x_train, i, axis=0)
-            tmp_weights_train = np.delete(self.weights_train, i)
-            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
-            scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
-        threshold = np.quantile(scores_train, r)
-        return threshold
-
-    def predict(self, x_test: ndarray):
+    def predict(self, x_test: ndarray) -> ndarray:
         """Predict the labels.
 
         Parameters
@@ -308,18 +298,17 @@ class KDEOutliersDetector:
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
 
-        # if r < 0:
-        #     raise RuntimeError("r must be positive")
-
-        # scores_train = np.empty(self.m_train)
-        # for i in range(self.m_train):
-        #     tmp_x_train = np.delete(self.x_train, i, axis=0)
-        #     tmp_weights_train = np.delete(self.weights_train, i)
-        #     tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
-        #     scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
-        # threshold = np.quantile(scores_train, r)
-
         kde = KDE(self.kernel_name).fit(self.x_train)
         scores_test = kde.pdf(x_test)
         labels_pred = np.where(scores_test <= self.threshold, 1, 0)
         return labels_pred
+
+    def _compute_threshold(self, r: float) -> float:
+        scores_train = np.empty(self.m_train)
+        for i in range(self.m_train):
+            tmp_x_train = np.delete(self.x_train, i, axis=0)
+            tmp_weights_train = np.delete(self.weights_train, i)
+            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
+            scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
+        threshold = np.quantile(scores_train, r)
+        return threshold
