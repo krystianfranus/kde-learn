@@ -95,7 +95,7 @@ def compute_kde(
     elif kernel_name == "cauchy":
         kernel = ccauchy
     else:
-        raise RuntimeError("invalid kernel name")
+        raise ValueError("invalid kernel name")
 
     scores = np.zeros(m_test, dtype=np.float64)
     cdef double[:] scores_view = scores
@@ -139,7 +139,7 @@ def compute_ckde(
     elif kernel_name == "cauchy":
         kernel = ccauchy
     else:
-        raise RuntimeError("invalid kernel name")
+        raise ValueError("invalid kernel name")
 
     scores = np.zeros(m_test, dtype=np.float64)
     cdef double[:] scores_view = scores
