@@ -22,7 +22,7 @@ class KDE:
     Examples
     --------
     >>> # Prepare data
-    >>> x_train = np.random.normal(0, 1, (1000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
     >>> # Fit the estimator
     >>> kde = KDE("gaussian").fit(x_train)
 
@@ -41,7 +41,7 @@ class KDE:
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
     ):
-        """Fit kernel density estymator to the data (x_train). This method computes bandwidth.
+        """Fit kernel density estimator to the data (x_train). This method computes bandwidth.
 
         Parameters
         ----------
@@ -60,8 +60,8 @@ class KDE:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(1000, 1))
-        >>> weights_train = np.random.randint(1, 10, size=(1000,))
+        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+        >>> weights_train = np.random.randint(1, 10, size=(10_000,))
         >>> bandwidth = np.random.uniform(0, 1, size=(1,))
         >>> # Fit the estimator
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
@@ -110,7 +110,7 @@ class KDE:
         >>> # Fit the estimator.
         >>> kde = KDE().fit(x_train)
         >>> # Compute pdf
-        >>> scores = kde.pdf(x_test)
+        >>> scores = kde.pdf(x_test)  # scores shape (1000,)
         """
         scores = compute_kde(
             self.x_train,
