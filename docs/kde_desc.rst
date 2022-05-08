@@ -45,6 +45,6 @@ Comparison plot
     for kernel in [gaussian, uniform, epanechnikov, cauchy]:
         scores = [kernel(x) for x in x_test]
         plt.plot(x_test, scores, label=kernel.__name__)
-    plt.ylim(top=0.8); plt.legend(); plt.grid();
+    plt.xlim(-3, 3); plt.ylim(top=0.8); plt.legend(); plt.grid();
     plt.xlabel("$x$", fontsize=11); plt.ylabel("$K(x)$", rotation=0, labelpad=15, fontsize=11);
     plt.title("Plot of available kernel functions", fontsize=11)

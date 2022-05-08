@@ -29,6 +29,7 @@ Pre-commit works with 'git commit'
 
 ```
 cd docs/
+make clean
 make html
 ```
 
@@ -37,3 +38,8 @@ make html
 1. Log in with GitHub credentials
 2. Import a project
 3. Build the project
+
+### Concert notebook into pdf
+```
+jupyter nbconvert --to pdf --no-input example_notebook.ipynb
+```
