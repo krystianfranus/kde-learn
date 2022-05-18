@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_ckde
 
-from .utils import scotts_rule
+from .bandwidth_selection import normal_reference
 
 
 class CKDE:
@@ -83,8 +83,8 @@ class CKDE:
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth_x is None or bandwidth_w is None:
-            self.bandwidth_x = scotts_rule(self.x_train, self.kernel_name)
-            self.bandwidth_w = scotts_rule(self.w_train, self.kernel_name)
+            self.bandwidth_x = normal_reference(self.x_train, self.kernel_name)
+            self.bandwidth_w = normal_reference(self.w_train, self.kernel_name)
         else:
             self.bandwidth_x = bandwidth_x
             self.bandwidth_w = bandwidth_w

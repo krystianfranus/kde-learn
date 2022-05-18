@@ -3,8 +3,8 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
+from .bandwidth_selection import normal_reference
 from .kde import KDE
-from .utils import scotts_rule
 
 
 class KDEClassifier:
@@ -115,7 +115,7 @@ class KDEClassifier:
                 raise RuntimeError(f"prior_prob must contain {self.n_classes} values")
             self.prior = prior_prob / prior_prob.sum()
 
-        self.bandwidth = scotts_rule(x_train) if share_bandwidth else None
+        self.bandwidth = normal_reference(x_train) if share_bandwidth else None
         self.fitted = True
         return self
 

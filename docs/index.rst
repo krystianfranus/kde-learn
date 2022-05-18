@@ -33,6 +33,7 @@ Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt
    ckde.rst
    cutils.rst
    kde_funcs.rst
+   bandwidth_selection.rst
    utils.rst
 
 Indices and tables

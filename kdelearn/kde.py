@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_kde
 
-from .utils import scotts_rule
+from .bandwidth_selection import normal_reference
 
 
 class KDE:
@@ -28,8 +28,7 @@ class KDE:
 
     References
     ----------
-    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
-      Boca Raton: Chapman and Hall, 1986.
+    - Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -40,6 +39,7 @@ class KDE:
         x_train: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
+        bandwidth_method: str = "normal_reference",
     ):
         """Fit kernel density estimator to the data (x_train). This method computes bandwidth.
 
@@ -51,6 +51,8 @@ class KDE:
             Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
+        bandwidth_method : `str`
+            Bandwidth selection method name.
 
         Returns
         -------
@@ -63,8 +65,9 @@ class KDE:
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> weights_train = np.random.randint(1, 10, size=(10_000,))
         >>> bandwidth = np.random.uniform(0, 1, size=(1,))
+        >>> bandwidth_method = "normal_reference"
         >>> # Fit the estimator
-        >>> kde = KDE().fit(x_train, weights_train, bandwidth)
+        >>> kde = KDE().fit(x_train, weights_train, bandwidth, bandwidth_method)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -81,7 +84,10 @@ class KDE:
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
-            self.bandwidth = scotts_rule(self.x_train, self.kernel_name)
+            if bandwidth_method == "normal_reference":
+                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+            else:
+                raise ValueError("invalid bandwidth method")
         else:
             if not (bandwidth > 0).all():
                 raise ValueError("bandwidth must be positive")
