@@ -12,8 +12,7 @@ cdef double cgaussian(double x):
 
 # wrapper to expose cgaussian() to Python
 def gaussian(x: float) -> float:
-    """
-    Gaussian kernel function.
+    """Gaussian kernel function.
 
     .. math::
         K(x) = \\frac{1}{\\sqrt{2 \\pi}} \\exp \\left( \\frac{x^2}{2} \\right)
@@ -30,8 +29,7 @@ cdef double cuniform(double x):
 
 # wrapper to expose cuniform() to Python
 def uniform(x: float) -> float:
-    """
-    Uniform kernel function.
+    """Uniform kernel function.
 
     .. math::
         K(x) = 0.5 \\quad \\text{if } |x| \\leq 0 \\quad  \\text{else } 0
@@ -48,8 +46,7 @@ cdef double cepanechnikov(double x):
 
 # wrapper to expose cepanechnikov() to Python
 def epanechnikov(x: float) -> float:
-    """
-    Epanechnikov kernel function.
+    """Epanechnikov kernel function.
 
     .. math::
         K(x) = \\frac{3}{4} (1-x^2) \\quad \\text{if } |x| \\leq 0 \\quad  \\text{else } 0
@@ -63,8 +60,7 @@ cdef double ccauchy(double x):
 
 # wrapper to expose ccauchy() to Python
 def cauchy(x: float) -> float:
-    """
-    Cauchy kernel function.
+    """Cauchy kernel function.
 
     .. math::
         K(x) = \\frac{2}{\\pi (x^2 + 1)^2}

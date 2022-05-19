@@ -11,9 +11,11 @@ ext_modules = []
 
 if use_cython:
     ext_modules.append(Extension("kdelearn.cutils", ["kdelearn/cutils.pyx"]))
+    ext_modules.append(Extension("kdelearn.cbw_selection", ["kdelearn/cbw_selection.pyx"]))
     cmdclass.update({"build_ext": build_ext})
 else:
     ext_modules.append(Extension("kdelearn.cutils", ["kdelearn/cutils.c"]))
+    ext_modules.append(Extension("kdelearn.cbw_selection", ["kdelearn/cbw_selection.c"]))
 
 # Related to docstrings in cython code
 for e in ext_modules:
