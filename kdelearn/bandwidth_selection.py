@@ -104,12 +104,10 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
 
     r = 2 * stage + 4
     zf = _psi(r)
-    print(f"zf shape: {zf.shape}")
     while r != 4:
         r -= 2
         der = gds[f"gd{r}"]
         bw = _bw(der, zf, r + 2)
-        print(f"bw shape: {bw.shape}")
         zf = isdd(x_train, bw, r)
 
     bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2

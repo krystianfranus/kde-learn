@@ -42,7 +42,7 @@ def gd8(x):
 @cython.cdivision(True)
 def isdd(
     double[:, :] x_train,
-    double[:] bw,
+    double[:] bandwidth,
     int r,
 ):
     """Estimation of integrated squared density derivative"""
@@ -63,6 +63,6 @@ def isdd(
     for j in range(n):
         for i1 in range(m_train):
             for i2 in range(m_train):
-                result_view[j] += func((x_train[i1, j] - x_train[i2, j]) / bw[j])
-        result_view[j] *= 1 / (m_train ** 2 * bw[j] ** (r + 1))
+                result_view[j] += func((x_train[i1, j] - x_train[i2, j]) / bandwidth[j])
+        result_view[j] *= 1 / (m_train ** 2 * bandwidth[j] ** (r + 1))
     return result
