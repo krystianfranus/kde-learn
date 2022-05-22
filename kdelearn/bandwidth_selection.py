@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 
-from kdelearn.cbw_selection import gd4, gd6, gd8, isdd
+from kdelearn.cutils import gd4, gd6, gd8, isdd
 
 
 def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:

@@ -123,6 +123,9 @@ class KDE:
         >>> # Compute pdf
         >>> scores = kde.pdf(x_test)  # scores shape (1000,)
         """
+        if not self.fitted:
+            raise RuntimeError("fit the estimator first")
+
         scores = compute_kde(
             self.x_train,
             x_test,

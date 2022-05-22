@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import normal_reference
+from .bandwidth_selection import direct_plugin, normal_reference
 from .kde import KDE
 
 
@@ -226,7 +226,14 @@ class KDEOutliersDetector:
         self.kernel_name = kernel_name
         self.fitted = False
 
-    def fit(self, x_train: ndarray, weights_train: Optional[ndarray] = None, r: float = 0.1):
+    def fit(
+        self,
+        x_train: ndarray,
+        weights_train: Optional[ndarray] = None,
+        bandwidth: Optional[ndarray] = None,
+        bandwidth_method: str = "normal_reference",
+        r: float = 0.1,
+    ):
         """Fit the outliers detector.
 
         Parameters
@@ -265,6 +272,18 @@ class KDEOutliersDetector:
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
+        if bandwidth is None:
+            if bandwidth_method == "normal_reference":
+                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+            elif bandwidth_method == "direct_plugin":
+                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, 2)
+            else:
+                raise ValueError("invalid bandwidth method")
+        else:
+            if not (bandwidth > 0).all():
+                raise ValueError("bandwidth must be positive")
+            self.bandwidth = bandwidth
+
         if r < 0:
             raise ValueError("r must be positive")
         self.threshold = self._compute_threshold(r)
@@ -298,7 +317,7 @@ class KDEOutliersDetector:
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
 
-        kde = KDE(self.kernel_name).fit(self.x_train)
+        kde = KDE(self.kernel_name).fit(self.x_train, self.weights_train, self.bandwidth)
         scores_test = kde.pdf(x_test)
         labels_pred = np.where(scores_test <= self.threshold, 1, 0)
         return labels_pred
@@ -308,7 +327,7 @@ class KDEOutliersDetector:
         for i in range(self.m_train):
             tmp_x_train = np.delete(self.x_train, i, axis=0)
             tmp_weights_train = np.delete(self.weights_train, i)
-            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train)
+            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train, self.bandwidth)
             scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
         threshold = np.quantile(scores_train, r)
         return threshold
