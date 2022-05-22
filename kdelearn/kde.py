@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_kde
 
-from .bandwidth_selection import normal_reference
+from .bandwidth_selection import direct_plugin, normal_reference
 
 
 class KDE:
@@ -52,7 +52,7 @@ class KDE:
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
         bandwidth_method : `str`
-            Bandwidth selection method name.
+            Name of bandwidth selection method used to compute bandwidth when bandwidth argument is not passed explicitly.
 
         Returns
         -------
@@ -86,6 +86,8 @@ class KDE:
         if bandwidth is None:
             if bandwidth_method == "normal_reference":
                 self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+            elif bandwidth_method == "direct_plugin":
+                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, 2)
             else:
                 raise ValueError("invalid bandwidth method")
         else:
