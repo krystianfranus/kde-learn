@@ -33,6 +33,7 @@ class KDE:
 
     def __init__(self, kernel_name: str = "gaussian"):
         self.kernel_name = kernel_name
+        self.fitted = False
 
     def fit(
         self,
@@ -40,8 +41,9 @@ class KDE:
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
+        **kwargs,
     ):
-        """Fit kernel density estimator to the data (x_train). This method computes bandwidth.
+        """Fit kernel density estimator to the data (x_train).
 
         Parameters
         ----------
@@ -51,8 +53,8 @@ class KDE:
             Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
-        bandwidth_method : `str`
-            Name of bandwidth selection method used to compute bandwidth when bandwidth argument is not passed explicitly.
+        bandwidth_method : {'normal_reference', 'direct_plugin'}, default='normal_reference'
+            Name of bandwidth selection method used to compute it when bandwidth argument is not passed explicitly.
 
         Returns
         -------
@@ -65,12 +67,11 @@ class KDE:
         >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
         >>> weights_train = np.random.randint(1, 10, size=(10_000,))
         >>> bandwidth = np.random.uniform(0, 1, size=(1,))
-        >>> bandwidth_method = "normal_reference"
         >>> # Fit the estimator
-        >>> kde = KDE().fit(x_train, weights_train, bandwidth, bandwidth_method)
+        >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if len(x_train.shape) != 2:
-            raise RuntimeError("x_train must be 2d ndarray")
+            raise ValueError("x_train must be 2d ndarray")
         self.x_train = x_train
 
         if weights_train is None:
@@ -78,7 +79,7 @@ class KDE:
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if len(weights_train.shape) != 1:
-                raise RuntimeError("weights_train must be 1d ndarray")
+                raise ValueError("weights_train must be 1d ndarray")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
@@ -87,7 +88,8 @@ class KDE:
             if bandwidth_method == "normal_reference":
                 self.bandwidth = normal_reference(self.x_train, self.kernel_name)
             elif bandwidth_method == "direct_plugin":
-                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, 2)
+                stage = kwargs["stage"] if "stage" in kwargs else 2
+                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
             else:
                 raise ValueError("invalid bandwidth method")
         else:
@@ -95,6 +97,7 @@ class KDE:
                 raise ValueError("bandwidth must be positive")
             self.bandwidth = bandwidth
 
+        self.fitted = True
         return self
 
     def pdf(self, x_test: ndarray) -> ndarray:

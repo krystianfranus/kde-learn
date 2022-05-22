@@ -74,8 +74,8 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
     ----------
     - Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
-    if stage > 3:
-        raise ValueError("stage must be less or equal 3")
+    if stage < 0 or stage > 3:
+        raise ValueError("stage must be greater than 0 and less than 4")
 
     m_train = x_train.shape[0]
     std_x = np.std(x_train, axis=0, ddof=1)
