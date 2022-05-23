@@ -233,6 +233,7 @@ class KDEOutliersDetector:
         bandwidth: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
         r: float = 0.1,
+        **kwargs,
     ):
         """Fit the outliers detector.
 
@@ -242,6 +243,10 @@ class KDEOutliersDetector:
             Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
         weights_train : `ndarray`, default=None
             Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+        bandwidth : `ndarray`, optional
+            Smoothing parameter. Must have shape (n,).
+        bandwidth_method : {'normal_reference', 'direct_plugin'}, default='normal_reference'
+            Name of bandwidth selection method used to compute it when bandwidth argument is not passed explicitly.
         r : `float`
             Threshold.
 
@@ -258,35 +263,14 @@ class KDEOutliersDetector:
         >>> # Fit the outliers detector
         >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train, r=0.1)
         """
-        if len(x_train.shape) != 2:
-            raise RuntimeError("x_train must be 2d ndarray")
-        self.x_train = x_train
-        self.m_train = self.x_train.shape[0]
-
-        if weights_train is None:
-            self.weights_train = np.full(self.m_train, 1 / self.m_train)
-        else:
-            if len(weights_train.shape) != 1:
-                raise RuntimeError("weights_train must be 1d ndarray")
-            if not (weights_train > 0).all():
-                raise ValueError("weights_train must be positive")
-            self.weights_train = weights_train / weights_train.sum()
-
-        if bandwidth is None:
-            if bandwidth_method == "normal_reference":
-                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
-            elif bandwidth_method == "direct_plugin":
-                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, 2)
-            else:
-                raise ValueError("invalid bandwidth method")
-        else:
-            if not (bandwidth > 0).all():
-                raise ValueError("bandwidth must be positive")
-            self.bandwidth = bandwidth
-
         if r < 0:
             raise ValueError("r must be positive")
-        self.threshold = self._compute_threshold(r)
+
+        self.kde = KDE(self.kernel_name).fit(
+            x_train, weights_train, bandwidth, bandwidth_method, **kwargs
+        )
+        scores = self.kde.pdf(x_train)
+        self.threshold = np.quantile(scores, r)
 
         self.fitted = True
         return self
@@ -317,17 +301,6 @@ class KDEOutliersDetector:
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
 
-        kde = KDE(self.kernel_name).fit(self.x_train, self.weights_train, self.bandwidth)
-        scores_test = kde.pdf(x_test)
-        labels_pred = np.where(scores_test <= self.threshold, 1, 0)
+        scores = self.kde.pdf(x_test)
+        labels_pred = np.where(scores <= self.threshold, 1, 0)
         return labels_pred
-
-    def _compute_threshold(self, r: float) -> float:
-        scores_train = np.empty(self.m_train)
-        for i in range(self.m_train):
-            tmp_x_train = np.delete(self.x_train, i, axis=0)
-            tmp_weights_train = np.delete(self.weights_train, i)
-            tmp_kde = KDE(self.kernel_name).fit(tmp_x_train, tmp_weights_train, self.bandwidth)
-            scores_train[i] = tmp_kde.pdf(self.x_train[[i]])
-        threshold = np.quantile(scores_train, r)
-        return threshold
