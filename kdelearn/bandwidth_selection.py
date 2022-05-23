@@ -91,23 +91,24 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
 
-    def _psi(r):  # ok
+    def _psi(r):
         n = (-1) ** (0.5 * r) * np.math.factorial(r)
         d = (2 * std_x) ** (r + 1) * np.math.factorial(0.5 * r) * np.sqrt(np.pi)
         return n / d
 
-    def _bw(gd, zf, b):  # ok
-        # there is hidden uk variable in denominator (equal to 1 for gaussian kernel)
+    def _bw(gd, zf, b):
+        # There is hidden uk variable in denominator (equal to 1 for gaussian kernel)
         return (-2 * gd(0) / (zf * m_train)) ** (1 / (b + 1))
 
+    # Gaussian derivatives of order 4, 6 and 8
     gds = {"gd8": gd8, "gd6": gd6, "gd4": gd4}
 
     r = 2 * stage + 4
     zf = _psi(r)
     while r != 4:
         r -= 2
-        der = gds[f"gd{r}"]
-        bw = _bw(der, zf, r + 2)
+        gd = gds[f"gd{r}"]
+        bw = _bw(gd, zf, r + 2)
         zf = isdd(x_train, bw, r)
 
     bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2
