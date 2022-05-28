@@ -50,7 +50,7 @@ class KDE:
         x_train : `ndarray`
             Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
         weights_train : `ndarray`, optional
-            Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+            Weights for data points. Must have shape (m_train,). If None is passed, all points are equally weighted.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
         bandwidth_method : {'normal_reference', 'direct_plugin'}, default='normal_reference'

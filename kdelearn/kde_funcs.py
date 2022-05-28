@@ -59,7 +59,7 @@ class KDEClassifier:
         labels_train : `ndarray`
             Labels of data points as a 1D array containing data with `int` type. Must have shape (m_train,).
         weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+            Weights for data points. Must have shape (m_train,). If None is passed, all points are equally weighted.
         share_bandwidth : bool, default=False
             Determines whether all classes should have common bandwidth. If False, each class gets its own bandwidth.
         prior_prob : `ndarray`, default=None
@@ -242,7 +242,7 @@ class KDEOutliersDetector:
         x_train : `ndarray`
             Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
         weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+            Weights for data points. Must have shape (m_train,). If None is passed, all points are equally weighted.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
         bandwidth_method : {'normal_reference', 'direct_plugin'}, default='normal_reference'
