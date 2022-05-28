@@ -301,6 +301,9 @@ class KDEOutliersDetector:
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
 
+        if len(x_test.shape) != 2:
+            raise ValueError("x_test must be 2d ndarray")
+
         scores = self.kde.pdf(x_test)
         labels_pred = np.where(scores <= self.threshold, 1, 0)
         return labels_pred

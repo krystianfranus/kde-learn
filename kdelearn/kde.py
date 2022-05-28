@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_kde
 
-from .bandwidth_selection import direct_plugin, normal_reference
+from .bandwidth_selection import direct_plugin, normal_reference, ste_plugin
 
 
 class KDE:
@@ -90,6 +90,8 @@ class KDE:
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
                 self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
+            elif bandwidth_method == "ste_plugin":
+                self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
             else:
                 raise ValueError("invalid bandwidth method")
         else:
