@@ -2,7 +2,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.optimize import newton
 
-from kdelearn.cutils import gd4, gd6, gd8, isdd
+from kdelearn.cutils import isdd
 
 
 def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
@@ -42,9 +42,9 @@ def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray
         wk, uk = 5 / (4 * np.pi), 1
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
-    zf = 3 / (8 * np.sqrt(np.pi))
+    zf = 3 / (8 * np.sqrt(np.pi) * std_x ** 5)
 
-    bandwidth = std_x * (wk / (uk ** 2 * zf * m_train)) ** 0.2
+    bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2
     return bandwidth
 
 
@@ -99,17 +99,17 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
 
     def _bw(gd, zf, b):
         # There is hidden uk variable in denominator (equal to 1 for gaussian kernel)
-        return (-2 * gd(0) / (zf * m_train)) ** (1 / (b + 1))
+        return (-2 * gd / (zf * m_train)) ** (1 / (b + 1))
 
-    # Gaussian derivatives of order 4, 6 and 8
-    gds = {"gd8": gd8, "gd6": gd6, "gd4": gd4}
+    # Gaussian derivatives of order 4, 6 and 8 at zero arg
+    gds = {"gd8": 41.888939, "gd6": -5.984134, "gd4": 1.196827}
 
     r = 2 * stage + 4
     zf = _psi(r)
     while r != 4:
         r -= 2
-        gd = gds[f"gd{r}"]
-        bw = _bw(gd, zf, r + 2)
+        gd_at_zero = gds[f"gd{r}"]
+        bw = _bw(gd_at_zero, zf, r + 2)
         zf = isdd(x_train, bw, r)
 
     bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2
@@ -154,19 +154,17 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
 
-    def eq(bw):
-        a = 0.92 * std_x * m_train ** (-1 / 7)
+    def eq(h):
+        a = 0.920 * std_x * m_train ** (-1 / 7)
         b = 0.912 * std_x * m_train ** (-1 / 9)
-
-        tdb = -isdd(x_train, b, 6)
         sda = isdd(x_train, a, 4)
+        tdb = -isdd(x_train, b, 6)
 
-        alpha2 = 1.357 * (abs(sda / tdb)) ** (1 / 7) * bw ** (5 / 7)
+        alpha2 = 1.357 * (sda / tdb) ** (1 / 7) * h ** (5 / 7)
         sdalpha2 = isdd(x_train, alpha2, 4)
+        return (wk / (uk ** 2 * sdalpha2 * m_train)) ** 0.2 - h
 
-        return (wk / (uk ** 2 * sdalpha2 * m_train)) ** 0.2 - bw
-
+    # Solve the equation using secant method
     bandwidth0 = normal_reference(x_train, kernel_name)
     bandwidth = newton(eq, bandwidth0)
-
     return bandwidth

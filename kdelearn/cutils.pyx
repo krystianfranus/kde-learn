@@ -167,29 +167,14 @@ cdef double cgd4(double x):
     return (x ** 4 - 6 * x ** 2 + 3) * gaussian(x)
 
 
-# wrapper to expose cgd4() to Python
-def gd4(x):
-    return cgd4(x)
-
-
 cdef double cgd6(double x):
     """Gaussian derivative of order 6."""
     return (x ** 6 - 15 * x ** 4 + 45 * x ** 2 - 15) * gaussian(x)
 
 
-# wrapper to expose cgd6() to Python
-def gd6(x):
-    return cgd6(x)
-
-
 cdef double cgd8(double x):
     """Gaussian derivative of order 8."""
     return (x ** 8 - 28 * x ** 6 + 210 * x ** 4 - 420 * x ** 2 + 105) * gaussian(x)
-
-
-# wrapper to expose cgd8() to Python
-def gd8(x):
-    return cgd8(x)
 
 
 @cython.boundscheck(False)
