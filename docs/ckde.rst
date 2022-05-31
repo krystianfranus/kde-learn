@@ -1,7 +1,10 @@
-CKDE
-====
+Conditional Kernel Density Estimation
+=====================================
 
 .. currentmodule:: kdelearn
 
-.. automodule:: kdelearn.ckde
+CKDE
+----
+
+.. autoclass:: kdelearn.ckde.CKDE
    :members:
