@@ -4,9 +4,16 @@ from scipy.optimize import newton
 
 from kdelearn.cutils import isdd
 
+kernel_properties = {
+    "gaussian": (1 / (2 * np.sqrt(np.pi)), 1),
+    "uniform": (0.5, 1 / 3),
+    "epanechnikov": (0.6, 0.2),
+    "cauchy": (5 / (4 * np.pi), 1),
+}
+
 
 def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
-    """AMISE-optimal bandwidth for the (assuming) gaussian density. See paragraph (3.2.1) in the Wand's book.
+    """AMISE-optimal bandwidth for the (assuming) gaussian density. See paragraph (3.2.1) in [1].
 
     Parameters
     ----------
@@ -22,24 +29,18 @@ def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray
 
     Examples
     --------
-    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> bandwidth = normal_reference(x_train, "gaussian")
 
     References
     ----------
-    - Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
+    [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     m_train = x_train.shape[0]
     std_x = np.std(x_train, axis=0, ddof=1)
 
-    if kernel_name == "gaussian":
-        wk, uk = 1 / (2 * np.sqrt(np.pi)), 1
-    elif kernel_name == "uniform":
-        wk, uk = 0.5, 1 / 3
-    elif kernel_name == "epanechnikov":
-        wk, uk = 0.6, 0.2
-    elif kernel_name == "cauchy":
-        wk, uk = 5 / (4 * np.pi), 1
+    if kernel_name in kernel_properties:
+        wk, uk = kernel_properties[kernel_name]
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
     zf = 3 / (8 * np.sqrt(np.pi) * std_x ** 5)
@@ -50,7 +51,7 @@ def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray
 
 def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 2):
     """Direct plug-in method with gaussian kernel used in estimation of integrated squared density derivatives
-    limited to max stage=3. See paragraph (3.6.1) in the Wand's book.
+    limited to max stage=3. See paragraph (3.6.1) in [1].
 
     Parameters
     ----------
@@ -68,12 +69,12 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
 
     Examples
     --------
-    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> bandwidth = direct_plugin(x_train, "gaussian", 2)
 
     References
     ----------
-    - Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
+    [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if stage < 0 or stage > 3:
         raise ValueError("stage must be greater than 0 and less than 4")
@@ -81,14 +82,8 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
     m_train = x_train.shape[0]
     std_x = np.std(x_train, axis=0, ddof=1)
 
-    if kernel_name == "gaussian":
-        wk, uk = 1 / (2 * np.sqrt(np.pi)), 1
-    elif kernel_name == "uniform":
-        wk, uk = 0.5, 1 / 3
-    elif kernel_name == "epanechnikov":
-        wk, uk = 0.6, 0.2
-    elif kernel_name == "cauchy":
-        wk, uk = 5 / (4 * np.pi), 1
+    if kernel_name in kernel_properties:
+        wk, uk = kernel_properties[kernel_name]
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
 
@@ -117,7 +112,7 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
 
 
 def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
-    """Solve-the-equation plug-in method. See paragraph (3.6.2) in the Wand's book.
+    """Solve-the-equation plug-in method. See paragraph (3.6.2) in [1].
 
     Parameters
     ----------
@@ -133,24 +128,18 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
 
     Examples
     --------
-    >>> x_train = np.random.normal(0, 1, size=(1000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> bandwidth = ste_plugin(x_train, "gaussian")
 
     References
     ----------
-    - Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
+    [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     m_train = x_train.shape[0]
     std_x = np.std(x_train, axis=0, ddof=1)
 
-    if kernel_name == "gaussian":
-        wk, uk = 1 / (2 * np.sqrt(np.pi)), 1
-    elif kernel_name == "uniform":
-        wk, uk = 0.5, 1 / 3
-    elif kernel_name == "epanechnikov":
-        wk, uk = 0.6, 0.2
-    elif kernel_name == "cauchy":
-        wk, uk = 5 / (4 * np.pi), 1
+    if kernel_name in kernel_properties:
+        wk, uk = kernel_properties[kernel_name]
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
 

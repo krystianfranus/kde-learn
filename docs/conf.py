@@ -56,6 +56,8 @@ np.random.seed(0)
 plt.figure(figsize=(6, 4))
 """
 
+autodoc_member_order = "bysource"
+
 
 # -- Options for HTML output -------------------------------------------------
 

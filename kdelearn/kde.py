@@ -9,7 +9,7 @@ from .bandwidth_selection import direct_plugin, normal_reference, ste_plugin
 
 
 class KDE:
-    """Kernel density estimator:
+    """Kernel density estimator with product kernel:
 
     .. math::
         \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j} K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
@@ -22,13 +22,14 @@ class KDE:
     Examples
     --------
     >>> # Prepare data
-    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> # Fit the estimator
     >>> kde = KDE("gaussian").fit(x_train)
 
     References
     ----------
     - Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
+    - Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -43,7 +44,7 @@ class KDE:
         bandwidth_method: str = "normal_reference",
         **kwargs,
     ):
-        """Fit kernel density estimator to the data (x_train).
+        """Fit the estimator to the data.
 
         Parameters
         ----------
@@ -64,8 +65,8 @@ class KDE:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-        >>> weights_train = np.random.randint(1, 10, size=(10_000,))
+        >>> x_train = np.random.normal(0, 1, size=(100, 1))
+        >>> weights_train = np.random.randint(1, 10, size=(10,))
         >>> bandwidth = np.random.uniform(0, 1, size=(1,))
         >>> # Fit the estimator
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
@@ -103,7 +104,7 @@ class KDE:
         return self
 
     def pdf(self, x_test: ndarray) -> ndarray:
-        """Compute estimation of probability density function.
+        """Compute probability density function.
 
         Parameters
         ----------
@@ -118,12 +119,12 @@ class KDE:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, (10_000, 1))
-        >>> x_test = np.random.uniform(-3, 3, (1000, 1))
+        >>> x_train = np.random.normal(0, 1, (100, 1))
+        >>> x_test = np.random.uniform(-3, 3, (10, 1))
         >>> # Fit the estimator.
         >>> kde = KDE().fit(x_train)
         >>> # Compute pdf
-        >>> scores = kde.pdf(x_test)  # scores shape (1000,)
+        >>> scores = kde.pdf(x_test)  # scores shape (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the estimator first")
