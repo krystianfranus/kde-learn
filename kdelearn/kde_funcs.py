@@ -61,11 +61,13 @@ class KDEClassifier:
         labels_train : `ndarray`
             Labels of data points as a 1D array containing data with `int` type. Must have shape (m_train,).
         weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,). If None is passed, all points are equally weighted.
+            Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
         share_bandwidth : bool, default=False
-            Determines whether all classes should have common bandwidth. If False, each class gets its own bandwidth.
+            Determines whether all classes should have common bandwidth. If False, estimator of each class gets its own bandwidth.
+        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin'}, default='normal_reference'
+            Name of bandwidth selection method.
         prior_prob : `ndarray`, default=None
-            Prior probabilities of each class. Must have shape (n_classes,).
+            Prior probabilities of each class. Must have shape (n_classes,). If None, all classes are equally probable.
 
         Returns
         -------
@@ -83,9 +85,8 @@ class KDEClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> weights_train = np.random.uniform(0, 1, size=(100,))
         >>> # Fit the classifier
-        >>> share_bandwidth = True
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, share_bandwidth, prior_prob)
+        >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)
         """
         if len(x_train.shape) != 2:
             raise RuntimeError("x_train must be 2d ndarray")
@@ -130,6 +131,8 @@ class KDEClassifier:
                 raise ValueError("invalid bandwidth method")
         else:
             self.bandwidth = None
+
+        self.kwargs = kwargs
 
         self.fitted = True
         return self
@@ -215,7 +218,11 @@ class KDEClassifier:
             if self.weights_train is not None:
                 weights = self.weights_train[mask]
             kde = KDE(self.kernel_name).fit(
-                self.x_train[mask], weights, self.bandwidth, self.bandwidth_method
+                self.x_train[mask],
+                weights,
+                self.bandwidth,
+                self.bandwidth_method,
+                **self.kwargs,
             )
             scores[:, idx] = kde.pdf(x_test)
 
