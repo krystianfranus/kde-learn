@@ -28,10 +28,10 @@ class KDEClassifier:
     Examples
     --------
     >>> # Prepare data for two classes
-    >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
-    >>> labels_train1 = np.full(10_000 // 2, 1)
-    >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
-    >>> labels_train2 = np.full(10_000 // 2, 2)
+    >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+    >>> labels_train1 = np.full(100 // 2, 1)
+    >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+    >>> labels_train2 = np.full(100 // 2, 2)
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit the classifier
@@ -50,7 +50,7 @@ class KDEClassifier:
         share_bandwidth: bool = False,
         prior_prob: Optional[ndarray] = None,
     ):
-        """Fit the classifier.
+        """Fit the classifier to the data.
 
         Parameters
         ----------
@@ -73,13 +73,13 @@ class KDEClassifier:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
-        >>> labels_train1 = np.full((10_000 // 2,), 1)
-        >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
-        >>> labels_train2 = np.full((10_000 // 2,), 2)
+        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+        >>> labels_train1 = np.full((100 // 2,), 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> labels_train2 = np.full((100 // 2,), 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
+        >>> weights_train = np.random.uniform(0, 1, size=(100,))
         >>> # Fit the classifier
         >>> share_bandwidth = True
         >>> prior_prob = np.array([0.3, 0.7])
@@ -120,7 +120,7 @@ class KDEClassifier:
         return self
 
     def predict(self, x_test: ndarray):
-        """Predict the labels.
+        """Predict labels.
 
         Parameters
         ----------
@@ -135,24 +135,24 @@ class KDEClassifier:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
-        >>> labels_train1 = np.full(10_000 // 2, 1)
-        >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
-        >>> labels_train2 = np.full(10_000 // 2, 2)
+        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+        >>> labels_train1 = np.full(100 // 2, 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> labels_train2 = np.full(100 // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
+        >>> x_test = np.random.uniform(-1, 4, size=(10, 1))
         >>> classifier = KDEClassifier().fit(x_train, labels_train)
-        >>> # Predict the labels
-        >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (1000,)
+        >>> # Predict labels
+        >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the model first")
         labels_pred, _ = self._classify(x_test)
         return labels_pred
 
-    def score(self, x_test: ndarray):
+    def pdfs(self, x_test: ndarray):
         """Compute pdf of each class.
 
         Parameters
@@ -168,17 +168,17 @@ class KDEClassifier:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> x_train1 = np.random.normal(0, 1, size=(10_000 // 2, 1))
-        >>> labels_train1 = np.full(10_000 // 2, 1)
-        >>> x_train2 = np.random.normal(3, 1, size=(10_000 // 2, 1))
-        >>> labels_train2 = np.full(10_000 // 2, 2)
+        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+        >>> labels_train1 = np.full(100 // 2, 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> labels_train2 = np.full(100 // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.random.uniform(-1, 4, size=(1000, 1))
+        >>> x_test = np.random.uniform(-1, 4, size=(10, 1))
         >>> classifier = KDEClassifier().fit(x_train, labels_train)
         >>> # Compute pdf of each class
-        >>> scores = classifier.score(x_test)  # scores shape (1000, 2)
+        >>> scores = classifier.pdfs(x_test)  # scores shape (10, 2)
         """
         if not self.fitted:
             raise RuntimeError("fit the classifier first")
@@ -189,7 +189,7 @@ class KDEClassifier:
         prior = np.empty(self.ulabels.shape)
         for idx, label in enumerate(self.ulabels):
             mask = self.labels_train == label
-            prior[idx] = self.labels_train[mask].shape[0] / self.x_train.shape[0]
+            prior[idx] = self.labels_train[mask].shape[0] / self.m_train
         return prior
 
     def _classify(self, x_test: ndarray) -> Tuple[ndarray, ndarray]:

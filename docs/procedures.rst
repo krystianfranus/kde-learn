@@ -9,7 +9,7 @@ kde classifier
 Classifier description
 
 .. math::
-    P(C=c|X=x) \propto \alpha_c \hat{f}_c(X=x)
+    P(C=c|X=x) \propto \pi_c \hat{f}_c(X=x)
 .. math::
     \underset{c}{\mathrm{argmax}} \quad P(C=c|X=x)
 
