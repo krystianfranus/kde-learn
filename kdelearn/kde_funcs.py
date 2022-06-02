@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import direct_plugin, normal_reference
+from .bandwidth_selection import direct_plugin, normal_reference, ste_plugin
 from .kde import KDE
 
 
@@ -48,7 +48,9 @@ class KDEClassifier:
         labels_train: ndarray,
         weights_train: Optional[ndarray] = None,
         share_bandwidth: bool = False,
+        bandwidth_method: str = "normal_reference",
         prior_prob: Optional[ndarray] = None,
+        **kwargs,
     ):
         """Fit the classifier to the data.
 
@@ -115,7 +117,20 @@ class KDEClassifier:
                 raise RuntimeError(f"prior_prob must contain {self.n_classes} values")
             self.prior = prior_prob / prior_prob.sum()
 
-        self.bandwidth = normal_reference(x_train) if share_bandwidth else None
+        self.bandwidth_method = bandwidth_method
+        if share_bandwidth:
+            if self.bandwidth_method == "normal_reference":
+                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+            elif self.bandwidth_method == "direct_plugin":
+                stage = kwargs["stage"] if "stage" in kwargs else 2
+                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
+            elif self.bandwidth_method == "ste_plugin":
+                self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
+            else:
+                raise ValueError("invalid bandwidth method")
+        else:
+            self.bandwidth = None
+
         self.fitted = True
         return self
 
@@ -199,7 +214,9 @@ class KDEClassifier:
             weights = self.weights_train
             if self.weights_train is not None:
                 weights = self.weights_train[mask]
-            kde = KDE(self.kernel_name).fit(self.x_train[mask], weights, self.bandwidth)
+            kde = KDE(self.kernel_name).fit(
+                self.x_train[mask], weights, self.bandwidth, self.bandwidth_method
+            )
             scores[:, idx] = kde.pdf(x_test)
 
         labels_pred = self.ulabels[np.argmax(self.prior * scores, axis=1)]
