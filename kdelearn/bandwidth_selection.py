@@ -159,7 +159,7 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
     return bandwidth
 
 
-def ml_cv(x_train: ndarray, weights_train: ndarray, kernel_name: str = "gaussian"):
+def ml_cv(x_train: ndarray, weights_train: ndarray = None, kernel_name: str = "gaussian"):
     """Likelihood cross-validation. See paragraph (3.4.4) in [1].
 
     Parameters
@@ -187,6 +187,16 @@ def ml_cv(x_train: ndarray, weights_train: ndarray, kernel_name: str = "gaussian
     ----------
     [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
     """
+
+    if weights_train is None:
+        m_train = x_train.shape[0]
+        weights_train = np.full(m_train, 1 / m_train)
+    else:
+        if len(weights_train.shape) != 1:
+            raise ValueError("weights_train must be 1d ndarray")
+        if not (weights_train > 0).all():
+            raise ValueError("weights_train must be positive")
+        weights_train = weights_train / weights_train.sum()
 
     def eq(h):
         scores = compute_unbiased_kde(x_train, weights_train, h, kernel_name)
