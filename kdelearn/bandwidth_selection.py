@@ -1,8 +1,8 @@
 import numpy as np
 from numpy import ndarray
-from scipy.optimize import newton
+from scipy.optimize import Bounds, minimize, newton
 
-from kdelearn.cutils import isdd
+from kdelearn.cutils import compute_unbiased_kde, isdd
 
 kernel_properties = {
     "gaussian": (1 / (2 * np.sqrt(np.pi)), 1),
@@ -156,4 +156,46 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
     # Solve the equation using secant method
     bandwidth0 = normal_reference(x_train, kernel_name)
     bandwidth = newton(eq, bandwidth0)
+    return bandwidth
+
+
+def ml_cv(x_train: ndarray, weights_train: ndarray, kernel_name: str = "gaussian"):
+    """Likelihood cross-validation. See paragraph (3.4.4) in [1].
+
+    Parameters
+    ----------
+    x_train : `ndarray`
+        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+    weights_train : `ndarray`, optional
+        Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
+
+    Returns
+    -------
+    bandwidth : `ndarray`
+        Smoothing parameter. Must have shape (n,).
+
+    Examples
+    --------
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
+    >>> m_train = x_train.shape[0]
+    >>> weights_train = np.full(m_train, 1 / m_train)
+    >>> bandwidth = ml_cv(x_train, weights_train, "gaussian")
+
+    References
+    ----------
+    [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
+    """
+
+    def eq(h):
+        scores = compute_unbiased_kde(x_train, weights_train, h, kernel_name)
+        return -np.mean(np.log(scores))
+
+    # Minimize the equation with nelder-mead method
+    bandwidth0 = normal_reference(x_train, kernel_name)
+    smallest_pos_num = np.nextafter(0, 1)
+    bounds = Bounds(smallest_pos_num, np.inf)
+    res = minimize(eq, bandwidth0, method="nelder-mead", bounds=bounds)
+    bandwidth = res.x
     return bandwidth

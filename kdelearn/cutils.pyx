@@ -73,8 +73,8 @@ def cauchy(x: float) -> float:
 @cython.cdivision(True)
 def compute_kde(
     double[:, :] x_train,
-    double[:, :] x_test,
     double[:] weights_train,
+    double[:, :] x_test,
     double[:] bandwidth,
     str kernel_name,
 ):
@@ -206,3 +206,43 @@ def isdd(
                 result_view[j] += func((x_train[i1, j] - x_train[i2, j]) / bandwidth[j])
         result_view[j] *= 1 / (m_train ** 2 * bandwidth[j] ** (r + 1))
     return result
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def compute_unbiased_kde(
+    double[:, :] x_train,
+    double[:] weights_train,
+    double[:] bandwidth,
+    str kernel_name,
+):
+    cdef Py_ssize_t m_train = x_train.shape[0]
+    cdef Py_ssize_t n = x_train.shape[1]
+
+    if kernel_name == "gaussian":
+        kernel = cgaussian
+    elif kernel_name == "uniform":
+        kernel = cuniform
+    elif kernel_name == "epanechnikov":
+        kernel = cepanechnikov
+    elif kernel_name == "cauchy":
+        kernel = ccauchy
+    else:
+        raise ValueError("invalid kernel name")
+
+    scores = np.zeros(m_train, dtype=np.float64)
+    cdef double[:] scores_view = scores
+
+    cdef Py_ssize_t k, i, j
+    cdef double tmp
+
+    for k in range(m_train):
+        for i in range(m_train):
+            if k == i:
+                continue
+            tmp = 1.0
+            for j in range(n):
+                tmp *= 1.0 / bandwidth[j] * kernel((x_train[k, j] - x_train[i, j]) / bandwidth[j])
+            scores_view[k] += weights_train[i] * tmp
+    return scores

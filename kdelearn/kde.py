@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_kde
 
-from .bandwidth_selection import direct_plugin, normal_reference, ste_plugin
+from .bandwidth_selection import direct_plugin, ml_cv, normal_reference, ste_plugin
 
 
 class KDE:
@@ -93,6 +93,8 @@ class KDE:
                 self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
             elif bandwidth_method == "ste_plugin":
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
+            elif bandwidth_method == "ml_cv":
+                self.bandwidth = ml_cv(self.x_train, self.weights_train, self.kernel_name)
             else:
                 raise ValueError("invalid bandwidth method")
         else:
@@ -131,8 +133,8 @@ class KDE:
 
         scores = compute_kde(
             self.x_train,
-            x_test,
             self.weights_train,
+            x_test,
             self.bandwidth,
             self.kernel_name,
         )
