@@ -37,13 +37,14 @@ def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     m_train = x_train.shape[0]
+    n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
 
     if kernel_name in kernel_properties:
         wk, uk = kernel_properties[kernel_name]
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
-    zf = 3 / (8 * np.sqrt(np.pi) * std_x ** 5)
+    zf = n * (n + 2) / (2 ** (n + 2) * np.pi ** (0.5 * n) * std_x ** 5)
 
     bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2
     return bandwidth
@@ -80,6 +81,7 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
         raise ValueError("stage must be greater than 0 and less than 4")
 
     m_train = x_train.shape[0]
+    n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
 
     if kernel_name in kernel_properties:
@@ -107,7 +109,7 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
         bw = _bw(gd_at_zero, zf, r + 2)
         zf = isdd(x_train, bw, r)
 
-    bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2
+    bandwidth = ((n * wk) / (uk ** 2 * zf * m_train)) ** (1 / (n + 4))
     return bandwidth
 
 
@@ -136,6 +138,7 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     m_train = x_train.shape[0]
+    n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
 
     if kernel_name in kernel_properties:
@@ -151,7 +154,7 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
 
         alpha2 = 1.357 * (sda / tdb) ** (1 / 7) * h ** (5 / 7)
         sdalpha2 = isdd(x_train, alpha2, 4)
-        return (wk / (uk ** 2 * sdalpha2 * m_train)) ** 0.2 - h
+        return ((n * wk) / (uk ** 2 * sdalpha2 * m_train)) ** (1 / (n + 4)) - h
 
     # Solve the equation using secant method
     bandwidth0 = normal_reference(x_train, kernel_name)
