@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import direct_plugin, normal_reference, ste_plugin
+from .bandwidth_selection import direct_plugin, ml_cv, normal_reference, ste_plugin
 from .kde import KDE
 
 
@@ -36,6 +36,10 @@ class KDEClassifier:
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit the classifier
     >>> classifier = KDEClassifier("gaussian").fit(x_train, labels_train)
+
+    References
+    ----------
+    - Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -52,7 +56,7 @@ class KDEClassifier:
         prior_prob: Optional[ndarray] = None,
         **kwargs,
     ):
-        """Fit the classifier to the data.
+        """Fit the classifier.
 
         Parameters
         ----------
@@ -63,8 +67,9 @@ class KDEClassifier:
         weights_train : `ndarray`, default=None
             Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
         share_bandwidth : bool, default=False
-            Determines whether all classes should have common bandwidth. If False, estimator of each class gets its own bandwidth.
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin'}, default='normal_reference'
+            Determines whether all classes should have common bandwidth.
+            If False, estimator of each class gets its own bandwidth.
+        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', 'ml_cv'}, default='normal_reference'
             Name of bandwidth selection method.
         prior_prob : `ndarray`, default=None
             Prior probabilities of each class. Must have shape (n_classes,). If None, all classes are equally probable.
@@ -89,19 +94,19 @@ class KDEClassifier:
         >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)
         """
         if len(x_train.shape) != 2:
-            raise RuntimeError("x_train must be 2d ndarray")
+            raise ValueError("x_train must be 2d ndarray")
         self.x_train = x_train
         self.m_train = self.x_train.shape[0]
 
         if len(labels_train.shape) != 1:
-            raise RuntimeError("labels_train must be 1d ndarray")
+            raise ValueError("labels_train must be 1d ndarray")
         self.labels_train = labels_train
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
             if len(weights_train.shape) != 1:
-                raise RuntimeError("weights_train must be 1d ndarray")
+                raise ValueError("weights_train must be 1d ndarray")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
@@ -118,26 +123,28 @@ class KDEClassifier:
                 raise RuntimeError(f"prior_prob must contain {self.n_classes} values")
             self.prior = prior_prob / prior_prob.sum()
 
-        self.bandwidth_method = bandwidth_method
         if share_bandwidth:
-            if self.bandwidth_method == "normal_reference":
+            if bandwidth_method == "normal_reference":
                 self.bandwidth = normal_reference(self.x_train, self.kernel_name)
-            elif self.bandwidth_method == "direct_plugin":
+            elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
                 self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
-            elif self.bandwidth_method == "ste_plugin":
+            elif bandwidth_method == "ste_plugin":
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
+            elif bandwidth_method == "ml_cv":
+                self.bandwidth = ml_cv(self.x_train, self.weights_train, self.kernel_name)
             else:
                 raise ValueError("invalid bandwidth method")
         else:
             self.bandwidth = None
+            self.bandwidth_method = bandwidth_method
 
         self.kwargs = kwargs
 
         self.fitted = True
         return self
 
-    def predict(self, x_test: ndarray):
+    def predict(self, x_test: ndarray) -> ndarray:
         """Predict labels.
 
         Parameters
@@ -170,7 +177,7 @@ class KDEClassifier:
         labels_pred, _ = self._classify(x_test)
         return labels_pred
 
-    def pdfs(self, x_test: ndarray):
+    def pdfs(self, x_test: ndarray) -> ndarray:
         """Compute pdf of each class.
 
         Parameters

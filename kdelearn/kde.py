@@ -44,7 +44,7 @@ class KDE:
         bandwidth_method: str = "normal_reference",
         **kwargs,
     ):
-        """Fit the estimator to the data.
+        """Fit the estimator.
 
         Parameters
         ----------
@@ -54,7 +54,7 @@ class KDE:
             Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin'}, default='normal_reference'
+        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', 'ml_cv'}, default='normal_reference'
             Name of bandwidth selection method used to compute it when bandwidth argument is not passed explicitly.
 
         Returns
