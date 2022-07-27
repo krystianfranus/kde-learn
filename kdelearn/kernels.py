@@ -31,7 +31,7 @@ def gaussian(x: ndarray):
     :obj:`ndarray`
         Values of the function for the given arguments.
     """
-    return np.exp(-(x ** 2) / 2) / np.sqrt(2 * np.pi)
+    return np.exp(-(x**2) / 2) / np.sqrt(2 * np.pi)
 
 
 def epanechnikov(x: ndarray):
@@ -47,8 +47,8 @@ def epanechnikov(x: ndarray):
     :obj:`ndarray`
         Values of the function for the given arguments.
     """
-    return np.where(np.abs(x) <= 1, 3 / 4 * (1 - x ** 2), 0.0)
+    return np.where(np.abs(x) <= 1, 3 / 4 * (1 - x**2), 0.0)
 
 
 def cauchy(x: ndarray):
-    return 2 / (np.pi * (x ** 2 + 1) ** 2)
+    return 2 / (np.pi * (x**2 + 1) ** 2)

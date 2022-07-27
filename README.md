@@ -22,6 +22,7 @@ isort {source_file_or_directory}
 ```
 
 Pre-commit works with 'git commit'
+https://pre-commit.com/
 
 ## Sphinx
 

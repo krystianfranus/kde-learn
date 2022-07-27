@@ -44,9 +44,9 @@ def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray
         wk, uk = kernel_properties[kernel_name]
     else:
         raise ValueError(f"invalid kernel name: {kernel_name}")
-    zf = n * (n + 2) / (2 ** (n + 2) * np.pi ** (0.5 * n) * std_x ** 5)
+    zf = n * (n + 2) / (2 ** (n + 2) * np.pi ** (0.5 * n) * std_x**5)
 
-    bandwidth = (wk / (uk ** 2 * zf * m_train)) ** 0.2
+    bandwidth = (wk / (uk**2 * zf * m_train)) ** 0.2
     return bandwidth
 
 
@@ -109,7 +109,7 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
         bw = _bw(gd_at_zero, zf, r + 2)
         zf = isdd(x_train, bw, r)
 
-    bandwidth = ((n * wk) / (uk ** 2 * zf * m_train)) ** (1 / (n + 4))
+    bandwidth = ((n * wk) / (uk**2 * zf * m_train)) ** (1 / (n + 4))
     return bandwidth
 
 
@@ -154,7 +154,7 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
 
         alpha2 = 1.357 * (sda / tdb) ** (1 / 7) * h ** (5 / 7)
         sdalpha2 = isdd(x_train, alpha2, 4)
-        return ((n * wk) / (uk ** 2 * sdalpha2 * m_train)) ** (1 / (n + 4)) - h
+        return ((n * wk) / (uk**2 * sdalpha2 * m_train)) ** (1 / (n + 4)) - h
 
     # Solve the equation using secant method
     bandwidth0 = normal_reference(x_train, kernel_name)
