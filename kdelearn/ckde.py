@@ -41,11 +41,14 @@ class CKDE:
         Parameters
         ----------
         x_train : `ndarray`
-            Data points (explanatory variables) as a 2D array containing data with `float` type. Must have shape (m_train, n_x).
+            Data points (explanatory variables) as a 2D array containing data with
+            `float` type. Must have shape (m_train, n_x).
         w_train : `ndarray`
-            Data points (conditional variables) as a 2D array containing data with `float` type. Must have shape (m_train, n_w).
+            Data points (conditional variables) as a 2D array containing data with
+            `float` type. Must have shape (m_train, n_w).
         weights_train : `ndarray`, optional
-            Weights for data points. Must have shape (m_train,). If None is passed, all points get the same weights.
+            Weights for data points. Must have shape (m_train,).
+            If None is passed, all points get the same weights.
         bandwidth_x : `ndarray`, optional
             Smoothing parameter for explanatory variables. Must have shape (n_x,).
         bandwidth_w : `ndarray`, optional
@@ -91,15 +94,21 @@ class CKDE:
 
         return self
 
-    def pdf(self, x_test: ndarray, w_test: ndarray) -> ndarray:
+    def pdf(
+        self,
+        x_test: ndarray,
+        w_test: ndarray,
+    ) -> ndarray:
         """Compute estimation of conditional probability density function.
 
         Parameters
         ----------
         x_test : `ndarray`
-            Grid data points (explanatory variables) as a 2D array containing data with `float` type. Must have shape (m_test, n).
+            Grid data points (explanatory variables) as a 2D array containing data with
+            `float` type. Must have shape (m_test, n).
         w_test : `ndarray`
-            Grid data points (conditional variables) as a 2D array containing data with `float` type. Must have shape (m_test, n).
+            Grid data points (conditional variables) as a 2D array containing data with
+            `float` type. Must have shape (m_test, n).
 
         Returns
         -------
@@ -130,6 +139,6 @@ class CKDE:
         )
         return scores
 
-    # TODO: https://stats.stackexchange.com/questions/43674/simple-sampling-method-for-a-kernel-density-estimator
+    # TODO: https://stats.stackexchange.com/questions/43674/simple-sampling-method-for-a-kernel-density-estimator  # noqa
     def sample(self):
         raise NotImplementedError

@@ -15,7 +15,8 @@ class KDEClassifier:
     .. math::
         P(C=c|X=x) \\propto \\pi_c \\hat{f}_c(X=x)
 
-    To predict class label for :math:`x` we need to take class :math:`c` with the highest probability:
+    To predict class label for :math:`x` we need to take class :math:`c` with the
+    highest probability:
 
     .. math::
         \\underset{c}{\\mathrm{argmax}} \\quad P(C=c|X=x)
@@ -39,7 +40,8 @@ class KDEClassifier:
 
     References
     ----------
-    - Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
+    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+      Chapman and Hall, 1986.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -61,18 +63,23 @@ class KDEClassifier:
         Parameters
         ----------
         x_train : `ndarray`
-            Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+            Data points as a 2D array containing data with `float` type.
+            Must have shape (m_train, n).
         labels_train : `ndarray`
-            Labels of data points as a 1D array containing data with `int` type. Must have shape (m_train,).
+            Labels of data points as a 1D array containing data with `int` type.
+            Must have shape (m_train,).
         weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
+            Weights for data points. Must have shape (m_train,).
+            If None, all points are equally weighted.
         share_bandwidth : bool, default=False
             Determines whether all classes should have common bandwidth.
             If False, estimator of each class gets its own bandwidth.
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', 'ml_cv'}, default='normal_reference'
+        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
+                'ml_cv'}, default='normal_reference'
             Name of bandwidth selection method.
         prior_prob : `ndarray`, default=None
-            Prior probabilities of each class. Must have shape (n_classes,). If None, all classes are equally probable.
+            Prior probabilities of each class. Must have shape (n_classes,).
+            If None, all classes are equally probable.
 
         Returns
         -------
@@ -91,7 +98,7 @@ class KDEClassifier:
         >>> weights_train = np.random.uniform(0, 1, size=(100,))
         >>> # Fit the classifier
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)
+        >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
         """
         if len(x_train.shape) != 2:
             raise ValueError("x_train must be 2d ndarray")
@@ -132,7 +139,9 @@ class KDEClassifier:
             elif bandwidth_method == "ste_plugin":
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
             elif bandwidth_method == "ml_cv":
-                self.bandwidth = ml_cv(self.x_train, self.weights_train, self.kernel_name)
+                self.bandwidth = ml_cv(
+                    self.x_train, self.weights_train, self.kernel_name
+                )
             else:
                 raise ValueError("invalid bandwidth method")
         else:
@@ -150,12 +159,14 @@ class KDEClassifier:
         Parameters
         ----------
         x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+            Grid data points as a 2D array containing data with `float` type.
+            Must have shape (m_test, n).
 
         Returns
         -------
         labels_pred : `ndarray`
-            Predicted labels as a 1D array containing data with `int` type. Shape (m_test,).
+            Predicted labels as a 1D array containing data with `int` type.
+            Shape (m_test,).
 
         Examples
         --------
@@ -183,12 +194,14 @@ class KDEClassifier:
         Parameters
         ----------
         x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+            Grid data points as a 2D array containing data with `float` type.
+            Must have shape (m_test, n).
 
         Returns
         -------
         scores : `ndarray`
-            Predicted scores as a 2D array containing data with `float` type. Shape (m_test, n_classes).
+            Predicted scores as a 2D array containing data with `float` type.
+            Shape (m_test, n_classes).
 
         Examples
         --------
@@ -271,13 +284,17 @@ class KDEOutliersDetector:
         Parameters
         ----------
         x_train : `ndarray`
-            Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+            Data points as a 2D array containing data with `float` type.
+            Must have shape (m_train, n).
         weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,). If None is passed, all points are equally weighted.
+            Weights for data points. Must have shape (m_train,).
+            If None is passed, all points are equally weighted.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
-        bandwidth_method : {'normal_reference', 'direct_plugin'}, default='normal_reference'
-            Name of bandwidth selection method used to compute it when bandwidth argument is not passed explicitly.
+        bandwidth_method : {'normal_reference', 'direct_plugin'}, \
+                default='normal_reference'
+            Name of bandwidth selection method used to compute it when bandwidth
+            argument is not passed explicitly.
         r : `float`
             Threshold.
 
@@ -312,12 +329,14 @@ class KDEOutliersDetector:
         Parameters
         ----------
         x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+            Grid data points as a 2D array containing data with `float` type.
+            Must have shape (m_test, n).
 
         Returns
         -------
         labels_pred : `ndarray`
-            Predicted labels (0 - inlier, 1 - outlier) as a 1D array containing data with `int` type. Shape (m_test,).
+            Predicted labels (0 - inlier, 1 - outlier) as a 1D array containing data
+            with `int` type. Shape (m_test,).
 
         Examples
         --------

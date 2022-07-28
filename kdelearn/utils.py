@@ -1,4 +1,3 @@
-import numpy as np
 from numpy import ndarray
 
 
@@ -10,7 +9,8 @@ def accuracy(labels_true: ndarray, labels_pred: ndarray) -> float:
     labels_true : `ndarray`
         True (ground truth) labels as a 1D array containing data with `int` type.
     labels_pred : `ndarray`
-        Predicted labels returned by a classifier as a 1D array containing data with `int` type.
+        Predicted labels returned by a classifier as a 1D array containing data with
+        `int` type.
 
     Examples
     --------

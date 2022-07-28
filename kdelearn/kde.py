@@ -12,7 +12,8 @@ class KDE:
     """Kernel density estimator with product kernel:
 
     .. math::
-        \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j} K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
+        \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j}
+        K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
 
     Parameters
     ----------
@@ -28,7 +29,8 @@ class KDE:
 
     References
     ----------
-    - Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
+    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+      Chapman and Hall, 1986.
     - Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
     """
 
@@ -49,13 +51,17 @@ class KDE:
         Parameters
         ----------
         x_train : `ndarray`
-            Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+            Data points as a 2D array containing data with `float` type.
+            Must have shape (m_train, n).
         weights_train : `ndarray`, optional
-            Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
+            Weights for data points. Must have shape (m_train,).
+            If None, all points are equally weighted.
         bandwidth : `ndarray`, optional
             Smoothing parameter. Must have shape (n,).
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', 'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method used to compute it when bandwidth argument is not passed explicitly.
+        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
+                'ml_cv'}, default='normal_reference'
+            Name of bandwidth selection method used to compute it when bandwidth
+            argument is not passed explicitly.
 
         Returns
         -------
@@ -94,7 +100,9 @@ class KDE:
             elif bandwidth_method == "ste_plugin":
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
             elif bandwidth_method == "ml_cv":
-                self.bandwidth = ml_cv(self.x_train, self.weights_train, self.kernel_name)
+                self.bandwidth = ml_cv(
+                    self.x_train, self.weights_train, self.kernel_name
+                )
             else:
                 raise ValueError("invalid bandwidth method")
         else:
@@ -111,7 +119,8 @@ class KDE:
         Parameters
         ----------
         x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type. Must have shape (m_test, n).
+            Grid data points as a 2D array containing data with `float` type.
+            Must have shape (m_test, n).
 
         Returns
         -------
@@ -140,6 +149,6 @@ class KDE:
         )
         return scores
 
-    # TODO: https://stats.stackexchange.com/questions/43674/simple-sampling-method-for-a-kernel-density-estimator
+    # TODO: https://stats.stackexchange.com/questions/43674/simple-sampling-method-for-a-kernel-density-estimator  # noqa
     def sample(self):
         raise NotImplementedError

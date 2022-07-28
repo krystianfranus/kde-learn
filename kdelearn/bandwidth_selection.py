@@ -12,13 +12,19 @@ kernel_properties = {
 }
 
 
-def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray:
-    """AMISE-optimal bandwidth for the (assuming) gaussian density. See paragraph (3.2.1) in [1].
+def normal_reference(
+    x_train: ndarray,
+    kernel_name: str = "gaussian",
+) -> ndarray:
+    """AMISE-optimal bandwidth for the (assuming) gaussian density.
+
+    See paragraph (3.2.1) in [1].
 
     Parameters
     ----------
     x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+        Data points as a 2D array containing data with `float` type.
+        Must have shape (m_train, n).
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
@@ -50,14 +56,21 @@ def normal_reference(x_train: ndarray, kernel_name: str = "gaussian") -> ndarray
     return bandwidth
 
 
-def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 2):
-    """Direct plug-in method with gaussian kernel used in estimation of integrated squared density derivatives
-    limited to max stage=3. See paragraph (3.6.1) in [1].
+def direct_plugin(
+    x_train: ndarray,
+    kernel_name: str = "gaussian",
+    stage: int = 2,
+):
+    """Direct plug-in method with gaussian kernel used in estimation of integrated
+    squared density derivatives limited to max stage=3.
+
+    See paragraph (3.6.1) in [1].
 
     Parameters
     ----------
     x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+        Data points as a 2D array containing data with `float` type.
+        Must have shape (m_train, n).
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
     stage : `int`, default=2
@@ -113,13 +126,19 @@ def direct_plugin(x_train: ndarray, kernel_name: str = "gaussian", stage: int = 
     return bandwidth
 
 
-def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
-    """Solve-the-equation plug-in method. See paragraph (3.6.2) in [1].
+def ste_plugin(
+    x_train: ndarray,
+    kernel_name: str = "gaussian",
+):
+    """Solve-the-equation plug-in method.
+
+    See paragraph (3.6.2) in [1].
 
     Parameters
     ----------
     x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+        Data points as a 2D array containing data with `float` type.
+        Must have shape (m_train, n).
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
@@ -162,15 +181,23 @@ def ste_plugin(x_train: ndarray, kernel_name: str = "gaussian"):
     return bandwidth
 
 
-def ml_cv(x_train: ndarray, weights_train: ndarray = None, kernel_name: str = "gaussian"):
-    """Likelihood cross-validation. See paragraph (3.4.4) in [1].
+def ml_cv(
+    x_train: ndarray,
+    weights_train: ndarray = None,
+    kernel_name: str = "gaussian",
+):
+    """Likelihood cross-validation.
+
+    See paragraph (3.4.4) in [1].
 
     Parameters
     ----------
     x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type. Must have shape (m_train, n).
+        Data points as a 2D array containing data with `float` type.
+        Must have shape (m_train, n).
     weights_train : `ndarray`, optional
-        Weights for data points. Must have shape (m_train,). If None, all points are equally weighted.
+        Weights for data points. Must have shape (m_train,).
+        If None, all points are equally weighted.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
@@ -188,7 +215,8 @@ def ml_cv(x_train: ndarray, weights_train: ndarray = None, kernel_name: str = "g
 
     References
     ----------
-    [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis. Chapman and Hall, 1986.
+    [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+    Chapman and Hall, 1986.
     """
 
     if weights_train is None:
