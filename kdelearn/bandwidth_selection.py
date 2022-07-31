@@ -24,16 +24,15 @@ def normal_reference(
 
     Parameters
     ----------
-    x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type.
-        Must have shape (m_train, n).
+    x_train : ndarray of shape (m_train, n)
+        Data points as an array containing data with float type.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
     Returns
     -------
-    bandwidth : `ndarray`
-        Smoothing parameter. Must have shape (n,).
+    bandwidth : ndarray of shape (n,)
+        Smoothing parameter.
 
     Examples
     --------
@@ -67,24 +66,23 @@ def direct_plugin(
     stage: int = 2,
 ):
     """Direct plug-in method with gaussian kernel used in estimation of integrated
-    squared density derivatives limited to max stage=3.
+    squared density derivatives limited to max `stage`=3.
 
     See paragraph (3.6.1) in [1].
 
     Parameters
     ----------
-    x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type.
-        Must have shape (m_train, n).
+    x_train : ndarray of shape (m_train, n)
+        Data points as an array containing data with float type.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
-    stage : `int`, default=2
-        Depth of plugging-in. Max 3.
+    stage : int, default=2
+        Depth of plugging-in (max 3).
 
     Returns
     -------
-    bandwidth : `ndarray`
-        Smoothing parameter. Must have shape (n,).
+    bandwidth : ndarray of shape (n,)
+        Smoothing parameter.
 
     Examples
     --------
@@ -144,16 +142,15 @@ def ste_plugin(
 
     Parameters
     ----------
-    x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type.
-        Must have shape (m_train, n).
+    x_train : ndarray of shape (m_train, n)
+        Data points as an array containing data with float type.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
     Returns
     -------
-    bandwidth : `ndarray`
-        Smoothing parameter. Must have shape (n,).
+    bandwidth : ndarray of shape (n,)
+        Smoothing parameter.
 
     Examples
     --------
@@ -203,26 +200,24 @@ def ml_cv(
 
     Parameters
     ----------
-    x_train : `ndarray`
-        Data points as a 2D array containing data with `float` type.
-        Must have shape (m_train, n).
+    x_train : ndarray of shape (m_train, n)
+        Data points as an array containing data with float type.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
-    weights_train : `ndarray`, optional
-        Weights for data points. Must have shape (m_train,).
-        If None, all points are equally weighted.
+    weights_train : ndarray of shape (m_train,), optional
+        Weights of data points. If None, all points are equally weighted.
 
     Returns
     -------
-    bandwidth : `ndarray`
-        Smoothing parameter. Must have shape (n,).
+    bandwidth : ndarray of shape (n,)
+        Smoothing parameter.
 
     Examples
     --------
     >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> m_train = x_train.shape[0]
     >>> weights_train = np.full(m_train, 1 / m_train)
-    >>> bandwidth = ml_cv(x_train, "gaussian" weights_train)
+    >>> bandwidth = ml_cv(x_train, "gaussian", weights_train)
 
     References
     ----------
@@ -240,7 +235,7 @@ def ml_cv(
         if len(weights_train.shape) != 1:
             raise ValueError("invalid shape of array - should be one-dimensional")
         if not (weights_train > 0).all():
-            raise ValueError("weights_train must be positive")
+            raise ValueError("array must be positive")
         weights_train = weights_train / weights_train.sum()
     else:
         m_train = x_train.shape[0]

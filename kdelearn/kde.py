@@ -50,14 +50,12 @@ class KDE:
 
         Parameters
         ----------
-        x_train : `ndarray`
-            Data points as a 2D array containing data with `float` type.
-            Must have shape (m_train, n).
-        weights_train : `ndarray`, optional
-            Weights for data points. Must have shape (m_train,).
-            If None, all points are equally weighted.
-        bandwidth : `ndarray`, optional
-            Smoothing parameter. Must have shape (n,).
+        x_train : ndarray of shape (m_train, n)
+            Data points as an array containing data with float type.
+        weights_train : ndarray of shape (m_train,), optional
+            Weights of data points. If None, all points are equally weighted.
+        bandwidth : ndarray of shape (n,), optional
+            Smoothing parameter.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
             Name of bandwidth selection method used to compute it when bandwidth
@@ -65,8 +63,8 @@ class KDE:
 
         Returns
         -------
-        self : `KDE`
-            Fitted self instance of `KDE`.
+        self : object
+            Fitted self instance of KDE.
 
         Examples
         --------
@@ -78,7 +76,7 @@ class KDE:
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if len(x_train.shape) != 2:
-            raise ValueError("x_train must be 2d ndarray")
+            raise ValueError("invalid shape of array - should be two-dimensional")
         self.x_train = x_train
 
         if weights_train is None:
@@ -86,9 +84,9 @@ class KDE:
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if len(weights_train.shape) != 1:
-                raise ValueError("weights_train must be 1d ndarray")
+                raise ValueError("invalid shape of array - should be one-dimensional")
             if not (weights_train > 0).all():
-                raise ValueError("weights_train must be positive")
+                raise ValueError("array must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
@@ -107,7 +105,7 @@ class KDE:
                 raise ValueError("invalid bandwidth method")
         else:
             if not (bandwidth > 0).all():
-                raise ValueError("bandwidth must be positive")
+                raise ValueError("array must be positive")
             self.bandwidth = bandwidth
 
         self.fitted = True
@@ -118,13 +116,12 @@ class KDE:
 
         Parameters
         ----------
-        x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type.
-            Must have shape (m_test, n).
+        x_test : ndarray of shape (m_test, n)
+            Grid data points as an array containing data with float type.
 
         Returns
         -------
-        scores : `ndarray`
+        scores : ndarray of shape (m_test,)
             Values of kernel density estimator.
 
         Examples

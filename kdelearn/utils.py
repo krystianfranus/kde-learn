@@ -6,11 +6,11 @@ def accuracy(labels_true: ndarray, labels_pred: ndarray) -> float:
 
     Parameters
     ----------
-    labels_true : `ndarray`
-        True (ground truth) labels as a 1D array containing data with `int` type.
-    labels_pred : `ndarray`
-        Predicted labels returned by a classifier as a 1D array containing data with
-        `int` type.
+    labels_true : ndarray
+        True (ground truth) labels as an array containing data with int type.
+    labels_pred : ndarray
+        Predicted labels returned by classifier as an array containing data with int
+        type.
 
     Examples
     --------
@@ -20,9 +20,9 @@ def accuracy(labels_true: ndarray, labels_pred: ndarray) -> float:
 
     Returns
     -------
-    accuracy : `float`
+    accuracy : float
         Fraction of correctly classified samples.
     """
     if labels_true.size != labels_pred.size:
-        raise RuntimeError("labels_true and labels_pred must have the same size")
+        raise RuntimeError("Both arrays must be of the same size")
     return (labels_true == labels_pred).sum() / labels_true.size

@@ -62,29 +62,26 @@ class KDEClassifier:
 
         Parameters
         ----------
-        x_train : `ndarray`
-            Data points as a 2D array containing data with `float` type.
-            Must have shape (m_train, n).
-        labels_train : `ndarray`
-            Labels of data points as a 1D array containing data with `int` type.
-            Must have shape (m_train,).
-        weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,).
-            If None, all points are equally weighted.
+        x_train : ndarray of shape (m_train, n)
+            Data points as an array containing data with float type.
+        labels_train : ndarray of shape (m_train,)
+            Labels of data points as an array containing data with int type.
+        weights_train : ndarray of shape (m_train,), default=None
+            Weights for data points. If None, all points are equally weighted.
         share_bandwidth : bool, default=False
             Determines whether all classes should have common bandwidth.
             If False, estimator of each class gets its own bandwidth.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
             Name of bandwidth selection method.
-        prior_prob : `ndarray`, default=None
-            Prior probabilities of each class. Must have shape (n_classes,).
-            If None, all classes are equally probable.
+        prior_prob : ndarray of shape (n_classes,), default=None
+            Prior probabilities of each class. If None, all classes are equally
+            probable.
 
         Returns
         -------
-        self : `KDEClassifier`
-            Fitted self instance of `KDEClassifier`.
+        self : object
+            Fitted self instance of KDEClassifier.
 
         Examples
         --------
@@ -101,21 +98,21 @@ class KDEClassifier:
         >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
         """
         if len(x_train.shape) != 2:
-            raise ValueError("x_train must be 2d ndarray")
+            raise ValueError("invalid shape of array - should be two-dimensional")
         self.x_train = x_train
         self.m_train = self.x_train.shape[0]
 
         if len(labels_train.shape) != 1:
-            raise ValueError("labels_train must be 1d ndarray")
+            raise ValueError("invalid shape of array - should be one-dimensional")
         self.labels_train = labels_train
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
             if len(weights_train.shape) != 1:
-                raise ValueError("weights_train must be 1d ndarray")
+                raise ValueError("invalid shape of array - should be one-dimensional")
             if not (weights_train > 0).all():
-                raise ValueError("weights_train must be positive")
+                raise ValueError("array must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
         self.ulabels = np.unique(labels_train)  # Sorted unique labels
@@ -125,7 +122,7 @@ class KDEClassifier:
             self.prior = self._compute_prior()
         else:
             if len(prior_prob.shape) != 1:
-                raise RuntimeError("prior_prob must be 1d ndarray")
+                raise RuntimeError("invalid shape of array - should be one-dimensional")
             if prior_prob.shape[0] != self.n_classes:
                 raise RuntimeError(f"prior_prob must contain {self.n_classes} values")
             self.prior = prior_prob / prior_prob.sum()
@@ -140,7 +137,7 @@ class KDEClassifier:
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
             elif bandwidth_method == "ml_cv":
                 self.bandwidth = ml_cv(
-                    self.x_train, self.weights_train, self.kernel_name
+                    self.x_train, self.kernel_name, self.weights_train
                 )
             else:
                 raise ValueError("invalid bandwidth method")
@@ -158,15 +155,13 @@ class KDEClassifier:
 
         Parameters
         ----------
-        x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type.
-            Must have shape (m_test, n).
+        x_test : ndarray of shape (m_test, n)
+            Grid data points as an array containing data with float type.
 
         Returns
         -------
-        labels_pred : `ndarray`
-            Predicted labels as a 1D array containing data with `int` type.
-            Shape (m_test,).
+        labels_pred : ndarray of shape (m_test,)
+            Predicted labels as a 1D array containing data with int type.
 
         Examples
         --------
@@ -193,15 +188,13 @@ class KDEClassifier:
 
         Parameters
         ----------
-        x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type.
-            Must have shape (m_test, n).
+        x_test : ndarray of shape (m_test, n)
+            Grid data points as an array containing data with float type.
 
         Returns
         -------
-        scores : `ndarray`
-            Predicted scores as a 2D array containing data with `float` type.
-            Shape (m_test, n_classes).
+        scores : ndarray of shape (m_test, n_classes)
+            Predicted scores as an array containing data with float type.
 
         Examples
         --------
@@ -283,25 +276,23 @@ class KDEOutliersDetector:
 
         Parameters
         ----------
-        x_train : `ndarray`
-            Data points as a 2D array containing data with `float` type.
-            Must have shape (m_train, n).
-        weights_train : `ndarray`, default=None
-            Weights for data points. Must have shape (m_train,).
-            If None is passed, all points are equally weighted.
-        bandwidth : `ndarray`, optional
-            Smoothing parameter. Must have shape (n,).
+        x_train : ndarray of shape (m_train, n)
+            Data points as an array containing data with float type.
+        weights_train : ndarray of shape (m_train,), default=None
+            Weights for data points. If None is passed, all points are equally weighted.
+        bandwidth : ndarray of shape (n,), optional
+            Smoothing parameter.
         bandwidth_method : {'normal_reference', 'direct_plugin'}, \
                 default='normal_reference'
             Name of bandwidth selection method used to compute it when bandwidth
             argument is not passed explicitly.
-        r : `float`
+        r : float
             Threshold.
 
         Returns
         -------
-        self : `KDEOutliersDetector`
-            Fitted self instance of `KDEOutliersDetector`.
+        self : object
+            Fitted self instance of KDEOutliersDetector.
 
         Examples
         --------
@@ -328,15 +319,14 @@ class KDEOutliersDetector:
 
         Parameters
         ----------
-        x_test : `ndarray`
-            Grid data points as a 2D array containing data with `float` type.
-            Must have shape (m_test, n).
+        x_test : ndarray of shape (m_test, n)
+            Grid data points as a 2D array containing data with float type.
 
         Returns
         -------
-        labels_pred : `ndarray`
-            Predicted labels (0 - inlier, 1 - outlier) as a 1D array containing data
-            with `int` type. Shape (m_test,).
+        labels_pred : ndarray of shape (m_test,)
+            Predicted labels (0 - inlier, 1 - outlier) as an array containing data
+            with int type.
 
         Examples
         --------
@@ -352,7 +342,7 @@ class KDEOutliersDetector:
             raise RuntimeError("fit the outliers detector first")
 
         if len(x_test.shape) != 2:
-            raise ValueError("x_test must be 2d ndarray")
+            raise ValueError("invalid shape of array - should be two-dimensional")
 
         scores = self.kde.pdf(x_test)
         labels_pred = np.where(scores <= self.threshold, 1, 0)
