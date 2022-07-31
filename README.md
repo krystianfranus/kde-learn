@@ -21,8 +21,8 @@ flake8 {source_file_or_directory}
 isort {source_file_or_directory}
 ```
 
-Pre-commit works with 'git commit'
-https://pre-commit.com/
+They are also executed as a pre-commit hooks.
+See more in `.pre-commit-config.yaml`.
 
 ## Sphinx
 
@@ -40,7 +40,7 @@ make html
 2. Import a project
 3. Build the project
 
-### Concert notebook into pdf
+### Convert notebook into pdf
 ```
 jupyter nbconvert --to pdf --no-input example_notebook.ipynb
 ```
