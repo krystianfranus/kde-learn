@@ -13,7 +13,7 @@ conda activate kde-learn
 pip install -e .
 ```
 
-## Helpers
+## Code Prettifiers
 
 ```
 black {source_file_or_directory}
