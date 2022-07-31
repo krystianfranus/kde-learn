@@ -30,6 +30,8 @@ Useful links:
 
 ### Create the documentation
 
+Docstrings inspired by scikit-learn.
+
 ```
 cd docs/
 make clean
