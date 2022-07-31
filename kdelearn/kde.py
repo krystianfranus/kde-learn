@@ -101,7 +101,7 @@ class KDE:
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
             elif bandwidth_method == "ml_cv":
                 self.bandwidth = ml_cv(
-                    self.x_train, self.weights_train, self.kernel_name
+                    self.x_train, self.kernel_name, self.weights_train
                 )
             else:
                 raise ValueError("invalid bandwidth method")
