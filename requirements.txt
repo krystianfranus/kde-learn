@@ -1,21 +1,25 @@
-numpy==1.22.3
-notebook==6.4.10
-matplotlib==3.5.1
+numpy==1.23.1
+notebook==6.4.12
+matplotlib==3.5.2
 jupyter_contrib_nbextensions==0.5.1
-scipy==1.8.0
-cython==0.29.28
+scipy==1.9.0
+cython==0.29.32
 
 # --------- docs --------- #
-sphinx==4.4.0
+sphinx==5.1.1
 sphinx-rtd-theme==1.0.0
-numpydoc==1.2
+numpydoc==1.4.0
 
 # --------- code prettifiers --------- #
-pre-commit==2.20.0      # hooks for applying linters on commit
-black==22.6.0           # code formatting
-isort==5.10.1           # import sorting
-flake8==4.0.1           # code analysis
+pre-commit==2.20.0
+black==22.6.0
+isort==5.10.1
+flake8==5.0.0
+
+# --------- tests --------- #
+pytest==7.1.2
+pytest-cov==3.0.0
 
 # --------- for comparison --------- #
-scikit-learn==1.0.2
+scikit-learn==1.1.1
 statsmodels==0.13.2

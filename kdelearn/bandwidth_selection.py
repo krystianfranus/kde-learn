@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from numpy import ndarray
 from scipy.optimize import Bounds, minimize, newton
@@ -42,14 +44,17 @@ def normal_reference(
     ----------
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
+    if x_train.ndim != 2:
+        raise ValueError("invalid shape of array - should be two-dimensional")
+
+    if kernel_name not in kernel_properties:
+        available_kernels = list(kernel_properties.keys())
+        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+
     m_train = x_train.shape[0]
     n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
-
-    if kernel_name in kernel_properties:
-        wk, uk = kernel_properties[kernel_name]
-    else:
-        raise ValueError(f"invalid kernel name: {kernel_name}")
+    wk, uk = kernel_properties[kernel_name]
     zf = n * (n + 2) / (2 ** (n + 2) * np.pi ** (0.5 * n) * std_x**5)
 
     bandwidth = (wk / (uk**2 * zf * m_train)) ** 0.2
@@ -90,17 +95,20 @@ def direct_plugin(
     ----------
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
+    if x_train.ndim != 2:
+        raise ValueError("invalid shape of array - should be two-dimensional")
+
+    if kernel_name not in kernel_properties:
+        available_kernels = list(kernel_properties.keys())
+        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+
     if stage < 0 or stage > 3:
-        raise ValueError("stage must be greater than 0 and less than 4")
+        raise ValueError("invalid stage - should be greater than 0 and less than 4")
 
     m_train = x_train.shape[0]
     n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
-
-    if kernel_name in kernel_properties:
-        wk, uk = kernel_properties[kernel_name]
-    else:
-        raise ValueError(f"invalid kernel name: {kernel_name}")
+    wk, uk = kernel_properties[kernel_name]
 
     def _psi(r):
         n = (-1) ** (0.5 * r) * np.math.factorial(r)
@@ -156,14 +164,17 @@ def ste_plugin(
     ----------
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
+    if x_train.ndim != 2:
+        raise ValueError("invalid shape of array - should be two-dimensional")
+
+    if kernel_name not in kernel_properties:
+        available_kernels = list(kernel_properties.keys())
+        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+
     m_train = x_train.shape[0]
     n = x_train.shape[1]
     std_x = np.std(x_train, axis=0, ddof=1)
-
-    if kernel_name in kernel_properties:
-        wk, uk = kernel_properties[kernel_name]
-    else:
-        raise ValueError(f"invalid kernel name: {kernel_name}")
+    wk, uk = kernel_properties[kernel_name]
 
     def eq(h):
         a = 0.920 * std_x * m_train ** (-1 / 7)
@@ -183,8 +194,8 @@ def ste_plugin(
 
 def ml_cv(
     x_train: ndarray,
-    weights_train: ndarray = None,
     kernel_name: str = "gaussian",
+    weights_train: Optional[ndarray] = None,
 ):
     """Likelihood cross-validation.
 
@@ -195,11 +206,11 @@ def ml_cv(
     x_train : `ndarray`
         Data points as a 2D array containing data with `float` type.
         Must have shape (m_train, n).
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
     weights_train : `ndarray`, optional
         Weights for data points. Must have shape (m_train,).
         If None, all points are equally weighted.
-    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
-        Name of kernel function.
 
     Returns
     -------
@@ -211,23 +222,29 @@ def ml_cv(
     >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> m_train = x_train.shape[0]
     >>> weights_train = np.full(m_train, 1 / m_train)
-    >>> bandwidth = ml_cv(x_train, weights_train, "gaussian")
+    >>> bandwidth = ml_cv(x_train, "gaussian" weights_train)
 
     References
     ----------
     [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis.
     Chapman and Hall, 1986.
     """
+    if x_train.ndim != 2:
+        raise ValueError("invalid shape of array - should be two-dimensional")
 
-    if weights_train is None:
-        m_train = x_train.shape[0]
-        weights_train = np.full(m_train, 1 / m_train)
-    else:
+    if kernel_name not in kernel_properties:
+        available_kernels = list(kernel_properties.keys())
+        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+
+    if weights_train is not None:
         if len(weights_train.shape) != 1:
-            raise ValueError("weights_train must be 1d ndarray")
+            raise ValueError("invalid shape of array - should be one-dimensional")
         if not (weights_train > 0).all():
             raise ValueError("weights_train must be positive")
         weights_train = weights_train / weights_train.sum()
+    else:
+        m_train = x_train.shape[0]
+        weights_train = np.full(m_train, 1 / m_train)
 
     def eq(h):
         scores = compute_unbiased_kde(x_train, weights_train, h, kernel_name)
