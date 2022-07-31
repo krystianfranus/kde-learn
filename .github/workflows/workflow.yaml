@@ -28,4 +28,4 @@ jobs:
       - name: Run isort
         run: isort . --check --verbose
       - name: Test with pytest
-        run: pytest --cov=src tests/
+        run: pytest --cov=kdelearn tests/
