@@ -27,3 +27,5 @@ jobs:
         run: flake8 . --verbose
       - name: Run isort
         run: isort . --check --verbose
+      - name: Test with pytest
+        run: pytest --cov=src tests/

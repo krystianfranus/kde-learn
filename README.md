@@ -21,8 +21,10 @@ flake8 {source_file_or_directory}
 isort {source_file_or_directory}
 ```
 
-They are also executed as a pre-commit hooks.
-See more in `.pre-commit-config.yaml`.
+They are also executed as a pre-commit hooks. See more in `.pre-commit-config.yaml`.
+
+Useful links:
+ - [Using black with other tools](https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html)
 
 ## Sphinx
 
@@ -40,7 +42,7 @@ make html
 2. Import a project
 3. Build the project
 
-### Convert notebook into pdf
+## Convert notebook into pdf
 ```
 jupyter nbconvert --to pdf --no-input example_notebook.ipynb
 ```

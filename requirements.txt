@@ -11,10 +11,14 @@ sphinx-rtd-theme==1.0.0
 numpydoc==1.4.0
 
 # --------- code prettifiers --------- #
-pre-commit==2.20.0      # hooks for applying linters on commit
-black==22.6.0           # code formatting
-isort==5.10.1           # import sorting
-flake8==5.0.0           # code analysis
+pre-commit==2.20.0
+black==22.6.0
+isort==5.10.1
+flake8==5.0.0
+
+# --------- tests --------- #
+pytest==7.1.2
+pytest-cov==3.0.0
 
 # --------- for comparison --------- #
 scikit-learn==1.1.1
