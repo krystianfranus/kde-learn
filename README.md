@@ -7,7 +7,7 @@
 ## Installation
 
 ```shell
-conda create -n kde-learn python=3.8.12
+conda create -n kde-learn python=3.9.12
 conda activate kde-learn
 
 pip install -e .
