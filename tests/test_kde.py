@@ -14,6 +14,8 @@ def test_kde(x_train, x_test, kernel_name, bandwidth_method):
     kde = KDE(kernel_name).fit(x_train, bandwidth_method=bandwidth_method)
     scores = kde.pdf(x_test)
     assert kde.fitted
+    assert kde.bandwidth.ndim == 1
+    assert kde.bandwidth.all() > 0
     assert scores.ndim == 1
     assert scores.shape[0] == x_test.shape[0]
     assert scores.all() >= 0
@@ -68,3 +70,21 @@ def test_kde_with_fixed_invalid_bandwidth(x_train):
     bandwidth = np.array([-0.5] * n)
     with pytest.raises(ValueError):
         kde.fit(x_train, bandwidth=bandwidth)
+
+
+def test_kde_with_invalid_bandwidth_method(x_train):
+    with pytest.raises(ValueError):
+        KDE("gaussian").fit(x_train, bandwidth_method="abc")
+
+
+def test_kde_pdf_with_invalid_x_test(x_train, x_test):
+    kde = KDE("gaussian").fit(x_train)
+    x_test = x_test.flatten()
+    with pytest.raises(ValueError):
+        kde.pdf(x_test)
+
+
+def test_kde_pdf_with_not_fitted_kde(x_train, x_test):
+    kde = KDE("gaussian")
+    with pytest.raises(RuntimeError):
+        kde.pdf(x_test)

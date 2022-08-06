@@ -148,6 +148,9 @@ class KDE:
         if not self.fitted:
             raise RuntimeError("fit the estimator first")
 
+        if len(x_test.shape) != 2:
+            raise ValueError("invalid shape of x_test - should be 2d")
+
         scores = compute_kde(
             self.x_train,
             self.weights_train,
