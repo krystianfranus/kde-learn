@@ -53,6 +53,9 @@ def test_direct_plugin_with_invalid_stage(x_train):
     with pytest.raises(ValueError):
         direct_plugin(x_train, "gaussian", 4)
 
+    with pytest.raises(ValueError):
+        direct_plugin(x_train, "gaussian", 1.5)
+
 
 @pytest.mark.parametrize(
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]

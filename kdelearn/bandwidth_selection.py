@@ -100,6 +100,9 @@ def direct_plugin(
         available_kernels = list(kernel_properties.keys())
         raise ValueError(f"invalid kernel_name - choose one of {available_kernels}")
 
+    if not isinstance(stage, int):
+        raise ValueError("invalid type of stage - should be of an int type")
+
     if stage < 0 or stage > 3:
         raise ValueError("invalid stage - should be greater than 0 and less than 4")
 
