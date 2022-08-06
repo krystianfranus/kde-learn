@@ -5,7 +5,13 @@ from numpy import ndarray
 
 from kdelearn.cutils import compute_kde
 
-from .bandwidth_selection import direct_plugin, ml_cv, normal_reference, ste_plugin
+from .bandwidth_selection import (
+    direct_plugin,
+    kernel_properties,
+    ml_cv,
+    normal_reference,
+    ste_plugin,
+)
 
 
 class KDE:
@@ -35,6 +41,9 @@ class KDE:
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
+        if kernel_name not in kernel_properties:
+            available_kernels = list(kernel_properties.keys())
+            raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -76,7 +85,7 @@ class KDE:
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if len(x_train.shape) != 2:
-            raise ValueError("invalid shape of array - should be two-dimensional")
+            raise ValueError("invalid shape of x_train - should be 2d")
         self.x_train = x_train
 
         if weights_train is None:
@@ -84,9 +93,9 @@ class KDE:
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if len(weights_train.shape) != 1:
-                raise ValueError("invalid shape of array - should be one-dimensional")
+                raise ValueError("invalid shape of weights_train - should be 1d")
             if not (weights_train > 0).all():
-                raise ValueError("array must be positive")
+                raise ValueError("weights_train should be positive")
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
@@ -102,10 +111,12 @@ class KDE:
                     self.x_train, self.kernel_name, self.weights_train
                 )
             else:
-                raise ValueError("invalid bandwidth method")
+                raise ValueError("invalid bandwidth_method")
         else:
+            if len(bandwidth.shape) != 1:
+                raise ValueError("invalid shape of bandwidth - should be 1d")
             if not (bandwidth > 0).all():
-                raise ValueError("array must be positive")
+                raise ValueError("bandwidth should be positive")
             self.bandwidth = bandwidth
 
         self.fitted = True
@@ -136,6 +147,9 @@ class KDE:
         """
         if not self.fitted:
             raise RuntimeError("fit the estimator first")
+
+        if len(x_test.shape) != 2:
+            raise ValueError("invalid shape of x_test - should be 2d")
 
         scores = compute_kde(
             self.x_train,

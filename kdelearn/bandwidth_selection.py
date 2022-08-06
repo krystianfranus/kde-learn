@@ -44,11 +44,11 @@ def normal_reference(
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of array - should be two-dimensional")
+        raise ValueError("invalid shape of x_train - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+        raise ValueError(f"invalid kernel_name - choose one of {available_kernels}")
 
     m_train = x_train.shape[0]
     n = x_train.shape[1]
@@ -94,11 +94,14 @@ def direct_plugin(
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of array - should be two-dimensional")
+        raise ValueError("invalid shape of x_train - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+        raise ValueError(f"invalid kernel_name - choose one of {available_kernels}")
+
+    if not isinstance(stage, int):
+        raise ValueError("invalid type of stage - should be of an int type")
 
     if stage < 0 or stage > 3:
         raise ValueError("invalid stage - should be greater than 0 and less than 4")
@@ -110,7 +113,7 @@ def direct_plugin(
 
     def _psi(r):
         n = (-1) ** (0.5 * r) * np.math.factorial(r)
-        d = (2 * std_x) ** (r + 1) * np.math.factorial(0.5 * r) * np.sqrt(np.pi)
+        d = (2 * std_x) ** (r + 1) * np.math.factorial(int(0.5 * r)) * np.sqrt(np.pi)
         return n / d
 
     def _bw(gd, zf, b):
@@ -162,11 +165,11 @@ def ste_plugin(
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of array - should be two-dimensional")
+        raise ValueError("invalid shape of x_train - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+        raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
 
     m_train = x_train.shape[0]
     n = x_train.shape[1]
@@ -225,29 +228,30 @@ def ml_cv(
     Chapman and Hall, 1986.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of array - should be two-dimensional")
+        raise ValueError("invalid shape of x_train - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel name - try one of {available_kernels}")
+        raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
 
     if weights_train is not None:
         if len(weights_train.shape) != 1:
-            raise ValueError("invalid shape of array - should be one-dimensional")
+            raise ValueError("invalid shape of weights_train - should be 1d")
         if not (weights_train > 0).all():
-            raise ValueError("array must be positive")
+            raise ValueError("weights_train must be positive")
         weights_train = weights_train / weights_train.sum()
     else:
         m_train = x_train.shape[0]
         weights_train = np.full(m_train, 1 / m_train)
 
-    def eq(h):
-        scores = compute_unbiased_kde(x_train, weights_train, h, kernel_name)
-        return -np.mean(np.log(scores))
-
     # Minimize the equation with nelder-mead method
     bandwidth0 = normal_reference(x_train, kernel_name)
     smallest_pos_num = np.nextafter(0, 1)
+
+    def eq(h):
+        scores = compute_unbiased_kde(x_train, weights_train, h, kernel_name)
+        return -np.mean(np.log(scores + smallest_pos_num))
+
     bounds = Bounds(smallest_pos_num, np.inf)
     res = minimize(eq, bandwidth0, method="nelder-mead", bounds=bounds)
     bandwidth = res.x

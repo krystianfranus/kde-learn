@@ -14,7 +14,7 @@ from kdelearn.bandwidth_selection import (
 )
 def test_normal_reference(x_train, kernel_name):
     bandwidth = normal_reference(x_train, kernel_name)
-    assert bandwidth > 0
+    assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
@@ -34,7 +34,7 @@ def test_normal_reference_with_invalid_kernel_name(x_train):
 )
 def test_direct_plugin(x_train, kernel_name):
     bandwidth = direct_plugin(x_train, kernel_name)
-    assert bandwidth > 0
+    assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
@@ -53,13 +53,16 @@ def test_direct_plugin_with_invalid_stage(x_train):
     with pytest.raises(ValueError):
         direct_plugin(x_train, "gaussian", 4)
 
+    with pytest.raises(ValueError):
+        direct_plugin(x_train, "gaussian", 1.5)
+
 
 @pytest.mark.parametrize(
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
 def test_ste_plugin(x_train, kernel_name):
     bandwidth = ste_plugin(x_train, kernel_name)
-    assert bandwidth > 0
+    assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
@@ -79,7 +82,7 @@ def test_ste_plugin_with_invalid_kernel_name(x_train):
 )
 def test_ml_cv(x_train, kernel_name):
     bandwidth = ml_cv(x_train, kernel_name)
-    assert bandwidth > 0
+    assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
