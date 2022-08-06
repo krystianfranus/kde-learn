@@ -8,14 +8,16 @@ Welcome to kde-learn's documentation!
 
 .. currentmodule:: kdelearn
 
-Morbi laoreet dui neque, id ultrices tortor lacinia ac. Nullam ornare tempor aliquam.
-Ut congue a arcu malesuada mollis. In tortor nisi, convallis ac tempus non, hendrerit sit amet tortor.
+Kde-learn to biblioteka napisana w Pythonie, która dostarcza metody rozwiązywania
+trzech fundamentalnych zagadnień analizy danych, takich jak:
 
-Aenean tincidunt ligula eget dui commodo cursus.
-Nam faucibus congue enim sed efficitur.
-Cras a magna at tortor posuere bibendum nec in diam.
-Nunc libero tellus, finibus a vehicula sit amet, tempus in ante.
-Proin quis erat leo. Suspendisse potenti. Suspendisse potenti. Sed nec tincidunt nisl.
+- klasyfikacja,
+- klasteryzacja,
+- detekcja elementów nietypowych
+
+opartych na estymatorze jądrowym w postaci bezwarunkowej oraz warunkowej.
+
+Zacznij z :ref:`getting_started`.
 
 .. toctree::
    :caption: Contents
