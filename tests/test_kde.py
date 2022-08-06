@@ -15,10 +15,11 @@ def test_kde(x_train, x_test, kernel_name, bandwidth_method):
     scores = kde.pdf(x_test)
     assert kde.fitted
     assert kde.bandwidth.ndim == 1
-    assert kde.bandwidth.all() > 0
+    assert (kde.bandwidth > 0).all()
     assert scores.ndim == 1
     assert scores.shape[0] == x_test.shape[0]
-    assert scores.all() >= 0
+    assert (scores >= 0).all()
+    assert (scores < 1).all()
 
 
 def test_kde_with_invalid_kernel_name(x_train):
