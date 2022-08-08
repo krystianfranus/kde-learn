@@ -3,7 +3,13 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import direct_plugin, ml_cv, normal_reference, ste_plugin
+from .bandwidth_selection import (
+    direct_plugin,
+    kernel_properties,
+    ml_cv,
+    normal_reference,
+    ste_plugin,
+)
 from .kde import KDE
 
 
@@ -36,7 +42,7 @@ class KDEClassifier:
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit the classifier
-    >>> classifier = KDEClassifier("gaussian").fit(x_train, labels_train)
+    >>> classifier = KDEClassifier().fit(x_train, labels_train)
 
     References
     ----------
@@ -45,6 +51,9 @@ class KDEClassifier:
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
+        if kernel_name not in kernel_properties:
+            available_kernels = list(kernel_properties.keys())
+            raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -97,35 +106,25 @@ class KDEClassifier:
         >>> prior_prob = np.array([0.3, 0.7])
         >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
         """
-        if len(x_train.shape) != 2:
-            raise ValueError("invalid shape of array - should be two-dimensional")
+        if x_train.ndim != 2:
+            raise ValueError("invalid shape of x_train - should be 2d")
         self.x_train = x_train
         self.m_train = self.x_train.shape[0]
 
-        if len(labels_train.shape) != 1:
-            raise ValueError("invalid shape of array - should be one-dimensional")
+        if labels_train.ndim != 1:
+            raise ValueError("invalid shape of labels_train - should be 1d")
+        if not np.issubdtype(labels_train.dtype, np.integer):
+            raise ValueError("invalid dtype of labels_train - should be of int type")
         self.labels_train = labels_train
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
-            if len(weights_train.shape) != 1:
-                raise ValueError("invalid shape of array - should be one-dimensional")
+            if weights_train.ndim != 1:
+                raise ValueError("invalid shape of weights_train - should be 1d")
             if not (weights_train > 0).all():
-                raise ValueError("array must be positive")
+                raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
-
-        self.ulabels = np.unique(labels_train)  # Sorted unique labels
-        self.n_classes = self.ulabels.shape[0]
-
-        if prior_prob is None:
-            self.prior = self._compute_prior()
-        else:
-            if len(prior_prob.shape) != 1:
-                raise RuntimeError("invalid shape of array - should be one-dimensional")
-            if prior_prob.shape[0] != self.n_classes:
-                raise RuntimeError(f"prior_prob must contain {self.n_classes} values")
-            self.prior = prior_prob / prior_prob.sum()
 
         if share_bandwidth:
             if bandwidth_method == "normal_reference":
@@ -144,6 +143,19 @@ class KDEClassifier:
         else:
             self.bandwidth = None
             self.bandwidth_method = bandwidth_method
+
+        self.ulabels = np.unique(labels_train)  # Sorted unique labels
+        self.n_classes = self.ulabels.shape[0]
+        if prior_prob is None:
+            self.prior = self._compute_prior()
+        else:
+            if prior_prob.ndim != 1:
+                raise ValueError("invalid shape of prior_prob - should be 1d")
+            if prior_prob.shape[0] != self.n_classes:
+                raise ValueError(
+                    f"invalid prior_prob - should contain {self.n_classes} values"
+                )
+            self.prior = prior_prob / prior_prob.sum()
 
         self.kwargs = kwargs
 
@@ -180,6 +192,10 @@ class KDEClassifier:
         """
         if not self.fitted:
             raise RuntimeError("fit the model first")
+
+        if x_test.ndim != 2:
+            raise ValueError("invalid shape of x_test - should be 2d")
+
         labels_pred, _ = self._classify(x_test)
         return labels_pred
 
@@ -213,6 +229,10 @@ class KDEClassifier:
         """
         if not self.fitted:
             raise RuntimeError("fit the classifier first")
+
+        if x_test.ndim != 2:
+            raise ValueError("invalid shape of x_test - should be 2d")
+
         _, scores = self._classify(x_test)
         return scores
 
