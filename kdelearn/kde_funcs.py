@@ -126,23 +126,23 @@ class KDEClassifier:
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
+        self.bandwidth = None
+        self.bandwidth_method = bandwidth_method
+
         if share_bandwidth:
-            if bandwidth_method == "normal_reference":
+            if self.bandwidth_method == "normal_reference":
                 self.bandwidth = normal_reference(self.x_train, self.kernel_name)
-            elif bandwidth_method == "direct_plugin":
+            elif self.bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
                 self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
-            elif bandwidth_method == "ste_plugin":
+            elif self.bandwidth_method == "ste_plugin":
                 self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
-            elif bandwidth_method == "ml_cv":
+            elif self.bandwidth_method == "ml_cv":
                 self.bandwidth = ml_cv(
                     self.x_train, self.kernel_name, self.weights_train
                 )
             else:
                 raise ValueError("invalid bandwidth method")
-        else:
-            self.bandwidth = None
-            self.bandwidth_method = bandwidth_method
 
         self.ulabels = np.unique(labels_train)  # Sorted unique labels
         self.n_classes = self.ulabels.shape[0]
@@ -280,6 +280,9 @@ class KDEOutliersDetector:
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
+        if kernel_name not in kernel_properties:
+            available_kernels = list(kernel_properties.keys())
+            raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -322,8 +325,8 @@ class KDEOutliersDetector:
         >>> # Fit the outliers detector
         >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train, r=0.1)
         """
-        if r < 0:
-            raise ValueError("r must be positive")
+        if r < 0 or r > 1:
+            raise ValueError("invalid value of r - should be in range [0, 1]")
 
         self.kde = KDE(self.kernel_name).fit(
             x_train, weights_train, bandwidth, bandwidth_method, **kwargs
