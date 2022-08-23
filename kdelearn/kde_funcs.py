@@ -274,7 +274,7 @@ class KDEOutliersDetector:
     Examples
     --------
     >>> # Prepare data
-    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> # Fit the outliers detector
     >>> outliers_detector = KDEOutliersDetector("gaussian").fit(x_train)
     """
@@ -320,8 +320,8 @@ class KDEOutliersDetector:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-        >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
+        >>> x_train = np.random.normal(0, 1, size=(100, 1))
+        >>> weights_train = np.random.uniform(0, 1, size=(100,))
         >>> # Fit the outliers detector
         >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train, r=0.1)
         """
@@ -354,12 +354,12 @@ class KDEOutliersDetector:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-        >>> x_test = np.random.uniform(-3, 3, size=(1000, 1))
+        >>> x_train = np.random.normal(0, 1, size=(100, 1))
+        >>> x_test = np.random.uniform(-3, 3, size=(10, 1))
         >>> # Fit the outliers detector
         >>> outliers_detector = KDEOutliersDetector().fit(x_train, r=0.1)
         >>> # Predict the labels
-        >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (1000,)
+        >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")

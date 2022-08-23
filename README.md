@@ -26,11 +26,23 @@ They are also executed as a pre-commit hooks. See more in `.pre-commit-config.ya
 Useful links:
  - [Using black with other tools](https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html)
 
+## Unit tests
+
+Basic pytest usage:
+```
+pytest tests/
+```
+
+with coverage
+```
+pytest --cov=kdelearn tests/
+```
+
 ## Sphinx
 
 ### Create the documentation
 
-Docstrings inspired by scikit-learn.
+Docstrings inspired on scikit-learn.
 
 ```
 cd docs/

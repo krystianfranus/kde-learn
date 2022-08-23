@@ -79,12 +79,12 @@ class KDE:
         --------
         >>> # Prepare data
         >>> x_train = np.random.normal(0, 1, size=(100, 1))
-        >>> weights_train = np.random.randint(1, 10, size=(10,))
+        >>> weights_train = np.random.randint(1, 10, size=(100,))
         >>> bandwidth = np.random.uniform(0, 1, size=(1,))
         >>> # Fit the estimator
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
-        if len(x_train.shape) != 2:
+        if x_train.ndim != 2:
             raise ValueError("invalid shape of x_train - should be 2d")
         self.x_train = x_train
 
@@ -92,8 +92,10 @@ class KDE:
             m_train = self.x_train.shape[0]
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
-            if len(weights_train.shape) != 1:
+            if weights_train.ndim != 1:
                 raise ValueError("invalid shape of weights_train - should be 1d")
+            if weights_train.shape[0] != x_train.shape[0]:
+                raise ValueError("invalid size of weights_train")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train should be positive")
             self.weights_train = weights_train / weights_train.sum()
@@ -113,7 +115,7 @@ class KDE:
             else:
                 raise ValueError("invalid bandwidth_method")
         else:
-            if len(bandwidth.shape) != 1:
+            if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of bandwidth - should be 1d")
             if not (bandwidth > 0).all():
                 raise ValueError("bandwidth should be positive")

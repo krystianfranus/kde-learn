@@ -61,6 +61,11 @@ def test_kde_fit_with_invalid_data(x_train, x_test):
     with pytest.raises(ValueError):
         kde.fit(x_train, weights_train=weights_train)
 
+    # Invalid size of weights_train
+    weights_train = np.ones((m_train // 2,))
+    with pytest.raises(ValueError):
+        kde.fit(x_train, weights_train=weights_train)
+
     # Invalid values of weights_train
     weights_train = np.full((m_train,), -1)
     with pytest.raises(ValueError):
