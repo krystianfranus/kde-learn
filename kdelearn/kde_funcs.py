@@ -122,6 +122,8 @@ class KDEClassifier:
         else:
             if weights_train.ndim != 1:
                 raise ValueError("invalid shape of weights_train - should be 1d")
+            if weights_train.shape[0] != x_train.shape[0]:
+                raise ValueError("invalid size of weights_train")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
