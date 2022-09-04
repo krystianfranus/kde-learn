@@ -281,7 +281,6 @@ def gradient_ascent(
                     for j2 in range(n):
                         tmp += ((x_k_view[i1, j2] - x_train[i2, j2]) / bandwidth[j2]) ** 2
                     tmp = exp(-0.5 * tmp)
-
                     numerator += -(x_k_view[i1, j1] - x_train[i2, j1]) * tmp
                     denominator += tmp
                 x_k_view[i1, j1] += 1.0 / (n + 2.0) * numerator / denominator
@@ -353,30 +352,29 @@ def assign_labels(
     cdef Py_ssize_t m_train = x_k.shape[0]
     cdef Py_ssize_t n = x_k.shape[1]
 
-    x_rep = np.empty((0, n), dtype=np.float64)
-    x_rep = np.append(x_rep, x_k[0:1], axis=0)
+    cdef double[:, :] x_rep_view = np.copy(x_k[0:1])
     labels = np.zeros(m_train, np.int32)
+    cdef int[:] labels_view = labels
 
     cdef Py_ssize_t i, r, j
     cdef double dist
     cdef bint add_new_rep
 
     for i in range(1, m_train):
-        rep_size = x_rep.shape[0]
+        rep_size = x_rep_view.shape[0]
         add_new_rep = True
 
         for r in range(rep_size):
             dist = 0.0
             for j in range(n):
-                dist += (x_k[i, j] - x_rep[r, j]) ** 2
+                dist += (x_k[i, j] - x_rep_view[r, j]) ** 2
             dist = sqrt(dist)
             if dist < delta:
-                labels[i] = r
+                labels_view[i] = r
                 add_new_rep = False
                 break
 
         if add_new_rep:
-            x_rep = np.append(x_rep, x_k[i:i+1], axis=0)
-            labels[i] = rep_size
-
+            x_rep_view = np.append(x_rep_view, x_k[i:i+1], axis=0)
+            labels_view[i] = rep_size
     return labels
