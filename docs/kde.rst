@@ -12,13 +12,13 @@ KDE
 KDEClassifier
 -------------
 
-.. autoclass:: kdelearn.kde_funcs.KDEClassifier
+.. autoclass:: kdelearn.kde_funcs.KDEClassification
    :members:
 
 KDEOutliersDetector
 -------------------
 
-.. autoclass:: kdelearn.kde_funcs.KDEOutliersDetector
+.. autoclass:: kdelearn.kde_funcs.KDEOutliersDetection
    :members:
 
 KDEClustering
