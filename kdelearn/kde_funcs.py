@@ -3,8 +3,6 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from kdelearn.cutils import assign_labels, gradient_ascent, mean_shift
-
 from .bandwidth_selection import (
     direct_plugin,
     kernel_properties,
@@ -12,6 +10,7 @@ from .bandwidth_selection import (
     normal_reference,
     ste_plugin,
 )
+from .cutils import assign_labels, gradient_ascent, mean_shift
 from .kde import KDE
 
 

@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.optimize import Bounds, minimize, newton
 
-from kdelearn.cutils import compute_unbiased_kde, isdd
+from .cutils import compute_unbiased_kde, isdd
 
 kernel_properties = {
     "gaussian": (1 / (2 * np.sqrt(np.pi)), 1),

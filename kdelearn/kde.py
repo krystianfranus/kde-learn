@@ -3,8 +3,6 @@ from typing import Optional
 import numpy as np
 from numpy import ndarray
 
-from kdelearn.cutils import compute_kde
-
 from .bandwidth_selection import (
     direct_plugin,
     kernel_properties,
@@ -12,6 +10,7 @@ from .bandwidth_selection import (
     normal_reference,
     ste_plugin,
 )
+from .cutils import compute_kde
 
 
 class KDE:
