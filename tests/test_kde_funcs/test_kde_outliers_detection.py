@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kdelearn.kde_funcs import KDEOutliersDetector
+from kdelearn.kde_funcs import KDEOutliersDetection
 
 
 @pytest.mark.parametrize(
@@ -11,7 +11,7 @@ from kdelearn.kde_funcs import KDEOutliersDetector
     "bandwidth_method", ["normal_reference", "direct_plugin", "ste_plugin", "ml_cv"]
 )
 def test_kde_outliers_detector(x_train, x_test, kernel_name, bandwidth_method):
-    outliers_detector = KDEOutliersDetector(kernel_name)
+    outliers_detector = KDEOutliersDetection(kernel_name)
     outliers_detector = outliers_detector.fit(
         x_train,
         bandwidth_method=bandwidth_method,
@@ -26,7 +26,7 @@ def test_kde_outliers_detector(x_train, x_test, kernel_name, bandwidth_method):
 def test_kde_outliers_detector_with_weights_train(x_train):
     m_train = x_train.shape[0]
     weights_train = np.ones((m_train,))
-    outliers_detector = KDEOutliersDetector()
+    outliers_detector = KDEOutliersDetection()
     outliers_detector.fit(x_train, weights_train=weights_train)
     assert outliers_detector.fitted
 
@@ -34,19 +34,19 @@ def test_kde_outliers_detector_with_weights_train(x_train):
 def test_kde_outliers_detector_with_fixed_bandwidth(x_train):
     n = x_train.shape[1]
     bandwidth = np.array([0.5] * n)
-    outliers_detector = KDEOutliersDetector()
+    outliers_detector = KDEOutliersDetection()
     outliers_detector.fit(x_train, bandwidth=bandwidth)
     assert outliers_detector.fitted
 
 
 def test_kde_outliers_detector_with_invalid_kernel_name():
     with pytest.raises(ValueError):
-        KDEOutliersDetector("abc")
+        KDEOutliersDetection("abc")
 
 
 def test_kde_outliers_detector_fit_with_invalid_data(x_train):
     m_train = x_train.shape[0]
-    outliers_detector = KDEOutliersDetector()
+    outliers_detector = KDEOutliersDetection()
 
     # Invalid shape of x_train
     x_train_tmp = x_train.flatten()
@@ -77,7 +77,7 @@ def test_kde_outliers_detector_fit_with_invalid_data(x_train):
 
 
 def test_kde_outliers_detector_predict_invalid_data(x_train, x_test):
-    outliers_detector = KDEOutliersDetector()
+    outliers_detector = KDEOutliersDetection()
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()

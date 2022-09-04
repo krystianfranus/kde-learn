@@ -246,3 +246,135 @@ def compute_unbiased_kde(
                 tmp *= 1.0 / bandwidth[j] * kernel((x_train[k, j] - x_train[i, j]) / bandwidth[j])
             scores_view[k] += weights_train[i] * tmp
     return scores
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def gradient_ascent(
+    double[:, :] x_train,
+    double[:] bandwidth,
+    double epsilon,
+):
+    if epsilon <= 0:
+        raise ValueError("invalid value of epsilon - should be positive")
+
+    cdef Py_ssize_t m_train = x_train.shape[0]
+    cdef Py_ssize_t n = x_train.shape[1]
+
+    x_k = np.copy(x_train)
+    cdef double[:, :] x_k_view = x_k
+    cdef double[:] x_k_prev_view
+
+    cdef Py_ssize_t i1, j1, i2, j2
+    cdef double numerator, denominator, tmp, dist
+
+    for i1 in range(m_train):
+        while True:
+            x_k_prev_view = np.copy(x_k_view[i1])
+
+            for j1 in range(n):
+                numerator = 0.0
+                denominator = 0.0
+                for i2 in range(m_train):
+                    tmp = 0.0
+                    for j2 in range(n):
+                        tmp += ((x_k_view[i1, j2] - x_train[i2, j2]) / bandwidth[j2]) ** 2
+                    tmp = exp(-0.5 * tmp)
+                    numerator += -(x_k_view[i1, j1] - x_train[i2, j1]) * tmp
+                    denominator += tmp
+                x_k_view[i1, j1] += 1.0 / (n + 2.0) * numerator / denominator
+
+            dist = 0.0
+            for j1 in range(n):
+                dist += (x_k_view[i1, j1] - x_k_prev_view[j1]) ** 2
+            dist = sqrt(dist)
+            if dist < epsilon:
+                break
+    return x_k
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def mean_shift(
+    double[:, :] x_train,
+    double[:] bandwidth,
+    double epsilon,
+):
+    if epsilon <= 0:
+        raise ValueError("invalid value of epsilon - should be positive")
+
+    cdef Py_ssize_t m_train = x_train.shape[0]
+    cdef Py_ssize_t n = x_train.shape[1]
+
+    x_k = np.copy(x_train)
+    cdef double[:, :] x_k_view = x_k
+    cdef double[:] x_k_prev_view
+
+    cdef Py_ssize_t i1, j1, i2, j2
+    cdef double numerator, denominator, tmp, dist
+
+    for i1 in range(m_train):
+        while True:
+            x_k_prev_view = np.copy(x_k_view[i1])
+
+            for j1 in range(n):
+                numerator = 0.0
+                denominator = 0.0
+                for i2 in range(m_train):
+                    tmp = 1.0
+                    for j2 in range(n):
+                        tmp *= cgaussian((x_k_view[i1, j2] - x_train[i2, j2]) / bandwidth[j2]) / bandwidth[j2]
+                    numerator += tmp * x_train[i2, j1]
+                    denominator += tmp
+                x_k_view[i1, j1] = numerator / denominator
+
+            dist = 0.0
+            for j1 in range(n):
+                dist += (x_k_view[i1, j1] - x_k_prev_view[j1]) ** 2
+            dist = sqrt(dist)
+            if dist < epsilon:
+                break
+    return x_k
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def assign_labels(
+    double[:, :] x_k,
+    double delta,
+):
+    if delta <= 0:
+        raise ValueError("invalid value of delta - should be positive")
+
+    cdef Py_ssize_t m_train = x_k.shape[0]
+    cdef Py_ssize_t n = x_k.shape[1]
+
+    cdef double[:, :] x_rep_view = np.copy(x_k[0:1])
+    labels = np.zeros(m_train, np.int32)
+    cdef int[:] labels_view = labels
+
+    cdef Py_ssize_t i, r, j
+    cdef double dist
+    cdef bint add_new_rep
+
+    for i in range(1, m_train):
+        rep_size = x_rep_view.shape[0]
+        add_new_rep = True
+
+        for r in range(rep_size):
+            dist = 0.0
+            for j in range(n):
+                dist += (x_k[i, j] - x_rep_view[r, j]) ** 2
+            dist = sqrt(dist)
+            if dist < delta:
+                labels_view[i] = r
+                add_new_rep = False
+                break
+
+        if add_new_rep:
+            x_rep_view = np.append(x_rep_view, x_k[i:i+1], axis=0)
+            labels_view[i] = rep_size
+    return labels

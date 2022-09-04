@@ -3,6 +3,8 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
+from kdelearn.cutils import assign_labels, gradient_ascent, mean_shift
+
 from .bandwidth_selection import (
     direct_plugin,
     kernel_properties,
@@ -13,7 +15,7 @@ from .bandwidth_selection import (
 from .kde import KDE
 
 
-class KDEClassifier:
+class KDEClassification:
     """Bayes' classifier based on kernel density estimation.
 
     Probability that :math:`x` belongs to class :math:`c`:
@@ -41,8 +43,8 @@ class KDEClassifier:
     >>> labels_train2 = np.full(100 // 2, 2)
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
-    >>> # Fit the classifier
-    >>> classifier = KDEClassifier().fit(x_train, labels_train)
+    >>> # Fit
+    >>> classifier = KDEClassification().fit(x_train, labels_train)
 
     References
     ----------
@@ -82,7 +84,7 @@ class KDEClassifier:
             If False, estimator of each class gets its own bandwidth.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method.
+            Name of bandwidth selection method used to compute smoothing parameter.
         prior_prob : ndarray of shape (n_classes,), default=None
             Prior probabilities of each class. If None, all classes are equally
             probable.
@@ -90,7 +92,7 @@ class KDEClassifier:
         Returns
         -------
         self : object
-            Fitted self instance of KDEClassifier.
+            Fitted self instance of KDEClassification.
 
         Examples
         --------
@@ -102,9 +104,9 @@ class KDEClassifier:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> weights_train = np.random.uniform(0, 1, size=(100,))
-        >>> # Fit the classifier
+        >>> # Fit
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> classifier = KDEClassifier().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
+        >>> classifier = KDEClassification().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of x_train - should be 2d")
@@ -122,6 +124,8 @@ class KDEClassifier:
         else:
             if weights_train.ndim != 1:
                 raise ValueError("invalid shape of weights_train - should be 1d")
+            if weights_train.shape[0] != x_train.shape[0]:
+                raise ValueError("invalid size of weights_train")
             if not (weights_train > 0).all():
                 raise ValueError("weights_train must be positive")
             self.weights_train = weights_train / weights_train.sum()
@@ -163,7 +167,7 @@ class KDEClassifier:
         return self
 
     def predict(self, x_test: ndarray) -> ndarray:
-        """Predict labels.
+        """Predict class labels.
 
         Parameters
         ----------
@@ -173,7 +177,7 @@ class KDEClassifier:
         Returns
         -------
         labels_pred : ndarray of shape (m_test,)
-            Predicted labels as a 1D array containing data with int type.
+            Predicted labels as an array containing data with int type.
 
         Examples
         --------
@@ -186,7 +190,7 @@ class KDEClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(10, 1))
-        >>> classifier = KDEClassifier().fit(x_train, labels_train)
+        >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Predict labels
         >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (10,)
         """
@@ -223,7 +227,7 @@ class KDEClassifier:
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(10, 1))
-        >>> classifier = KDEClassifier().fit(x_train, labels_train)
+        >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Compute pdf of each class
         >>> scores = classifier.pdfs(x_test)  # scores shape (10, 2)
         """
@@ -263,8 +267,8 @@ class KDEClassifier:
         return labels_pred, scores
 
 
-class KDEOutliersDetector:
-    """Outliers Detector.
+class KDEOutliersDetection:
+    """Outliers detectoion based on kernel density estimation.
 
     Parameters
     ----------
@@ -274,9 +278,9 @@ class KDEOutliersDetector:
     Examples
     --------
     >>> # Prepare data
-    >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
+    >>> x_train = np.random.normal(0, 1, size=(100, 1))
     >>> # Fit the outliers detector
-    >>> outliers_detector = KDEOutliersDetector("gaussian").fit(x_train)
+    >>> outliers_detector = KDEOutliersDetection("gaussian").fit(x_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -307,23 +311,24 @@ class KDEOutliersDetector:
             Smoothing parameter.
         bandwidth_method : {'normal_reference', 'direct_plugin'}, \
                 default='normal_reference'
-            Name of bandwidth selection method used to compute it when bandwidth
-            argument is not passed explicitly.
-        r : float
-            Threshold.
+            Name of bandwidth selection method used to compute smoothing parameter
+            when `bandwidth` is not given explicitly.
+        r : float, default=0.1
+            Threshold separating outliers and inliers.
 
         Returns
         -------
         self : object
-            Fitted self instance of KDEOutliersDetector.
+            Fitted self instance of KDEOutliersDetection.
 
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-        >>> weights_train = np.random.uniform(0, 1, size=(10_000,))
+        >>> x_train = np.random.normal(0, 1, size=(100, 1))
+        >>> weights_train = np.random.uniform(0, 1, size=(100,))
         >>> # Fit the outliers detector
-        >>> outliers_detector = KDEOutliersDetector().fit(x_train, weights_train, r=0.1)
+        >>> r = 0.1
+        >>> outliers_detector = KDEOutliersDetection().fit(x_train, weights_train, r=r)
         """
         if r < 0 or r > 1:
             raise ValueError("invalid value of r - should be in range [0, 1]")
@@ -354,12 +359,12 @@ class KDEOutliersDetector:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(10_000, 1))
-        >>> x_test = np.random.uniform(-3, 3, size=(1000, 1))
+        >>> x_train = np.random.normal(0, 1, size=(100, 1))
+        >>> x_test = np.random.uniform(-3, 3, size=(10, 1))
         >>> # Fit the outliers detector
-        >>> outliers_detector = KDEOutliersDetector().fit(x_train, r=0.1)
+        >>> outliers_detector = KDEOutliersDetection().fit(x_train, r=0.1)
         >>> # Predict the labels
-        >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (1000,)
+        >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
@@ -370,3 +375,130 @@ class KDEOutliersDetector:
         scores = self.kde.pdf(x_test)
         labels_pred = np.where(scores <= self.threshold, 1, 0)
         return labels_pred
+
+
+class KDEClustering:
+    """Clustering based on kernel density estimation.
+
+    Examples
+    --------
+    >>> # Prepare data for two clusters
+    >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+    >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+    >>> x_train = np.concatenate((x_train1, x_train2))
+    >>> # Fit
+    >>> clustering = KDEClustering().fit(x_train)
+    """
+
+    def __init__(self):
+        self.kernel_name = "gaussian"
+        self.fitted = False
+
+    def fit(
+        self,
+        x_train: ndarray,
+        bandwidth: Optional[ndarray] = None,
+        bandwidth_method: str = "normal_reference",
+        **kwargs,
+    ):
+        """Fit the model.
+
+        Parameters
+        ----------
+        x_train : ndarray of shape (m_train, n)
+            Data points as an array containing data with float type.
+        bandwidth : ndarray of shape (n,), optional
+            Smoothing parameter.
+        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
+                'ml_cv'}, default='normal_reference'
+            Name of bandwidth selection method used to compute smoothing parameter
+            when `bandwidth` is not given explicitly.
+
+        Returns
+        -------
+        self : object
+            Fitted self instance of KDEClustering.
+
+        Examples
+        --------
+        >>> # Prepare data for two clusters
+        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> x_train = np.concatenate((x_train1, x_train2))
+        >>> # Fit
+        >>> clustering = KDEClustering().fit(x_train)
+        """
+        if x_train.ndim != 2:
+            raise ValueError("invalid shape of x_train - should be 2d")
+        self.x_train = x_train
+
+        if bandwidth is None:
+            if bandwidth_method == "normal_reference":
+                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+            elif bandwidth_method == "direct_plugin":
+                stage = kwargs["stage"] if "stage" in kwargs else 2
+                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
+            elif bandwidth_method == "ste_plugin":
+                self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
+            elif bandwidth_method == "ml_cv":
+                self.bandwidth = ml_cv(self.x_train, self.kernel_name)
+            else:
+                raise ValueError("invalid bandwidth_method")
+        else:
+            if bandwidth.ndim != 1:
+                raise ValueError("invalid shape of bandwidth - should be 1d")
+            if not (bandwidth > 0).all():
+                raise ValueError("bandwidth should be positive")
+            self.bandwidth = bandwidth
+
+        self.fitted = True
+        return self
+
+    def predict(
+        self,
+        algorithm: str = "mean_shift",
+        epsilon: float = 1e-8,
+        delta: float = 1e-3,  # 1e-1
+    ):
+        """Predict cluster labels.
+
+        Parameters
+        ----------
+        algorithm : {'gradient_ascent', 'mean_shift'}, default='mean_shift'
+            Name of clustering algorithm.
+        epsilon : float, default=1e-8
+            Threshold for difference (euclidean distance) of data point position while
+            shifting. When the difference is less than epsilon, data point is no longer
+            shifted.
+        delta : float, default=1e-3
+            Acceptance error (euclidean distance) between shifted data point and
+            representative of cluster. If the error is less than delta, data point is
+            assigned to cluster represented by cluster representative.
+
+        Returns
+        -------
+        labels : ndarray of shape (m_train,)
+            Predicted labels as an array containing data with int type.
+
+        Examples
+        --------
+        >>> # Prepare data for two clusters
+        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
+        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> x_train = np.concatenate((x_train1, x_train2))
+        >>> # Fit
+        >>> clustering = KDEClustering().fit(x_train)
+        >>> labels = clustering.predict()
+        """
+        if not self.fitted:
+            raise RuntimeError("fit the clusterer first")
+
+        if algorithm == "gradient_ascent":
+            x_k = gradient_ascent(self.x_train, self.bandwidth, epsilon)
+        elif algorithm == "mean_shift":
+            x_k = mean_shift(self.x_train, self.bandwidth, epsilon)
+        else:
+            raise ValueError("invalid name of clustering algorithm")
+        labels = assign_labels(x_k, delta)
+
+        return labels
