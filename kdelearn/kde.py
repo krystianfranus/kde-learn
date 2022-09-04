@@ -67,8 +67,8 @@ class KDE:
             Smoothing parameter.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method used to compute it when bandwidth
-            argument is not passed explicitly.
+            Name of bandwidth selection method used to compute smoothing parameter
+            when `bandwidth` is not given explicitly.
 
         Returns
         -------

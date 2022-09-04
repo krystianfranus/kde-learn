@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kdelearn.kde_funcs import KDEClassifier
+from kdelearn.kde_funcs import KDEClassification
 
 
 @pytest.mark.parametrize(
@@ -18,7 +18,7 @@ def test_kde_classifier(
     bandwidth_method,
 ):
     x_train, labels_train, x_test, labels_test = data_classification
-    classifier = KDEClassifier(kernel_name)
+    classifier = KDEClassification(kernel_name)
     classifier = classifier.fit(
         x_train,
         labels_train,
@@ -40,7 +40,7 @@ def test_kde_classifier_with_weights_train(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     m_train = x_train.shape[0]
     weights_train = np.ones((m_train,))
-    classifier = KDEClassifier()
+    classifier = KDEClassification()
     classifier.fit(x_train, labels_train, weights_train=weights_train)
     assert classifier.fitted
     assert classifier.weights_train.ndim == 1
@@ -52,7 +52,7 @@ def test_kde_classifier_with_fixed_prior_prob(data_classification):
     ulabels = np.unique(labels_train)
     n_classes = ulabels.shape[0]
     prior_prob = np.array([0.5] * n_classes)
-    classifier = KDEClassifier()
+    classifier = KDEClassification()
     classifier.fit(x_train, labels_train, prior_prob=prior_prob)
     assert classifier.fitted
     assert classifier.prior.ndim == 1
@@ -64,7 +64,7 @@ def test_kde_classifier_pdfs(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     ulabels = np.unique(labels_train)
     n_classes = ulabels.shape[0]
-    classifier = KDEClassifier()
+    classifier = KDEClassification()
     scores = classifier.fit(x_train, labels_train).pdfs(x_test)
     assert classifier.fitted
     assert scores.ndim == 2
@@ -76,13 +76,13 @@ def test_kde_classifier_pdfs(data_classification):
 
 def test_kde_classifier_with_invalid_kernel_name():
     with pytest.raises(ValueError):
-        KDEClassifier("abc")
+        KDEClassification("abc")
 
 
 def test_kde_classifier_fit_with_invalid_data(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     m_train = x_train.shape[0]
-    classifier = KDEClassifier()
+    classifier = KDEClassification()
 
     # Invalid shape of x_train
     x_train_tmp = x_train.flatten()
@@ -141,7 +141,7 @@ def test_kde_classifier_fit_with_invalid_data(data_classification):
 
 def test_kde_classifier_predict_invalid_data(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
-    classifier = KDEClassifier()
+    classifier = KDEClassification()
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()
@@ -151,7 +151,7 @@ def test_kde_classifier_predict_invalid_data(data_classification):
 
 def test_kde_classifier_pdfs_invalid_data(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
-    classifier = KDEClassifier()
+    classifier = KDEClassification()
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()

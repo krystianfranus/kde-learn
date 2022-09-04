@@ -20,3 +20,9 @@ KDEOutliersDetector
 
 .. autoclass:: kdelearn.kde_funcs.KDEOutliersDetector
    :members:
+
+KDEClustering
+-------------------
+
+.. autoclass:: kdelearn.kde_funcs.KDEClustering
+   :members:
