@@ -30,7 +30,7 @@ class KDE:
     --------
     >>> # Prepare data
     >>> x_train = np.random.normal(0, 1, size=(100, 1))
-    >>> # Fit the estimator
+    >>> # Fit
     >>> kde = KDE("gaussian").fit(x_train)
 
     References
