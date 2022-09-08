@@ -55,7 +55,7 @@ class KDEClassification:
     def __init__(self, kernel_name: str = "gaussian"):
         if kernel_name not in kernel_properties:
             available_kernels = list(kernel_properties.keys())
-            raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
+            raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -109,25 +109,25 @@ class KDEClassification:
         >>> classifier = KDEClassification().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
         """
         if x_train.ndim != 2:
-            raise ValueError("invalid shape of x_train - should be 2d")
+            raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
         self.m_train = self.x_train.shape[0]
 
         if labels_train.ndim != 1:
-            raise ValueError("invalid shape of labels_train - should be 1d")
+            raise ValueError("invalid shape of 'labels_train' - should be 1d")
         if not np.issubdtype(labels_train.dtype, np.integer):
-            raise ValueError("invalid dtype of labels_train - should be of int type")
+            raise ValueError("invalid dtype of 'labels_train' - should be of int type")
         self.labels_train = labels_train
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
             if weights_train.ndim != 1:
-                raise ValueError("invalid shape of weights_train - should be 1d")
+                raise ValueError("invalid shape of 'weights_train' - should be 1d")
             if weights_train.shape[0] != x_train.shape[0]:
-                raise ValueError("invalid size of weights_train")
+                raise ValueError("invalid size of 'weights_train'")
             if not (weights_train > 0).all():
-                raise ValueError("weights_train must be positive")
+                raise ValueError("'weights_train' must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
         self.bandwidth = None
@@ -146,7 +146,7 @@ class KDEClassification:
                     self.x_train, self.kernel_name, self.weights_train
                 )
             else:
-                raise ValueError("invalid bandwidth method")
+                raise ValueError("invalid 'bandwidth_method'")
 
         self.ulabels = np.unique(labels_train)  # Sorted unique labels
         self.n_classes = self.ulabels.shape[0]
@@ -154,10 +154,10 @@ class KDEClassification:
             self.prior = self._compute_prior()
         else:
             if prior_prob.ndim != 1:
-                raise ValueError("invalid shape of prior_prob - should be 1d")
+                raise ValueError("invalid shape of 'prior_prob' - should be 1d")
             if prior_prob.shape[0] != self.n_classes:
                 raise ValueError(
-                    f"invalid prior_prob - should contain {self.n_classes} values"
+                    f"invalid 'prior_prob' - should contain {self.n_classes} values"
                 )
             self.prior = prior_prob / prior_prob.sum()
 
@@ -198,7 +198,7 @@ class KDEClassification:
             raise RuntimeError("fit the model first")
 
         if x_test.ndim != 2:
-            raise ValueError("invalid shape of x_test - should be 2d")
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
 
         labels_pred, _ = self._classify(x_test)
         return labels_pred
@@ -235,7 +235,7 @@ class KDEClassification:
             raise RuntimeError("fit the classifier first")
 
         if x_test.ndim != 2:
-            raise ValueError("invalid shape of x_test - should be 2d")
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
 
         _, scores = self._classify(x_test)
         return scores
@@ -289,7 +289,7 @@ class KDEOutliersDetection:
     def __init__(self, kernel_name: str = "gaussian"):
         if kernel_name not in kernel_properties:
             available_kernels = list(kernel_properties.keys())
-            raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
+            raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -334,7 +334,7 @@ class KDEOutliersDetection:
         >>> outliers_detector = KDEOutliersDetection().fit(x_train, weights_train, r=r)
         """
         if r < 0 or r > 1:
-            raise ValueError("invalid value of r - should be in range [0, 1]")
+            raise ValueError("invalid value of 'r' - should be in range [0, 1]")
 
         self.kde = KDE(self.kernel_name).fit(
             x_train, weights_train, bandwidth, bandwidth_method, **kwargs
@@ -373,7 +373,7 @@ class KDEOutliersDetection:
             raise RuntimeError("fit the outliers detector first")
 
         if len(x_test.shape) != 2:
-            raise ValueError("invalid shape of array - should be two-dimensional")
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
 
         scores = self.kde.pdf(x_test)
         labels_pred = np.where(scores <= self.threshold, 1, 0)
@@ -432,7 +432,7 @@ class KDEClustering:
         >>> clustering = KDEClustering().fit(x_train)
         """
         if x_train.ndim != 2:
-            raise ValueError("invalid shape of x_train - should be 2d")
+            raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
 
         if bandwidth is None:
@@ -446,12 +446,12 @@ class KDEClustering:
             elif bandwidth_method == "ml_cv":
                 self.bandwidth = ml_cv(self.x_train, self.kernel_name)
             else:
-                raise ValueError("invalid bandwidth_method")
+                raise ValueError("invalid 'bandwidth_method'")
         else:
             if bandwidth.ndim != 1:
-                raise ValueError("invalid shape of bandwidth - should be 1d")
+                raise ValueError("invalid shape of 'bandwidth' - should be 1d")
             if not (bandwidth > 0).all():
-                raise ValueError("bandwidth should be positive")
+                raise ValueError("'bandwidth' should be positive")
             self.bandwidth = bandwidth
 
         self.fitted = True
@@ -501,7 +501,7 @@ class KDEClustering:
         elif algorithm == "mean_shift":
             x_k = mean_shift(self.x_train, self.bandwidth, epsilon)
         else:
-            raise ValueError("invalid name of clustering algorithm")
+            raise ValueError("invalid 'algorithm'")
         labels = assign_labels(x_k, delta)
 
         return labels

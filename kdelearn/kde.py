@@ -42,7 +42,7 @@ class KDE:
     def __init__(self, kernel_name: str = "gaussian"):
         if kernel_name not in kernel_properties:
             available_kernels = list(kernel_properties.keys())
-            raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
+            raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -84,7 +84,7 @@ class KDE:
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if x_train.ndim != 2:
-            raise ValueError("invalid shape of x_train - should be 2d")
+            raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
 
         if weights_train is None:
@@ -92,11 +92,11 @@ class KDE:
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if weights_train.ndim != 1:
-                raise ValueError("invalid shape of weights_train - should be 1d")
+                raise ValueError("invalid shape of 'weights_train' - should be 1d")
             if weights_train.shape[0] != x_train.shape[0]:
-                raise ValueError("invalid size of weights_train")
+                raise ValueError("invalid size of 'weights_train'")
             if not (weights_train > 0).all():
-                raise ValueError("weights_train should be positive")
+                raise ValueError("'weights_train' should be positive")
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
@@ -112,12 +112,12 @@ class KDE:
                     self.x_train, self.kernel_name, self.weights_train
                 )
             else:
-                raise ValueError("invalid bandwidth_method")
+                raise ValueError("invalid 'bandwidth_method'")
         else:
             if bandwidth.ndim != 1:
-                raise ValueError("invalid shape of bandwidth - should be 1d")
+                raise ValueError("invalid shape of 'bandwidth' - should be 1d")
             if not (bandwidth > 0).all():
-                raise ValueError("bandwidth should be positive")
+                raise ValueError("'bandwidth' should be positive")
             self.bandwidth = bandwidth
 
         self.fitted = True
@@ -150,7 +150,7 @@ class KDE:
             raise RuntimeError("fit the estimator first")
 
         if x_test.ndim != 2:
-            raise ValueError("invalid shape of x_test - should be 2d")
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
 
         scores = compute_kde(
             self.x_train,

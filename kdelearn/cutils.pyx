@@ -91,7 +91,7 @@ def compute_kde(
     elif kernel_name == "cauchy":
         kernel = ccauchy
     else:
-        raise ValueError("invalid kernel name")
+        raise ValueError("invalid 'kernel_name'")
 
     scores = np.zeros(m_test, dtype=np.float64)
     cdef double[:] scores_view = scores
@@ -135,7 +135,7 @@ def compute_ckde(
     elif kernel_name == "cauchy":
         kernel = ccauchy
     else:
-        raise ValueError("invalid kernel name")
+        raise ValueError("invalid 'kernel_name'")
 
     scores = np.zeros(m_test, dtype=np.float64)
     cdef double[:] scores_view = scores
@@ -229,7 +229,7 @@ def compute_unbiased_kde(
     elif kernel_name == "cauchy":
         kernel = ccauchy
     else:
-        raise ValueError("invalid kernel name")
+        raise ValueError("invalid 'kernel_name'")
 
     scores = np.zeros(m_train, dtype=np.float64)
     cdef double[:] scores_view = scores
@@ -257,7 +257,7 @@ def gradient_ascent(
     double epsilon,
 ):
     if epsilon <= 0:
-        raise ValueError("invalid value of epsilon - should be positive")
+        raise ValueError("invalid value of 'epsilon' - should be positive")
 
     cdef Py_ssize_t m_train = x_train.shape[0]
     cdef Py_ssize_t n = x_train.shape[1]
@@ -303,7 +303,7 @@ def mean_shift(
     double epsilon,
 ):
     if epsilon <= 0:
-        raise ValueError("invalid value of epsilon - should be positive")
+        raise ValueError("invalid value of 'epsilon' - should be positive")
 
     cdef Py_ssize_t m_train = x_train.shape[0]
     cdef Py_ssize_t n = x_train.shape[1]
@@ -347,7 +347,7 @@ def assign_labels(
     double delta,
 ):
     if delta <= 0:
-        raise ValueError("invalid value of delta - should be positive")
+        raise ValueError("invalid value of 'delta' - should be positive")
 
     cdef Py_ssize_t m_train = x_k.shape[0]
     cdef Py_ssize_t n = x_k.shape[1]
