@@ -34,7 +34,7 @@ Zacznij z :ref:`getting_started`.
    kde.rst
    ckde.rst
    bandwidth_selection.rst
-   utils.rst
+   metrics.rst
 
 Indices and tables
 ==================

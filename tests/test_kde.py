@@ -76,6 +76,11 @@ def test_kde_fit_with_invalid_data(x_train, x_test):
     with pytest.raises(ValueError):
         kde.fit(x_train, bandwidth=bandwidth)
 
+    # Invalid size of bandwidth
+    bandwidth = np.array([0.5] * (n + 1))
+    with pytest.raises(ValueError):
+        kde.fit(x_train, bandwidth=bandwidth)
+
     # Invalid values of bandwidth
     bandwidth = np.array([-0.5] * n)
     with pytest.raises(ValueError):

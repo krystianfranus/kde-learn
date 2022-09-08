@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ndarray
 from scipy.optimize import Bounds, minimize, newton
 
-from kdelearn.cutils import compute_unbiased_kde, isdd
+from .cutils import compute_unbiased_kde, isdd
 
 kernel_properties = {
     "gaussian": (1 / (2 * np.sqrt(np.pi)), 1),
@@ -44,11 +44,11 @@ def normal_reference(
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of x_train - should be 2d")
+        raise ValueError("invalid shape of 'x_train' - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel_name - choose one of {available_kernels}")
+        raise ValueError(f"invalid 'kernel_name' - choose one of {available_kernels}")
 
     m_train = x_train.shape[0]
     n = x_train.shape[1]
@@ -66,7 +66,7 @@ def direct_plugin(
     stage: int = 2,
 ):
     """Direct plug-in method with gaussian kernel used in estimation of integrated
-    squared density derivatives limited to max `stage`=3.
+    squared density derivatives limited to maximum value of `stage` equal to 3.
 
     See paragraph (3.6.1) in [1].
 
@@ -94,17 +94,17 @@ def direct_plugin(
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of x_train - should be 2d")
+        raise ValueError("invalid shape of 'x_train' - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel_name - choose one of {available_kernels}")
+        raise ValueError(f"invalid 'kernel_name' - choose one of {available_kernels}")
 
     if not isinstance(stage, int):
-        raise ValueError("invalid type of stage - should be of an int type")
+        raise ValueError("invalid type of 'stage' - should be of an int type")
 
     if stage < 0 or stage > 3:
-        raise ValueError("invalid stage - should be greater than 0 and less than 4")
+        raise ValueError("invalid 'stage' - should be greater than 0 and less than 4")
 
     m_train = x_train.shape[0]
     n = x_train.shape[1]
@@ -165,11 +165,11 @@ def ste_plugin(
     [1] Wand, M. P. and Jones, M. C. Kernel Smoothing. Chapman and Hall, 1995.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of x_train - should be 2d")
+        raise ValueError("invalid shape of 'x_train' - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
+        raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
 
     m_train = x_train.shape[0]
     n = x_train.shape[1]
@@ -228,17 +228,17 @@ def ml_cv(
     Chapman and Hall, 1986.
     """
     if x_train.ndim != 2:
-        raise ValueError("invalid shape of x_train - should be 2d")
+        raise ValueError("invalid shape of 'x_train' - should be 2d")
 
     if kernel_name not in kernel_properties:
         available_kernels = list(kernel_properties.keys())
-        raise ValueError(f"invalid kernel_name - try one of {available_kernels}")
+        raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
 
     if weights_train is not None:
         if len(weights_train.shape) != 1:
-            raise ValueError("invalid shape of weights_train - should be 1d")
+            raise ValueError("invalid shape of 'weights_train' - should be 1d")
         if not (weights_train > 0).all():
-            raise ValueError("weights_train must be positive")
+            raise ValueError("'weights_train' must be positive")
         weights_train = weights_train / weights_train.sum()
     else:
         m_train = x_train.shape[0]
