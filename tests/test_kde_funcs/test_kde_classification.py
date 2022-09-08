@@ -128,7 +128,7 @@ def test_kde_classifier_fit_with_invalid_data(data_classification):
             prior_prob=prior_prob,
         )
 
-    # Invalid number of classes in prior_prob
+    # Invalid size of prior_prob
     n_classes = np.unique(labels_train).shape[0]
     prior_prob = np.full((n_classes + 1,), 0.5)
     with pytest.raises(ValueError):

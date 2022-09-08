@@ -86,9 +86,10 @@ class KDE:
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
+        m_train = self.x_train.shape[0]
+        n = self.x_train.shape[1]
 
         if weights_train is None:
-            m_train = self.x_train.shape[0]
             self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if weights_train.ndim != 1:
@@ -116,6 +117,10 @@ class KDE:
         else:
             if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth' - should be 1d")
+            if bandwidth.shape[0] != n:
+                raise ValueError(
+                    f"invalid size of 'bandwidth' - should contain {n} values"
+                )
             if not (bandwidth > 0).all():
                 raise ValueError("'bandwidth' should be positive")
             self.bandwidth = bandwidth

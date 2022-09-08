@@ -157,7 +157,8 @@ class KDEClassification:
                 raise ValueError("invalid shape of 'prior_prob' - should be 1d")
             if prior_prob.shape[0] != self.n_classes:
                 raise ValueError(
-                    f"invalid 'prior_prob' - should contain {self.n_classes} values"
+                    f"invalid size of 'prior_prob' - should contain {self.n_classes} "
+                    "values"
                 )
             self.prior = prior_prob / prior_prob.sum()
 
@@ -434,6 +435,7 @@ class KDEClustering:
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
+        n = self.x_train.shape[1]
 
         if bandwidth is None:
             if bandwidth_method == "normal_reference":
@@ -450,6 +452,10 @@ class KDEClustering:
         else:
             if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth' - should be 1d")
+            if bandwidth.shape[0] != n:
+                raise ValueError(
+                    f"invalid size of 'bandwidth' - should contain {n} values"
+                )
             if not (bandwidth > 0).all():
                 raise ValueError("'bandwidth' should be positive")
             self.bandwidth = bandwidth
