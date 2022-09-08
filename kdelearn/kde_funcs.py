@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, Tuple
 
 import numpy as np
@@ -250,17 +251,20 @@ class KDEClassification:
         scores = np.empty((x_test.shape[0], self.n_classes))
         for idx, label in enumerate(self.ulabels):
             mask = self.labels_train == label
-            weights = self.weights_train
-            if self.weights_train is not None:
-                weights = self.weights_train[mask]
             kde = KDE(self.kernel_name).fit(
                 self.x_train[mask],
-                weights,
+                self.weights_train[mask],
                 self.bandwidth,
                 self.bandwidth_method,
                 **self.kwargs,
             )
             scores[:, idx] = kde.pdf(x_test)
+
+        if np.any(np.all(scores == 0, axis=1)):
+            warnings.warn(
+                "some labels have been predicted randomly (zero probability issue) - "
+                "try again with continuous kernel"
+            )
 
         labels_pred = self.ulabels[np.argmax(self.prior * scores, axis=1)]
         return labels_pred, scores
