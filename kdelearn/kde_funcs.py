@@ -48,8 +48,8 @@ class KDEClassification:
 
     References
     ----------
-    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
-      Chapman and Hall, 1986.
+    [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+    Chapman and Hall, 1986.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -508,6 +508,6 @@ class KDEClustering:
             x_k = mean_shift(self.x_train, self.bandwidth, epsilon)
         else:
             raise ValueError("invalid 'algorithm'")
-        labels = assign_labels(x_k, delta)
+        labels_pred = assign_labels(x_k, delta)
 
-        return labels
+        return labels_pred

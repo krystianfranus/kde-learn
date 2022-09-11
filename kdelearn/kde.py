@@ -34,9 +34,10 @@ class KDE:
 
     References
     ----------
-    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
-      Chapman and Hall, 1986.
-    - Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
+    [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+    Chapman and Hall, 1986.
+
+    [2] Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):

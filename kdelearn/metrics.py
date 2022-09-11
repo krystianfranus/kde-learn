@@ -1,5 +1,10 @@
+from typing import Tuple
+
 import numpy as np
 from numpy import ndarray
+
+from .bandwidth_selection import normal_reference
+from .kde import KDE
 
 
 def accuracy_loo(
@@ -64,3 +69,127 @@ def accuracy_loo(
 
     accuracy = np.sum(labels_train == labels_pred) / m_train
     return accuracy
+
+
+def my_metrics(
+    x_train: ndarray,
+    labels: ndarray,
+    kernel_name: str = "gaussian",
+) -> float:
+    """Metrics for outliers detector.
+
+    Parameters
+    ----------
+    x_train : ndarray of shape (m_train, n)
+        Data points as an array containing data with float type.
+    labels : ndarray of shape (m_train,)
+        Labels of data points as an array containing data with int type.
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
+
+    Returns
+    -------
+    metrics : float
+        Metrics.
+
+    Examples
+    --------
+    >>> x_train = np.array([[-0.1], [0.0], [0.1], [1.1]])
+    >>> labels = np.array([0, 0, 0, 1])
+    >>> metrics = my_metrics(x_train, labels)
+    """
+    inliers = labels == 0
+    outliers = labels == 1
+
+    scores_out = KDE(kernel_name).fit(x_train).pdf(x_train[outliers])
+    n_outliers = scores_out.shape[0]
+    scores_in = KDE(kernel_name).fit(x_train).pdf(x_train[inliers])
+    scores_in = np.sort(scores_in)[:n_outliers]
+
+    metrics = np.sum(scores_out) / np.sum(scores_in)
+    return metrics
+
+
+def density_silhouette(
+    x_train: ndarray,
+    labels: ndarray,
+    kernel_name: str = "gaussian",
+    share_bandwidth: bool = False,
+) -> Tuple[ndarray, float]:
+    """Density based silhouette.
+
+    Parameters
+    ----------
+    x_train : ndarray of shape (m_train, n)
+        Data points as an array containing data with float type.
+    labels : ndarray of shape (m_train,)
+        Labels of data points as an array containing data with int type.
+    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
+        Name of kernel function.
+    share_bandwidth : bool, default=False
+        Determines whether all clusters should have common bandwidth.
+        If False, estimator of each cluster gets its own bandwidth.
+
+    Returns
+    -------
+    dbs : ndarray of shape (m_train,)
+        Density based silhouette scores of all data points.
+    dbs_mean : float
+        Mean density based silhouette score.
+
+    Examples
+    --------
+    >>> x_train = np.array([[-0.1], [0.0], [0.1], [2.9], [3.0], [3.1]])
+    >>> labels = np.array([0, 0, 0, 1, 1 ,1])
+    >>> dbs, dbs_mean = density_silhouette(x_train, labels)
+
+    References
+    ----------
+    [1] Menardi, G. Density-based Silhouette diagnostics for clustering methods.
+    Springer, 2010.
+    """
+    m_train, n = x_train.shape
+    ulabels, cluster_sizes = np.unique(labels, return_counts=True)
+    n_clusters = ulabels.shape[0]
+
+    # Prepare bandwidths for each cluster
+    if share_bandwidth:
+        bandwidth = normal_reference(x_train, kernel_name)
+        cluster_bandwidths = np.full((n_clusters, n), bandwidth)
+        valid_bandwidths = np.full(n_clusters, True)
+    else:
+        cluster_bandwidths = np.empty((n_clusters, n))
+        valid_bandwidths = np.full(n_clusters, False)
+        for idx, label in enumerate(ulabels):
+            if cluster_sizes[idx] != 1:
+                x_train_tmp = x_train[labels == label]
+                cluster_bandwidths[idx] = normal_reference(x_train_tmp, kernel_name)
+                valid_bandwidths[idx] = True
+    valid_bandwidths = valid_bandwidths[:, None]
+    bandwidth_mean = np.mean(cluster_bandwidths, axis=0, where=valid_bandwidths)
+
+    # Compute dbs
+    theta = np.empty((n_clusters, m_train))
+    for idx, label in enumerate(ulabels):
+        cluster_size = cluster_sizes[idx]
+        bandwidth = cluster_bandwidths[idx] if cluster_size != 1 else bandwidth_mean
+        kde = KDE(kernel_name).fit(x_train[labels == label], bandwidth=bandwidth)
+        scores = kde.pdf(x_train)
+        theta[idx, :] = cluster_size / m_train * scores
+    theta = theta / theta.sum(axis=0)
+
+    arange = np.arange(m_train)
+    # Posterior probability that x_i belongs to its own cluster
+    theta_m0 = theta[labels, arange]
+    theta[labels, arange] = 0
+    # Posterior probability that x_i belongs to the nearest cluster
+    theta_m1 = np.max(theta, axis=0)
+
+    # Smallest positive float number - preventing from computing log(0)
+    e = np.nextafter(0, 1)
+    dbs = (np.log(theta_m0 + e) - np.log(theta_m1 + e)) / np.max(
+        np.abs((np.log(theta_m0 + e) - np.log(theta_m1 + e)))
+    )
+    dbs_mean = np.mean(dbs)
+
+    return dbs, dbs_mean

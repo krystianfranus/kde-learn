@@ -1,5 +1,5 @@
-Kernel Density Estimation
-=========================
+Unconditional case
+==================
 
 .. currentmodule:: kdelearn
 

@@ -1,5 +1,5 @@
-Conditional Kernel Density Estimation
-=====================================
+Conditional case
+================
 
 .. currentmodule:: kdelearn
 
