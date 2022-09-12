@@ -46,7 +46,21 @@ def data_classification():
 def data_outliers_detection():
     m_train, n = 100, 1
     x_train = np.random.normal(0, 1, size=(m_train, n))
-    labels = np.zeros(m_train, dtype=np.int32)
+    labels_train = np.zeros(m_train, dtype=np.int32)
     mask = np.abs(x_train[:, 0]) > np.std(x_train[:, 0])
-    labels[mask] = 1
-    return x_train, labels
+    labels_train[mask] = 1
+    return x_train, labels_train
+
+
+@pytest.fixture(scope="session")
+def data_clustering():
+    m_train, n = 100, 1
+    m_train1 = m_train // 2
+    x_train1 = np.random.normal(0, 1, size=(m_train1, n))
+    labels_train1 = np.full(m_train1, 0)
+    m_train2 = m_train // 2
+    x_train2 = np.random.normal(3, 1, size=(m_train2, n))
+    labels_train2 = np.full(m_train2, 1)
+    x_train = np.concatenate((x_train1, x_train2))
+    labels_train = np.concatenate((labels_train1, labels_train2))
+    return x_train, labels_train

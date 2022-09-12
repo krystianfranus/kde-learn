@@ -117,7 +117,7 @@ def pi_kf(x_train: ndarray, labels_train: ndarray) -> float:
 
 def density_silhouette(
     x_train: ndarray,
-    labels: ndarray,
+    labels_train: ndarray,
     kernel_name: str = "gaussian",
     share_bandwidth: bool = False,
 ) -> Tuple[ndarray, float]:
@@ -127,7 +127,7 @@ def density_silhouette(
     ----------
     x_train : ndarray of shape (m_train, n)
         Data points as an array containing data with float type.
-    labels : ndarray of shape (m_train,)
+    labels_train : ndarray of shape (m_train,)
         Labels of data points as an array containing data with int type.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
@@ -145,17 +145,31 @@ def density_silhouette(
     Examples
     --------
     >>> x_train = np.array([[-0.1], [0.0], [0.1], [2.9], [3.0], [3.1]])
-    >>> labels = np.array([0, 0, 0, 1, 1 ,1])
-    >>> dbs, dbs_mean = density_silhouette(x_train, labels)
+    >>> labels_train = np.array([0, 0, 0, 1, 1 ,1])
+    >>> dbs, dbs_mean = density_silhouette(x_train, labels_train)
 
     References
     ----------
     [1] Menardi, G. Density-based Silhouette diagnostics for clustering methods.
     Springer, 2010.
     """
+    if x_train.ndim != 2:
+        raise ValueError("invalid shape of 'x_train' - should be 2d")
+
+    if labels_train.ndim != 1:
+        raise ValueError("invalid shape of 'labels_train' - should be 1d")
+    if not np.issubdtype(labels_train.dtype, np.integer):
+        raise ValueError("invalid dtype of 'labels_train' - should be of int type")
+
     m_train, n = x_train.shape
-    ulabels, cluster_sizes = np.unique(labels, return_counts=True)
+    # Sorted unique labels
+    ulabels, cluster_sizes = np.unique(labels_train, return_counts=True)
     n_clusters = ulabels.shape[0]
+
+    if ulabels[0] != 0:
+        raise ValueError(
+            "invalid values in 'labels_train' - labels should be enumerated from 0"
+        )
 
     # Prepare bandwidths for each cluster
     if share_bandwidth:
@@ -167,7 +181,7 @@ def density_silhouette(
         valid_bandwidths = np.full(n_clusters, False)
         for idx, label in enumerate(ulabels):
             if cluster_sizes[idx] != 1:
-                x_train_tmp = x_train[labels == label]
+                x_train_tmp = x_train[labels_train == label]
                 cluster_bandwidths[idx] = normal_reference(x_train_tmp, kernel_name)
                 valid_bandwidths[idx] = True
     valid_bandwidths = valid_bandwidths[:, None]
@@ -178,15 +192,15 @@ def density_silhouette(
     for idx, label in enumerate(ulabels):
         cluster_size = cluster_sizes[idx]
         bandwidth = cluster_bandwidths[idx] if cluster_size != 1 else bandwidth_mean
-        kde = KDE(kernel_name).fit(x_train[labels == label], bandwidth=bandwidth)
+        kde = KDE(kernel_name).fit(x_train[labels_train == label], bandwidth=bandwidth)
         scores = kde.pdf(x_train)
         theta[idx, :] = cluster_size / m_train * scores
     theta = theta / theta.sum(axis=0)
 
     arange = np.arange(m_train)
     # Posterior probability that x_i belongs to its own cluster
-    theta_m0 = theta[labels, arange]
-    theta[labels, arange] = 0
+    theta_m0 = theta[labels_train, arange]
+    theta[labels_train, arange] = 0
     # Posterior probability that x_i belongs to the nearest cluster
     theta_m1 = np.max(theta, axis=0)
 
