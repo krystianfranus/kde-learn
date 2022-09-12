@@ -71,43 +71,48 @@ def accuracy_loo(
     return accuracy
 
 
-def my_metrics(
-    x_train: ndarray,
-    labels: ndarray,
-    kernel_name: str = "gaussian",
-) -> float:
-    """Metrics for outliers detector.
+def pi_kf(x_train: ndarray, labels_train: ndarray) -> float:
+    """Performance index for outliers detection.
 
     Parameters
     ----------
     x_train : ndarray of shape (m_train, n)
         Data points as an array containing data with float type.
-    labels : ndarray of shape (m_train,)
-        Labels of data points as an array containing data with int type.
-    kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
-        Name of kernel function.
+    labels_train : ndarray of shape (m_train,)
+        Labels (0 - inlier, 1 - outlier) of data points as an array containing data
+        with int type.
 
     Returns
     -------
-    metrics : float
-        Metrics.
+    pi : float
+        Performance index.
 
     Examples
     --------
     >>> x_train = np.array([[-0.1], [0.0], [0.1], [1.1]])
-    >>> labels = np.array([0, 0, 0, 1])
-    >>> metrics = my_metrics(x_train, labels)
+    >>> labels_train = np.array([0, 0, 0, 1])
+    >>> pi = pi_kf(x_train, labels_train)
     """
-    inliers = labels == 0
-    outliers = labels == 1
+    if x_train.ndim != 2:
+        raise ValueError("invalid shape of 'x_train' - should be 2d")
 
-    scores_out = KDE(kernel_name).fit(x_train).pdf(x_train[outliers])
+    if labels_train.ndim != 1:
+        raise ValueError("invalid shape of 'labels_train' - should be 1d")
+    if not np.issubdtype(labels_train.dtype, np.integer):
+        raise ValueError("invalid dtype of 'labels_train' - should be of int type")
+    if not np.all(np.isin(labels_train, [0, 1])):
+        raise ValueError("invalid values in 'labels_train' - should contain 0 or 1")
+
+    inliers = labels_train == 0
+    outliers = labels_train == 1
+
+    scores_out = KDE().fit(x_train).pdf(x_train[outliers])
     n_outliers = scores_out.shape[0]
-    scores_in = KDE(kernel_name).fit(x_train).pdf(x_train[inliers])
+    scores_in = KDE().fit(x_train).pdf(x_train[inliers])
     scores_in = np.sort(scores_in)[:n_outliers]
 
-    metrics = np.sum(scores_out) / np.sum(scores_in)
-    return metrics
+    pi = np.sum(scores_out) / np.sum(scores_in)
+    return pi
 
 
 def density_silhouette(

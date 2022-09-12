@@ -40,3 +40,13 @@ def data_classification():
     labels_test = np.concatenate((labels_test1, labels_test2))
 
     return x_train, labels_train, x_test, labels_test
+
+
+@pytest.fixture(scope="session")
+def data_outliers_detection():
+    m_train, n = 100, 1
+    x_train = np.random.normal(0, 1, size=(m_train, n))
+    labels = np.zeros(m_train, dtype=np.int32)
+    mask = np.abs(x_train[:, 0]) > np.std(x_train[:, 0])
+    labels[mask] = 1
+    return x_train, labels
