@@ -28,4 +28,4 @@ jobs:
       - name: Run isort
         run: isort . --check --verbose
       - name: Test with pytest
-        run: pytest tests/ --cov=recsys/kdelearn --cov-report missing-term
+        run: pytest tests/ --cov=recsys/kdelearn --cov-report term-missing
