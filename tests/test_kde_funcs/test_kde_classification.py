@@ -74,12 +74,12 @@ def test_kde_classifier_pdfs(data_classification):
     assert (scores < 1).all()
 
 
-def test_kde_classifier_with_invalid_kernel_name():
+def test_kde_classifier_invalid():
     with pytest.raises(ValueError):
         KDEClassification("abc")
 
 
-def test_kde_classifier_fit_with_invalid_data(data_classification):
+def test_kde_classifier_fit_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     m_train = x_train.shape[0]
     classifier = KDEClassification()
@@ -139,7 +139,7 @@ def test_kde_classifier_fit_with_invalid_data(data_classification):
         )
 
 
-def test_kde_classifier_predict_invalid_data(data_classification):
+def test_kde_classifier_predict_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     classifier = KDEClassification()
 
@@ -149,7 +149,7 @@ def test_kde_classifier_predict_invalid_data(data_classification):
         classifier.fit(x_train, labels_train).predict(x_test_tmp)
 
 
-def test_kde_classifier_pdfs_invalid_data(data_classification):
+def test_kde_classifier_pdfs_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     classifier = KDEClassification()
 

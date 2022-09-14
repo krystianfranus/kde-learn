@@ -39,12 +39,12 @@ def test_kde_outliers_detector_with_fixed_bandwidth(x_train):
     assert outliers_detector.fitted
 
 
-def test_kde_outliers_detector_with_invalid_kernel_name():
+def test_kde_outliers_detector_invalid():
     with pytest.raises(ValueError):
         KDEOutliersDetection("abc")
 
 
-def test_kde_outliers_detector_fit_with_invalid_data(x_train):
+def test_kde_outliers_detector_fit_invalid(x_train):
     m_train = x_train.shape[0]
     outliers_detector = KDEOutliersDetection()
 
@@ -76,8 +76,12 @@ def test_kde_outliers_detector_fit_with_invalid_data(x_train):
         outliers_detector.fit(x_train, r=r)
 
 
-def test_kde_outliers_detector_predict_invalid_data(x_train, x_test):
+def test_kde_outliers_detector_predict_invalid(x_train, x_test):
     outliers_detector = KDEOutliersDetection()
+
+    # No fitting
+    with pytest.raises(RuntimeError):
+        outliers_detector.predict(x_test)
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()
