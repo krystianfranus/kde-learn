@@ -104,6 +104,11 @@ def test_kde_classifier_fit_invalid(data_classification):
     with pytest.raises(ValueError):
         classifier.fit(x_train, labels_train, weights_train)
 
+    # Inconsistent size of x_train and weights_train
+    weights_train = np.ones((2 * m_train,))
+    with pytest.raises(ValueError):
+        classifier.fit(x_train, labels_train, weights_train)
+
     # Invalid values of weights_train
     weights_train = np.full((m_train,), -1)
     with pytest.raises(ValueError):
@@ -143,6 +148,10 @@ def test_kde_classifier_predict_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     classifier = KDEClassification()
 
+    # No fitting
+    with pytest.raises(RuntimeError):
+        classifier.predict(x_test)
+
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()
     with pytest.raises(ValueError):
@@ -152,6 +161,10 @@ def test_kde_classifier_predict_invalid(data_classification):
 def test_kde_classifier_pdfs_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     classifier = KDEClassification()
+
+    # No fitting
+    with pytest.raises(RuntimeError):
+        classifier.pdfs(x_test)
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()
