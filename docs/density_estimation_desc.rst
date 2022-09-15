@@ -6,7 +6,7 @@ Kernel density estimation
 
 Kernel density estimation is a method for non-parametric density estimation.
 
-In this page you can read about its :ref:`unconditional <unconditional>` (standard) and :ref:`conditional <conditional>` form.
+On this page you can read about its :ref:`unconditional <unconditional_kde>` (standard) and :ref:`conditional <conditional_kde>` form.
 
 
 .. _unconditional_kde:
@@ -78,10 +78,22 @@ Notice that the rightmost data points have more impact on estimated density than
 Bandwidth selection
 ===================
 
-TODO
+There are four available bandwidth selection methods:
+
+- normal reference
+- direct plugin
+- solve-the-equation plugin
+- maximum likelihood cross-validation
+
+Illustration of kernel density estimations with different bandwidth selection methods
+computed on data drawn from gaussian mixture (blue curve):
+
+.. image:: images/bandwidth_selection.png
+    :width: 75%
+    :align: center
 
 
-.. _conditional:
+.. _conditional_kde:
 
 ****************
 Conditional case

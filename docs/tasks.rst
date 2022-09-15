@@ -27,7 +27,7 @@ Example:
 .. plot::
     :include-source:
 
-    from kdelearn.kde_funcs import KDEClassification
+    from kdelearn.kde_tasks import KDEClassification
 
     # Prepare train data
     m_train = 1000
