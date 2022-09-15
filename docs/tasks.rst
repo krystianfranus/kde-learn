@@ -10,6 +10,8 @@ Unconditional case
 ******************
 
 
+.. _unconditional_classification:
+
 Classification
 ==============
 
@@ -66,11 +68,15 @@ Example:
     plt.legend(); plt.title("Decision boundry determined by KDEClassifier", fontsize=11);
 
 
+.. _unconditional_outliers_detection:
+
 Outliers Detection
 ==================
 
 TODO
 
+
+.. _unconditional_clustering:
 
 Clustering
 ==========

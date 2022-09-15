@@ -9,13 +9,13 @@ Kernel density estimation is a method for non-parametric density estimation.
 In this page you can read about its :ref:`unconditional <unconditional>` (standard) and :ref:`conditional <conditional>` form.
 
 
-.. _unconditional:
+.. _unconditional_kde:
 
 ******************
 Unconditional case
 ******************
 
-Formula of unconditional kernel density estimation:
+Formula of unconditional kernel density estimation with product kernel:
 
 .. math::
     \hat{f}(x) = \sum_{i=1}^m w_{i} \prod_{j=i}^n \frac{1}{h_j} K \left( \frac{x_{j} - x_{i, j}}{h_j} \right) \text{,} \quad x \in \mathbb{R}^n

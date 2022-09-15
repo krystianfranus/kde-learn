@@ -29,6 +29,8 @@ class KDEClassification:
     .. math::
         \\underset{c}{\\mathrm{argmax}} \\quad P(C=c|X=x)
 
+    Read more :ref:`here <unconditional_classification>`.
+
     Parameters
     ----------
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
@@ -274,6 +276,8 @@ class KDEClassification:
 class KDEOutliersDetection:
     """Outliers detectoion based on kernel density estimation.
 
+    Read more :ref:`here <unconditional_outliers_detection>`.
+
     Parameters
     ----------
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
@@ -383,6 +387,8 @@ class KDEOutliersDetection:
 
 class KDEClustering:
     """Clustering based on kernel density estimation.
+
+    Read more :ref:`here <unconditional_clustering>`.
 
     Examples
     --------

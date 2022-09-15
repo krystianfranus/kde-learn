@@ -35,7 +35,7 @@ pytest tests/
 
 with coverage
 ```
-pytest --cov=kdelearn tests/
+pytest tests/ --cov=kdelearn/ --cov-report term-missing
 ```
 
 ## Sphinx
