@@ -35,10 +35,15 @@ pytest tests/
 
 with coverage
 ```
-pytest --cov=kdelearn tests/
+pytest tests/ --cov=kdelearn/ --cov-report term-missing
 ```
 
 ## Sphinx
+
+Useful links:
+ - [style guide](https://sphinx-rtd-theme.readthedocs.io/en/stable/demo/lists_tables.html)
+ - [style guide2](https://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html)
+
 
 ### Create the documentation
 

@@ -18,7 +18,9 @@ class KDE:
 
     .. math::
         \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j}
-        K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
+        K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right), \\quad x \\in \\mathbb{R}^n
+
+    Read more :ref:`here <unconditional_kde>`.
 
     Parameters
     ----------
@@ -34,9 +36,10 @@ class KDE:
 
     References
     ----------
-    - Silverman, B. W. Density Estimation for Statistics and Data Analysis.
-      Chapman and Hall, 1986.
-    - Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
+    [1] Silverman, B. W. Density Estimation for Statistics and Data Analysis.
+    Chapman and Hall, 1986.
+
+    [2] Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
     """
 
     def __init__(self, kernel_name: str = "gaussian"):

@@ -1,10 +1,19 @@
-Procedures
-==========
+#####
+Tasks
+#####
 
 .. currentmodule:: kdelearn
 
-kde classifier
---------------
+
+******************
+Unconditional case
+******************
+
+
+.. _unconditional_classification:
+
+Classification
+==============
 
 Classifier description
 
@@ -18,7 +27,7 @@ Example:
 .. plot::
     :include-source:
 
-    from kdelearn.kde_funcs import KDEClassification
+    from kdelearn.kde_tasks import KDEClassification
 
     # Prepare train data
     m_train = 1000
@@ -57,3 +66,24 @@ Example:
     plt.xlim(-6, 8); plt.ylim(-6, 8);
     plt.xlabel("$x_1$", fontsize=11); plt.ylabel("$x_2$", rotation=0, fontsize=11);
     plt.legend(); plt.title("Decision boundry determined by KDEClassifier", fontsize=11);
+
+
+.. _unconditional_outliers_detection:
+
+Outliers Detection
+==================
+
+TODO
+
+
+.. _unconditional_clustering:
+
+Clustering
+==========
+
+TODO
+
+
+****************
+Conditional case
+****************

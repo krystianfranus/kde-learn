@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kdelearn.kde_funcs import KDEClassification
+from kdelearn.kde_tasks import KDEClassification
 
 
 @pytest.mark.parametrize(
@@ -74,12 +74,12 @@ def test_kde_classifier_pdfs(data_classification):
     assert (scores < 1).all()
 
 
-def test_kde_classifier_with_invalid_kernel_name():
+def test_kde_classifier_invalid():
     with pytest.raises(ValueError):
         KDEClassification("abc")
 
 
-def test_kde_classifier_fit_with_invalid_data(data_classification):
+def test_kde_classifier_fit_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     m_train = x_train.shape[0]
     classifier = KDEClassification()
@@ -101,6 +101,11 @@ def test_kde_classifier_fit_with_invalid_data(data_classification):
 
     # Invalid shape of weights_train
     weights_train = np.ones((m_train, 2))
+    with pytest.raises(ValueError):
+        classifier.fit(x_train, labels_train, weights_train)
+
+    # Inconsistent size of x_train and weights_train
+    weights_train = np.ones((2 * m_train,))
     with pytest.raises(ValueError):
         classifier.fit(x_train, labels_train, weights_train)
 
@@ -139,9 +144,13 @@ def test_kde_classifier_fit_with_invalid_data(data_classification):
         )
 
 
-def test_kde_classifier_predict_invalid_data(data_classification):
+def test_kde_classifier_predict_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     classifier = KDEClassification()
+
+    # No fitting
+    with pytest.raises(RuntimeError):
+        classifier.predict(x_test)
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()
@@ -149,9 +158,13 @@ def test_kde_classifier_predict_invalid_data(data_classification):
         classifier.fit(x_train, labels_train).predict(x_test_tmp)
 
 
-def test_kde_classifier_pdfs_invalid_data(data_classification):
+def test_kde_classifier_pdfs_invalid(data_classification):
     x_train, labels_train, x_test, labels_test = data_classification
     classifier = KDEClassification()
+
+    # No fitting
+    with pytest.raises(RuntimeError):
+        classifier.pdfs(x_test)
 
     # Invalid shape of x_test
     x_test_tmp = x_test.flatten()
