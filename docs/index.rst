@@ -3,8 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+#####################################
 Welcome to kde-learn's documentation!
-=====================================
+#####################################
 
 .. currentmodule:: kdelearn
 
@@ -24,20 +25,22 @@ Zacznij z :ref:`getting_started`.
    :maxdepth: 2
 
    getting_started.rst
-   kde_desc.rst
-   procedures.rst
+   density_estimation_desc.rst
+   tasks.rst
 
 .. toctree::
    :caption: Api Reference
    :maxdepth: 2
 
-   kde.rst
-   ckde.rst
+   unconditional_api.rst
+   conditional_api.rst
    bandwidth_selection.rst
    metrics.rst
 
+
+******************
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`

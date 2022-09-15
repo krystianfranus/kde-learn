@@ -20,6 +20,8 @@ class KDE:
         \\hat{f}(x) = \\sum_{i=1}^m w_{i} \\prod_{j=i}^n \\frac{1}{h_j}
         K \\left( \\frac{x_{j} - x_{i, j}}{h_j} \\right)
 
+    Read more in the :ref:`User Guide <density_estimation_desc>`.
+
     Parameters
     ----------
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'

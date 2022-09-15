@@ -1,10 +1,17 @@
-Procedures
-==========
+#####
+Tasks
+#####
 
 .. currentmodule:: kdelearn
 
-kde classifier
---------------
+
+******************
+Unconditional case
+******************
+
+
+Classification
+==============
 
 Classifier description
 
@@ -57,3 +64,20 @@ Example:
     plt.xlim(-6, 8); plt.ylim(-6, 8);
     plt.xlabel("$x_1$", fontsize=11); plt.ylabel("$x_2$", rotation=0, fontsize=11);
     plt.legend(); plt.title("Decision boundry determined by KDEClassifier", fontsize=11);
+
+
+Outliers Detection
+==================
+
+TODO
+
+
+Clustering
+==========
+
+TODO
+
+
+****************
+Conditional case
+****************

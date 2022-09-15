@@ -40,6 +40,10 @@ pytest --cov=kdelearn tests/
 
 ## Sphinx
 
+Useful links:
+ - [style guide](https://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html)
+
+
 ### Create the documentation
 
 Docstrings inspired on scikit-learn.
