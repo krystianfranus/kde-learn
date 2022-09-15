@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kdelearn.kde_funcs import KDEClassification
+from kdelearn.kde_tasks import KDEClassification
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kdelearn.kde_funcs import KDEOutliersDetection
+from kdelearn.kde_tasks import KDEOutliersDetection
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kdelearn.kde_funcs import KDEClustering
+from kdelearn.kde_tasks import KDEClustering
 
 
 @pytest.mark.parametrize("algorithm", ["gradient_ascent", "mean_shift"])

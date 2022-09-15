@@ -1,6 +1,6 @@
 import pytest
 
-from kdelearn.kde_funcs import KDEClassification
+from kdelearn.kde_tasks import KDEClassification
 from kdelearn.metrics import accuracy_loo, density_silhouette, pi_kf
 
 
