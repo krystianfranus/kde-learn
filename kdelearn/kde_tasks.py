@@ -407,6 +407,7 @@ class KDEClustering:
     def fit(
         self,
         x_train: ndarray,
+        weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
         **kwargs,
@@ -417,6 +418,8 @@ class KDEClustering:
         ----------
         x_train : ndarray of shape (m_train, n)
             Data points as an array containing data with float type.
+        weights_train : ndarray of shape (m_train,), optional
+            Weights of data points. If None, all points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
             Smoothing parameter.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
@@ -441,7 +444,19 @@ class KDEClustering:
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        n = self.x_train.shape[1]
+        self.m_train = self.x_train.shape[0]
+        self.n = self.x_train.shape[1]
+
+        if weights_train is None:
+            self.weights_train = np.full(self.m_train, 1 / self.m_train)
+        else:
+            if weights_train.ndim != 1:
+                raise ValueError("invalid shape of 'weights_train' - should be 1d")
+            if weights_train.shape[0] != x_train.shape[0]:
+                raise ValueError("invalid size of 'weights_train'")
+            if not (weights_train > 0).all():
+                raise ValueError("'weights_train' must be positive")
+            self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
             if bandwidth_method == "normal_reference":
@@ -458,9 +473,9 @@ class KDEClustering:
         else:
             if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth' - should be 1d")
-            if bandwidth.shape[0] != n:
+            if bandwidth.shape[0] != self.n:
                 raise ValueError(
-                    f"invalid size of 'bandwidth' - should contain {n} values"
+                    f"invalid size of 'bandwidth' - should contain {self.n} values"
                 )
             if not (bandwidth > 0).all():
                 raise ValueError("'bandwidth' should be positive")
@@ -509,9 +524,11 @@ class KDEClustering:
             raise RuntimeError("fit the clusterer first")
 
         if algorithm == "gradient_ascent":
-            x_k = gradient_ascent(self.x_train, self.bandwidth, epsilon)
+            x_k = gradient_ascent(
+                self.x_train, self.weights_train, self.bandwidth, epsilon
+            )
         elif algorithm == "mean_shift":
-            x_k = mean_shift(self.x_train, self.bandwidth, epsilon)
+            x_k = mean_shift(self.x_train, self.weights_train, self.bandwidth, epsilon)
         else:
             raise ValueError("invalid 'algorithm'")
         labels_pred = assign_labels(x_k, delta)

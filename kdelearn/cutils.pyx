@@ -111,20 +111,59 @@ def compute_kde(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
+def compute_d(
+    double[:, :] w_train,
+    double[:] weights_train,
+    double[:] w_star,
+    double[:] bandwidth_w,
+    str kernel_name,
+):
+    cdef Py_ssize_t m_train = w_train.shape[0]
+    cdef Py_ssize_t n_w = w_train.shape[1]
+
+    if kernel_name == "gaussian":
+        kernel = cgaussian
+    elif kernel_name == "uniform":
+        kernel = cuniform
+    elif kernel_name == "epanechnikov":
+        kernel = cepanechnikov
+    elif kernel_name == "cauchy":
+        kernel = ccauchy
+    else:
+        raise ValueError("invalid 'kernel_name'")
+
+    d = np.zeros((m_train,), dtype=np.float64)
+    cdef double[:] d_view = d
+
+    cdef Py_ssize_t i, j
+    cdef double tmp, d_sum
+
+    d_sum = 0.0
+    for i in range(m_train):
+        tmp = 1.0
+        for j in range(n_w):
+            tmp *= kernel((w_star[j] - w_train[i, j]) / bandwidth_w[j])
+        d_view[i] = weights_train[i] * tmp
+        d_sum += d_view[i]
+
+    for i in range(m_train):
+        d_view[i] = d_view[i] / d_sum
+    return d
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
 def compute_ckde(
     double[:, :] x_train,
-    double[:, :] w_train,
+    double[:] d,
     double[:, :] x_test,
-    double[:, :] w_test,
-    double[:] weights_train,
     double[:] bandwidth_x,
-    double[:] bandwidth_w,
     str kernel_name,
 ):
     cdef Py_ssize_t m_train = x_train.shape[0]
     cdef Py_ssize_t m_test = x_test.shape[0]
     cdef Py_ssize_t n_x = x_train.shape[1]
-    cdef Py_ssize_t n_w = w_train.shape[1]
 
     if kernel_name == "gaussian":
         kernel = cgaussian
@@ -141,24 +180,14 @@ def compute_ckde(
     cdef double[:] scores_view = scores
 
     cdef Py_ssize_t k, i, j
-    cdef double tmp, scores_x, scores_w
+    cdef double tmp
 
     for k in range(m_test):
-        scores_z, scores_w = 0.0, 0.0
         for i in range(m_train):
             tmp = 1.0
             for j in range(n_x):
                 tmp *= 1.0 / bandwidth_x[j] * kernel((x_test[k, j] - x_train[i, j]) / bandwidth_x[j])
-            for j in range(n_w):
-                tmp *= 1.0 / bandwidth_w[j] * kernel((w_test[k, j] - w_train[i, j]) / bandwidth_w[j])
-            scores_z += weights_train[i] * tmp
-
-        for i in range(m_train):
-            tmp = 1.0
-            for j in range(n_w):
-                tmp *= 1.0 / bandwidth_w[j] * kernel((w_test[k, j] - w_train[i, j]) / bandwidth_w[j])
-            scores_w += weights_train[i] * tmp
-        scores_view[k] = scores_z / scores_w
+            scores_view[k] += d[i] * tmp
     return scores
 
 
@@ -253,6 +282,7 @@ def compute_unbiased_kde(
 @cython.cdivision(True)
 def gradient_ascent(
     double[:, :] x_train,
+    double[:] weights_train,
     double[:] bandwidth,
     double epsilon,
 ):
@@ -281,8 +311,8 @@ def gradient_ascent(
                     for j2 in range(n):
                         tmp += ((x_k_view[i1, j2] - x_train[i2, j2]) / bandwidth[j2]) ** 2
                     tmp = exp(-0.5 * tmp)
-                    numerator += -(x_k_view[i1, j1] - x_train[i2, j1]) * tmp
-                    denominator += tmp
+                    numerator += - weights_train[i2] * (x_k_view[i1, j1] - x_train[i2, j1]) * tmp
+                    denominator += weights_train[i2] * tmp
                 x_k_view[i1, j1] += 1.0 / (n + 2.0) * numerator / denominator
 
             dist = 0.0
@@ -299,6 +329,7 @@ def gradient_ascent(
 @cython.cdivision(True)
 def mean_shift(
     double[:, :] x_train,
+    double[:] weights_train,
     double[:] bandwidth,
     double epsilon,
 ):
@@ -326,8 +357,8 @@ def mean_shift(
                     tmp = 1.0
                     for j2 in range(n):
                         tmp *= cgaussian((x_k_view[i1, j2] - x_train[i2, j2]) / bandwidth[j2]) / bandwidth[j2]
-                    numerator += tmp * x_train[i2, j1]
-                    denominator += tmp
+                    numerator += weights_train[i2] * tmp * x_train[i2, j1]
+                    denominator += weights_train[i2] * tmp
                 x_k_view[i1, j1] = numerator / denominator
 
             dist = 0.0
