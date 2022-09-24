@@ -349,8 +349,8 @@ class KDEOutliersDetection:
         >>> x_train = np.random.normal(0, 1, size=(m_train, n))
         >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit the outliers detector
-        >>> r = 0.1
-        >>> outliers_detector = KDEOutliersDetection().fit(x_train, weights_train, r=r)
+        >>> params = (x_train, weights_train)
+        >>> outliers_detector = KDEOutliersDetection().fit(*params, r=0.1)
         """
         if r < 0 or r > 1:
             raise ValueError("invalid value of 'r' - should be in range [0, 1]")
@@ -529,7 +529,7 @@ class KDEClustering:
 
         Returns
         -------
-        labels : ndarray of shape (m_train,)
+        labels_pred : ndarray of shape (m_train,)
             Predicted labels as an array containing data with int type.
 
         Examples
@@ -542,7 +542,7 @@ class KDEClustering:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> # Fit
         >>> clustering = KDEClustering().fit(x_train)
-        >>> labels = clustering.predict()
+        >>> labels_pred = clustering.predict()
         """
         if not self.fitted:
             raise RuntimeError("fit the clusterer first")

@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, Tuple
 
 import numpy as np
@@ -111,21 +112,45 @@ class CKDEClassification:
         >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> classifier = CKDEClassification().fit(x_train, w_train, w_star, labels_train, weights_train, prior_prob=prior_prob)  # noqa
+        >>> params = (x_train, w_train, w_star, labels_train, weights_train)
+        >>> classifier = CKDEClassification().fit(*params, prior_prob=prior_prob)
         """
+        if x_train.ndim != 2:
+            raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        self.w_train = w_train
         self.m_train = self.x_train.shape[0]
         self.n_x = self.x_train.shape[1]
+
+        if w_train.ndim != 2:
+            raise ValueError("invalid shape of 'w_train' - should be 2d")
+        if w_train.shape[0] != x_train.shape[0]:
+            raise ValueError("invalid size of 'w_train'")
+        self.w_train = w_train
         self.n_w = self.w_train.shape[1]
 
-        self.labels_train = labels_train
-
+        if w_star.ndim != 1:
+            raise ValueError("invalid shape of 'w_star' - should be 1d")
+        if w_star.shape[0] != self.n_w:
+            raise ValueError(
+                f"invalid size of 'w_star'- should contain {self.n_w} values"
+            )
         self.w_star = w_star
+
+        if labels_train.ndim != 1:
+            raise ValueError("invalid shape of 'labels_train' - should be 1d")
+        if not np.issubdtype(labels_train.dtype, np.integer):
+            raise ValueError("invalid dtype of 'labels_train' - should be of int type")
+        self.labels_train = labels_train
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
+            if weights_train.ndim != 1:
+                raise ValueError("invalid shape of 'weights_train' - should be 1d")
+            if weights_train.shape[0] != x_train.shape[0]:
+                raise ValueError("invalid size of 'weights_train'")
+            if not (weights_train > 0).all():
+                raise ValueError("'weights_train' must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
         self.bandwidth_x = None
@@ -153,6 +178,13 @@ class CKDEClassification:
         if prior_prob is None:
             self.prior = self._compute_prior()
         else:
+            if prior_prob.ndim != 1:
+                raise ValueError("invalid shape of 'prior_prob' - should be 1d")
+            if prior_prob.shape[0] != self.n_classes:
+                raise ValueError(
+                    f"invalid size of 'prior_prob' - should contain {self.n_classes} "
+                    "values"
+                )
             self.prior = prior_prob / prior_prob.sum()
 
         self.kwargs = kwargs
@@ -192,14 +224,63 @@ class CKDEClassification:
         >>> w_star = np.array([0.0] * n_w)
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(m_test, n_x))
-        >>> classifier = CKDEClassification().fit(x_train, w_train, w_star, labels_train)  # noqa
+        >>> params = (x_train, w_train, w_star, labels_train)
+        >>> classifier = CKDEClassification().fit(*params)
         >>> # Predict labels
         >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (10,)
         """
+        if not self.fitted:
+            raise RuntimeError("fit the model first")
+
+        if x_test.ndim != 2:
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
+
         labels_pred, _ = self._classify(x_test)
         return labels_pred
 
     def pdfs(self, x_test: ndarray) -> ndarray:
+        """Compute pdf of each class.
+
+        Parameters
+        ----------
+        x_test : ndarray of shape (m_test, n)
+            Grid data points (describing variables) as an array containing data with
+            float type.
+
+        Returns
+        -------
+        scores : ndarray of shape (m_test, n_classes)
+            Predicted scores as an array containing data with float type.
+
+        Examples
+        --------
+        >>> # Prepare data for two classes
+        >>> m_train = 100
+        >>> n_x, n_w = 1, 1
+        >>> m_test = 10
+        >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
+        >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> labels_train1 = np.full(m_train // 2, 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
+        >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> labels_train2 = np.full(m_train // 2, 2)
+        >>> x_train = np.concatenate((x_train1, x_train2))
+        >>> w_train = np.concatenate((w_train1, w_train2))
+        >>> labels_train = np.concatenate((labels_train1, labels_train2))
+        >>> w_star = np.array([0.0] * n_w)
+        >>> # Fit the classifier
+        >>> x_test = np.random.uniform(-1, 4, size=(m_test, n_x))
+        >>> params = (x_train, w_train, w_star, labels_train)
+        >>> classifier = CKDEClassification().fit(*params)
+        >>> # Compute pdf of each class
+        >>> scores = classifier.pdfs(x_test)  # scores shape (10, 2)
+        """
+        if not self.fitted:
+            raise RuntimeError("fit the classifier first")
+
+        if x_test.ndim != 2:
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
+
         _, scores = self._classify(x_test)
         return scores
 
@@ -226,6 +307,12 @@ class CKDEClassification:
             )
             scores[:, idx], _ = ckde.pdf(x_test)
 
+        if np.any(np.all(scores == 0, axis=1)):
+            warnings.warn(
+                "some labels have been predicted randomly (zero probability issue) - "
+                "try again with continuous kernel"
+            )
+
         labels_pred = self.ulabels[np.argmax(self.prior * scores, axis=1)]
         return labels_pred, scores
 
@@ -249,10 +336,14 @@ class CKDEOutliersDetection:
     >>> w_train = np.random.normal(0, 1, size=(m_train, n_w))
     >>> w_star = np.array([0.0] * n_w)
     >>> # Fit the outliers detector
-    >>> outliers_detector = CKDEOutliersDetection("gaussian").fit(x_train, w_train, w_star)  # noqa
+    >>> params = (x_train, w_train, w_star)
+    >>> outliers_detector = CKDEOutliersDetection("gaussian").fit(*params)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
+        if kernel_name not in kernel_properties:
+            available_kernels = list(kernel_properties.keys())
+            raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
         self.kernel_name = kernel_name
         self.fitted = False
 
@@ -308,11 +399,11 @@ class CKDEOutliersDetection:
         >>> w_star = np.array([0.0] * n_w)
         >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit the outliers detector
-        >>> r = 0.1
-        >>> outliers_detector = CKDEOutliersDetection().fit(x_train, w_train, w_star, weights_train, r=r)   # noqa
+        >>> params = (x_train, w_train, w_star, weights_train)
+        >>> outliers_detector = CKDEOutliersDetection().fit(*params, r=0.1)
         """
-        self.m_train = x_train.shape[0]
-        self.n_w = w_train.shape[1]
+        if r < 0 or r > 1:
+            raise ValueError("invalid value of 'r' - should be in range [0, 1]")
 
         self.ckde = CKDE(self.kernel_name).fit(
             x_train,
@@ -324,18 +415,18 @@ class CKDEOutliersDetection:
             bandwidth_method,
             **kwargs,
         )
-        scores, d = self.ckde.pdf(x_train)
+        scores, cond_weights_train = self.ckde.pdf(x_train)
 
         idx_sorted = np.argsort(scores)
         scores_ord = scores[idx_sorted]
-        d_ord = d[idx_sorted]
+        cond_weights_train_ord = cond_weights_train[idx_sorted]
 
-        d_ord_cumsum = np.cumsum(d_ord)
-        k = np.where(d_ord_cumsum > r)[0][0] - 1
+        cond_weights_train_ord_cumsum = np.cumsum(cond_weights_train_ord)
+        k = np.where(cond_weights_train_ord_cumsum > r)[0][0] - 1
 
-        tmp1 = (d_ord_cumsum[k + 1] - r) * scores_ord[k]
-        tmp2 = (r - d_ord_cumsum[k]) * scores_ord[k + 1]
-        self.threshold = (tmp1 + tmp2) / d_ord[k + 1]
+        tmp1 = (cond_weights_train_ord_cumsum[k + 1] - r) * scores_ord[k]
+        tmp2 = (r - cond_weights_train_ord_cumsum[k]) * scores_ord[k + 1]
+        self.threshold = (tmp1 + tmp2) / cond_weights_train_ord[k + 1]
         # self.threshold = np.quantile(scores, r)
 
         self.fitted = True
@@ -367,10 +458,17 @@ class CKDEOutliersDetection:
         >>> w_star = np.array([0.0] * n_w)
         >>> x_test = np.random.uniform(-3, 3, size=(m_test, n_x))
         >>> # Fit the outliers detector
-        >>> outliers_detector = CKDEOutliersDetection().fit(x_train, w_train, w_star, r=0.1)  # noqa
+        >>> params = (x_train, w_train, w_star)
+        >>> outliers_detector = CKDEOutliersDetection().fit(*params, r=0.1)
         >>> # Predict the labels
         >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (10,)
         """
+        if not self.fitted:
+            raise RuntimeError("fit the outliers detector first")
+
+        if len(x_test.shape) != 2:
+            raise ValueError("invalid shape of 'x_test' - should be 2d")
+
         scores, _ = self.ckde.pdf(x_test)
         labels_pred = np.where(scores <= self.threshold, 1, 0)
         return labels_pred
@@ -456,18 +554,39 @@ class CKDEClustering:
         >>> # Fit
         >>> clustering = CKDEClustering().fit(x_train, w_train, w_star, weights_train)
         """
+        if x_train.ndim != 2:
+            raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        self.w_train = w_train
-        self.w_star = w_star
         self.m_train = self.x_train.shape[0]
         self.n_x = self.x_train.shape[1]
+
+        if w_train.ndim != 2:
+            raise ValueError("invalid shape of 'w_train' - should be 2d")
+        if w_train.shape[0] != x_train.shape[0]:
+            raise ValueError("invalid size of 'w_train'")
+        self.w_train = w_train
+        self.n_w = self.w_train.shape[1]
+
+        if w_star.ndim != 1:
+            raise ValueError("invalid shape of 'w_star' - should be 1d")
+        if w_star.shape[0] != self.n_w:
+            raise ValueError(
+                f"invalid size of 'w_star'- should contain {self.n_w} values"
+            )
+        self.w_star = w_star
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
+            if weights_train.ndim != 1:
+                raise ValueError("invalid shape of 'weights_train' - should be 1d")
+            if weights_train.shape[0] != x_train.shape[0]:
+                raise ValueError("invalid size of 'weights_train'")
+            if not (weights_train > 0).all():
+                raise ValueError("'weights_train' should be positive")
             self.weights_train = weights_train / weights_train.sum()
 
-        if bandwidth_x is None:
+        if bandwidth_x is None or bandwidth_w is None:
             z_train = np.concatenate((self.x_train, self.w_train), axis=1)
             if bandwidth_method == "normal_reference":
                 bandwidth = normal_reference(z_train, self.kernel_name)
@@ -483,6 +602,22 @@ class CKDEClustering:
             self.bandwidth_x = bandwidth[: self.n_x]
             self.bandwidth_w = bandwidth[self.n_x :]
         else:
+            if bandwidth_x.ndim != 1:
+                raise ValueError("invalid shape of 'bandwidth_x' - should be 1d")
+            if bandwidth_w.ndim != 1:
+                raise ValueError("invalid shape of 'bandwidth_w' - should be 1d")
+            if bandwidth_x.shape[0] != self.n_x:
+                raise ValueError(
+                    f"invalid size of 'bandwidth_x' - should contain {self.n_x} values"
+                )
+            if bandwidth_w.shape[0] != self.n_w:
+                raise ValueError(
+                    f"invalid size of 'bandwidth_w' - should contain {self.n_w} values"
+                )
+            if not (bandwidth_x > 0).all():
+                raise ValueError("'bandwidth_x' should be positive")
+            if not (bandwidth_w > 0).all():
+                raise ValueError("'bandwidth_w' should be positive")
             self.bandwidth_x = bandwidth_x
             self.bandwidth_w = bandwidth_w
 
@@ -512,7 +647,7 @@ class CKDEClustering:
 
         Returns
         -------
-        labels : ndarray of shape (m_train,)
+        labels_pred : ndarray of shape (m_train,)
             Predicted labels as an array containing data with int type.
 
         Examples
@@ -529,9 +664,9 @@ class CKDEClustering:
         >>> w_star = np.array([0.0] * n_w)
         >>> # Fit
         >>> clustering = CKDEClustering().fit(x_train, w_train, w_star)
-        >>> labels = clustering.predict()
+        >>> labels_pred = clustering.predict()
         """
-        d = compute_d(
+        cond_weights_train = compute_d(
             self.w_train,
             self.weights_train,
             self.w_star,
@@ -540,9 +675,13 @@ class CKDEClustering:
         )
 
         if algorithm == "gradient_ascent":
-            x_k = gradient_ascent(self.x_train, d, self.bandwidth_x, epsilon)
+            x_k = gradient_ascent(
+                self.x_train, cond_weights_train, self.bandwidth_x, epsilon
+            )
         elif algorithm == "mean_shift":
-            x_k = mean_shift(self.x_train, d, self.bandwidth_x, epsilon)
+            x_k = mean_shift(
+                self.x_train, cond_weights_train, self.bandwidth_x, epsilon
+            )
         else:
             raise ValueError("invalid 'algorithm'")
         labels_pred = assign_labels(x_k, delta)
