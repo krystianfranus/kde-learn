@@ -39,10 +39,12 @@ class KDEClassification:
     Examples
     --------
     >>> # Prepare data for two classes
-    >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-    >>> labels_train1 = np.full(100 // 2, 1)
-    >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
-    >>> labels_train2 = np.full(100 // 2, 2)
+    >>> m_train = 100
+    >>> n = 1
+    >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+    >>> labels_train1 = np.full(m_train // 2, 1)
+    >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
+    >>> labels_train2 = np.full(m_train // 2, 2)
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit
@@ -99,13 +101,15 @@ class KDEClassification:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-        >>> labels_train1 = np.full((100 // 2,), 1)
-        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
-        >>> labels_train2 = np.full((100 // 2,), 2)
+        >>> m_train = 100
+        >>> n = 1
+        >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+        >>> labels_train1 = np.full((m_train // 2,), 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
+        >>> labels_train2 = np.full((m_train // 2,), 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> weights_train = np.random.uniform(0, 1, size=(100,))
+        >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit
         >>> prior_prob = np.array([0.3, 0.7])
         >>> classifier = KDEClassification().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
@@ -185,14 +189,17 @@ class KDEClassification:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-        >>> labels_train1 = np.full(100 // 2, 1)
-        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
-        >>> labels_train2 = np.full(100 // 2, 2)
+        >>> m_train = 100
+        >>> n = 1
+        >>> m_test = 10
+        >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+        >>> labels_train1 = np.full(m_train // 2, 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
+        >>> labels_train2 = np.full(m_train // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.random.uniform(-1, 4, size=(10, 1))
+        >>> x_test = np.random.uniform(-1, 4, size=(m_test, n))
         >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Predict labels
         >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (10,)
@@ -222,14 +229,17 @@ class KDEClassification:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-        >>> labels_train1 = np.full(100 // 2, 1)
-        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
-        >>> labels_train2 = np.full(100 // 2, 2)
+        >>> m_train = 100
+        >>> n = 1
+        >>> m_test = 10
+        >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+        >>> labels_train1 = np.full(m_train // 2, 1)
+        >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
+        >>> labels_train2 = np.full(m_train // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.random.uniform(-1, 4, size=(10, 1))
+        >>> x_test = np.random.uniform(-1, 4, size=(m_test, n))
         >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Compute pdf of each class
         >>> scores = classifier.pdfs(x_test)  # scores shape (10, 2)
@@ -286,7 +296,9 @@ class KDEOutliersDetection:
     Examples
     --------
     >>> # Prepare data
-    >>> x_train = np.random.normal(0, 1, size=(100, 1))
+    >>> m_train = 100
+    >>> n = 1
+    >>> x_train = np.random.normal(0, 1, size=(m_train, n))
     >>> # Fit the outliers detector
     >>> outliers_detector = KDEOutliersDetection("gaussian").fit(x_train)
     """
@@ -332,8 +344,10 @@ class KDEOutliersDetection:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(100, 1))
-        >>> weights_train = np.random.uniform(0, 1, size=(100,))
+        >>> m_train = 100
+        >>> n = 1
+        >>> x_train = np.random.normal(0, 1, size=(m_train, n))
+        >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit the outliers detector
         >>> r = 0.1
         >>> outliers_detector = KDEOutliersDetection().fit(x_train, weights_train, r=r)
@@ -367,8 +381,11 @@ class KDEOutliersDetection:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(100, 1))
-        >>> x_test = np.random.uniform(-3, 3, size=(10, 1))
+        >>> m_train = 100
+        >>> n = 1
+        >>> m_test = 10
+        >>> x_train = np.random.normal(0, 1, size=(m_train, n))
+        >>> x_test = np.random.uniform(-3, 3, size=(m_test, n))
         >>> # Fit the outliers detector
         >>> outliers_detector = KDEOutliersDetection().fit(x_train, r=0.1)
         >>> # Predict the labels
@@ -393,8 +410,10 @@ class KDEClustering:
     Examples
     --------
     >>> # Prepare data for two clusters
-    >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-    >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+    >>> m_train = 100
+    >>> n = 1
+    >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+    >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> # Fit
     >>> clustering = KDEClustering().fit(x_train)
@@ -435,11 +454,14 @@ class KDEClustering:
         Examples
         --------
         >>> # Prepare data for two clusters
-        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> m_train = 100
+        >>> n = 1
+        >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+        >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
         >>> x_train = np.concatenate((x_train1, x_train2))
+        >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit
-        >>> clustering = KDEClustering().fit(x_train)
+        >>> clustering = KDEClustering().fit(x_train, weights_train)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
@@ -513,8 +535,10 @@ class KDEClustering:
         Examples
         --------
         >>> # Prepare data for two clusters
-        >>> x_train1 = np.random.normal(0, 1, size=(100 // 2, 1))
-        >>> x_train2 = np.random.normal(3, 1, size=(100 // 2, 1))
+        >>> m_train = 100
+        >>> n = 1
+        >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
+        >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> # Fit
         >>> clustering = KDEClustering().fit(x_train)
