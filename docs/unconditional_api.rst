@@ -22,7 +22,7 @@ KDEOutliersDetector
    :members:
 
 KDEClustering
--------------------
+-------------
 
 .. autoclass:: kdelearn.kde_tasks.KDEClustering
    :members:

@@ -30,7 +30,9 @@ class KDE:
     Examples
     --------
     >>> # Prepare data
-    >>> x_train = np.random.normal(0, 1, size=(100, 1))
+    >>> m_train = 100
+    >>> n = 1
+    >>> x_train = np.random.normal(0, 1, size=(m_train, n))
     >>> # Fit
     >>> kde = KDE("gaussian").fit(x_train)
 
@@ -80,20 +82,22 @@ class KDE:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, size=(100, 1))
-        >>> weights_train = np.random.randint(1, 10, size=(100,))
-        >>> bandwidth = np.random.uniform(0, 1, size=(1,))
+        >>> m_train = 100
+        >>> n = 1
+        >>> x_train = np.random.normal(0, 1, size=(m_train, n))
+        >>> weights_train = np.random.randint(1, 10, size=(m_train,))
+        >>> bandwidth = np.random.uniform(0, 1, size=(n,))
         >>> # Fit the estimator
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        m_train = self.x_train.shape[0]
-        n = self.x_train.shape[1]
+        self.m_train = self.x_train.shape[0]
+        self.n = self.x_train.shape[1]
 
         if weights_train is None:
-            self.weights_train = np.full(m_train, 1 / m_train)
+            self.weights_train = np.full(self.m_train, 1 / self.m_train)
         else:
             if weights_train.ndim != 1:
                 raise ValueError("invalid shape of 'weights_train' - should be 1d")
@@ -120,9 +124,9 @@ class KDE:
         else:
             if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth' - should be 1d")
-            if bandwidth.shape[0] != n:
+            if bandwidth.shape[0] != self.n:
                 raise ValueError(
-                    f"invalid size of 'bandwidth' - should contain {n} values"
+                    f"invalid size of 'bandwidth' - should contain {self.n} values"
                 )
             if not (bandwidth > 0).all():
                 raise ValueError("'bandwidth' should be positive")
@@ -147,8 +151,10 @@ class KDE:
         Examples
         --------
         >>> # Prepare data
-        >>> x_train = np.random.normal(0, 1, (100, 1))
-        >>> x_test = np.random.uniform(-3, 3, (10, 1))
+        >>> m_train = 100
+        >>> n = 1
+        >>> x_train = np.random.normal(0, 1, (m_train, n))
+        >>> x_test = np.random.uniform(-3, 3, (10, n))
         >>> # Fit the estimator.
         >>> kde = KDE().fit(x_train)
         >>> # Compute pdf
