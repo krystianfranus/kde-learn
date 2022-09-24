@@ -93,7 +93,8 @@ class CKDE:
         >>> bandwidth_x = np.array([0.5] * n_x)
         >>> bandwidth_w = np.array([0.5] * n_w)
         >>> # Fit the estimator
-        >>> ckde = CKDE().fit(x_train, w_train, w_star, weights_train, bandwidth_x, bandwidth_w)  # noqa
+        >>> params = (x_train, w_train, w_star, weights_train, bandwidth_x, bandwidth_w)
+        >>> ckde = CKDE().fit(*params)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
@@ -101,8 +102,8 @@ class CKDE:
         self.m_train = self.x_train.shape[0]
         self.n_x = self.x_train.shape[1]
 
-        if x_train.ndim != 2:
-            raise ValueError("invalid shape of 'x_train' - should be 2d")
+        if w_train.ndim != 2:
+            raise ValueError("invalid shape of 'w_train' - should be 2d")
         if w_train.shape[0] != x_train.shape[0]:
             raise ValueError("invalid size of 'w_train'")
         self.w_train = w_train
@@ -127,7 +128,7 @@ class CKDE:
                 raise ValueError("'weights_train' should be positive")
             self.weights_train = weights_train / weights_train.sum()
 
-        if bandwidth_x is None:
+        if bandwidth_x is None or bandwidth_w is None:
             z_train = np.concatenate((self.x_train, self.w_train), axis=1)
             if bandwidth_method == "normal_reference":
                 bandwidth = normal_reference(z_train, self.kernel_name)
@@ -181,7 +182,7 @@ class CKDE:
         -------
         scores : ndarray of shape (m_test,)
             Values of kernel density estimator.
-        d : ndarray of shape (m_train,)
+        cond_weights_train : ndarray of shape (m_train,)
             TODO: complete !!!!!!!!
 
         Examples
@@ -205,7 +206,7 @@ class CKDE:
         if x_test.ndim != 2:
             raise ValueError("invalid shape of 'x_test' - should be 2d")
 
-        d = compute_d(
+        cond_weights_train = compute_d(
             self.w_train,
             self.weights_train,
             self.w_star,
@@ -214,9 +215,9 @@ class CKDE:
         )
         scores = compute_kde(
             self.x_train,
-            d,
+            cond_weights_train,
             x_test,
             self.bandwidth_x,
             self.kernel_name,
         )
-        return scores, d
+        return scores, cond_weights_train
