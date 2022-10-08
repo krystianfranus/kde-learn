@@ -29,19 +29,19 @@ class CKDEClassification:
     --------
     >>> # Prepare data for two classes
     >>> m_train = 100
-    >>> n_x, n_w = 1, 1
+    >>> n_x, n_y = 1, 1
     >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-    >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+    >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
     >>> labels_train1 = np.full(m_train // 2, 1)
     >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-    >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+    >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
     >>> labels_train2 = np.full(m_train // 2, 2)
     >>> x_train = np.concatenate((x_train1, x_train2))
-    >>> w_train = np.concatenate((w_train1, w_train2))
+    >>> y_train = np.concatenate((y_train1, y_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
-    >>> w_star = np.array([0.0] * n_w)
+    >>> y_star = np.array([0.0] * n_y)
     >>> # Fit
-    >>> classifier = CKDEClassification().fit(x_train, w_train, w_star, labels_train)
+    >>> classifier = CKDEClassification().fit(x_train, y_train, y_star, labels_train)
     """
 
     def __init__(self, kernel_name: str = "gaussian"):
@@ -54,8 +54,8 @@ class CKDEClassification:
     def fit(
         self,
         x_train: ndarray,
-        w_train: ndarray,
-        w_star: ndarray,
+        y_train: ndarray,
+        y_star: ndarray,
         labels_train: ndarray,
         weights_train: Optional[ndarray] = None,
         share_bandwidth: bool = False,
@@ -70,10 +70,10 @@ class CKDEClassification:
         x_train : ndarray of shape (m_train, n_x)
             Data points (describing variables) as an array containing data with float
             type.
-        w_train : ndarray of shape (m_train, n_w)
+        y_train : ndarray of shape (m_train, n_y)
             Data points (conditioning variables) as an array containing data with float
             type.
-        w_star : ndarray of shape (n_w,)
+        y_star : ndarray of shape (n_y,)
             Conditioned value.
         labels_train : ndarray of shape (m_train,)
             Labels of data points as an array containing data with int type.
@@ -98,21 +98,21 @@ class CKDEClassification:
         --------
         >>> # Prepare data for two classes
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-        >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> labels_train1 = np.full(m_train // 2, 1)
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-        >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> labels_train2 = np.full(m_train // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
-        >>> w_train = np.concatenate((w_train1, w_train2))
+        >>> y_train = np.concatenate((y_train1, y_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_star = np.array([0.0] * n_y)
         >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> params = (x_train, w_train, w_star, labels_train, weights_train)
+        >>> params = (x_train, y_train, y_star, labels_train, weights_train)
         >>> classifier = CKDEClassification().fit(*params, prior_prob=prior_prob)
         """
         if x_train.ndim != 2:
@@ -121,20 +121,20 @@ class CKDEClassification:
         self.m_train = self.x_train.shape[0]
         self.n_x = self.x_train.shape[1]
 
-        if w_train.ndim != 2:
-            raise ValueError("invalid shape of 'w_train' - should be 2d")
-        if w_train.shape[0] != x_train.shape[0]:
-            raise ValueError("invalid size of 'w_train'")
-        self.w_train = w_train
-        self.n_w = self.w_train.shape[1]
+        if y_train.ndim != 2:
+            raise ValueError("invalid shape of 'y_train' - should be 2d")
+        if y_train.shape[0] != x_train.shape[0]:
+            raise ValueError("invalid size of 'y_train'")
+        self.y_train = y_train
+        self.n_y = self.y_train.shape[1]
 
-        if w_star.ndim != 1:
-            raise ValueError("invalid shape of 'w_star' - should be 1d")
-        if w_star.shape[0] != self.n_w:
+        if y_star.ndim != 1:
+            raise ValueError("invalid shape of 'y_star' - should be 1d")
+        if y_star.shape[0] != self.n_y:
             raise ValueError(
-                f"invalid size of 'w_star'- should contain {self.n_w} values"
+                f"invalid size of 'y_star'- should contain {self.n_y} values"
             )
-        self.w_star = w_star
+        self.y_star = y_star
 
         if labels_train.ndim != 1:
             raise ValueError("invalid shape of 'labels_train' - should be 1d")
@@ -154,11 +154,11 @@ class CKDEClassification:
             self.weights_train = weights_train / weights_train.sum()
 
         self.bandwidth_x = None
-        self.bandwidth_w = None
+        self.bandwidth_y = None
         self.bandwidth_method = bandwidth_method
 
         if share_bandwidth:
-            z_train = np.concatenate((self.x_train, self.w_train), axis=1)
+            z_train = np.concatenate((self.x_train, self.y_train), axis=1)
             if self.bandwidth_method == "normal_reference":
                 bandwidth = normal_reference(z_train, self.kernel_name)
             elif self.bandwidth_method == "direct_plugin":
@@ -171,7 +171,7 @@ class CKDEClassification:
             else:
                 raise ValueError("invalid 'bandwidth_method'")
             self.bandwidth_x = bandwidth[: self.n_x]
-            self.bandwidth_w = bandwidth[self.n_x :]
+            self.bandwidth_y = bandwidth[self.n_x :]
 
         self.ulabels = np.unique(labels_train)  # Sorted unique labels
         self.n_classes = self.ulabels.shape[0]
@@ -210,21 +210,21 @@ class CKDEClassification:
         --------
         >>> # Prepare data for two classes
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> m_test = 10
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-        >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> labels_train1 = np.full(m_train // 2, 1)
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-        >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> labels_train2 = np.full(m_train // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
-        >>> w_train = np.concatenate((w_train1, w_train2))
+        >>> y_train = np.concatenate((y_train1, y_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_star = np.array([0.0] * n_y)
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(m_test, n_x))
-        >>> params = (x_train, w_train, w_star, labels_train)
+        >>> params = (x_train, y_train, y_star, labels_train)
         >>> classifier = CKDEClassification().fit(*params)
         >>> # Predict labels
         >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (10,)
@@ -243,7 +243,7 @@ class CKDEClassification:
 
         Parameters
         ----------
-        x_test : ndarray of shape (m_test, n)
+        x_test : ndarray of shape (m_test, n_x)
             Grid data points (describing variables) as an array containing data with
             float type.
 
@@ -256,21 +256,21 @@ class CKDEClassification:
         --------
         >>> # Prepare data for two classes
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> m_test = 10
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-        >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> labels_train1 = np.full(m_train // 2, 1)
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-        >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> labels_train2 = np.full(m_train // 2, 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
-        >>> w_train = np.concatenate((w_train1, w_train2))
+        >>> y_train = np.concatenate((y_train1, y_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_star = np.array([0.0] * n_y)
         >>> # Fit the classifier
         >>> x_test = np.random.uniform(-1, 4, size=(m_test, n_x))
-        >>> params = (x_train, w_train, w_star, labels_train)
+        >>> params = (x_train, y_train, y_star, labels_train)
         >>> classifier = CKDEClassification().fit(*params)
         >>> # Compute pdf of each class
         >>> scores = classifier.pdfs(x_test)  # scores shape (10, 2)
@@ -297,11 +297,11 @@ class CKDEClassification:
             mask = self.labels_train == label
             ckde = CKDE(self.kernel_name).fit(
                 self.x_train[mask],
-                self.w_train[mask],
-                self.w_star,
+                self.y_train[mask],
+                self.y_star,
                 self.weights_train[mask],
                 self.bandwidth_x,
-                self.bandwidth_w,
+                self.bandwidth_y,
                 self.bandwidth_method,
                 **self.kwargs,
             )
@@ -331,12 +331,12 @@ class CKDEOutliersDetection:
     --------
     >>> # Prepare data
     >>> m_train = 100
-    >>> n_x, n_w = 1, 1
+    >>> n_x, n_y = 1, 1
     >>> x_train = np.random.normal(0, 1, size=(m_train, n_x))
-    >>> w_train = np.random.normal(0, 1, size=(m_train, n_w))
-    >>> w_star = np.array([0.0] * n_w)
+    >>> y_train = np.random.normal(0, 1, size=(m_train, n_y))
+    >>> y_star = np.array([0.0] * n_y)
     >>> # Fit the outliers detector
-    >>> params = (x_train, w_train, w_star)
+    >>> params = (x_train, y_train, y_star)
     >>> outliers_detector = CKDEOutliersDetection("gaussian").fit(*params)
     """
 
@@ -350,11 +350,11 @@ class CKDEOutliersDetection:
     def fit(
         self,
         x_train: ndarray,
-        w_train: ndarray,
-        w_star: ndarray,
+        y_train: ndarray,
+        y_star: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidth_x: Optional[ndarray] = None,
-        bandwidth_w: Optional[ndarray] = None,
+        bandwidth_y: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
         r: float = 0.1,
         **kwargs,
@@ -366,16 +366,16 @@ class CKDEOutliersDetection:
         x_train : ndarray of shape (m_train, n_x)
             Data points (describing variables) as an array containing data with float
             type.
-        w_train : ndarray of shape (m_train, n_w)
+        y_train : ndarray of shape (m_train, n_y)
             Data points (conditioning variables) as an array containing data with float
             type.
-        w_star : ndarray of shape (n_w,)
+        y_star : ndarray of shape (n_y,)
             Conditioned value.
         weights_train : ndarray of shape (m_train,), default=None
             Weights for data points. If None is passed, all points are equally weighted.
         bandwidth_x : ndarray of shape (n_x,), optional
             Smoothing parameter of describing variables.
-        bandwidth_w : ndarray of shape (n_w,), optional
+        bandwidth_y : ndarray of shape (n_y,), optional
             Smoothing parameter of conditioning variables.
         bandwidth_method : {'normal_reference', 'direct_plugin'}, \
                 default='normal_reference'
@@ -393,13 +393,13 @@ class CKDEOutliersDetection:
         --------
         >>> # Prepare data
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> x_train = np.random.normal(0, 1, size=(m_train, n_x))
-        >>> w_train = np.random.normal(0, 1, size=(m_train, n_w))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_train = np.random.normal(0, 1, size=(m_train, n_y))
+        >>> y_star = np.array([0.0] * n_y)
         >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit the outliers detector
-        >>> params = (x_train, w_train, w_star, weights_train)
+        >>> params = (x_train, y_train, y_star, weights_train)
         >>> outliers_detector = CKDEOutliersDetection().fit(*params, r=0.1)
         """
         if r < 0 or r > 1:
@@ -407,11 +407,11 @@ class CKDEOutliersDetection:
 
         self.ckde = CKDE(self.kernel_name).fit(
             x_train,
-            w_train,
-            w_star,
+            y_train,
+            y_star,
             weights_train,
             bandwidth_x,
-            bandwidth_w,
+            bandwidth_y,
             bandwidth_method,
             **kwargs,
         )
@@ -437,7 +437,7 @@ class CKDEOutliersDetection:
 
         Parameters
         ----------
-        x_test : ndarray of shape (m_test, n)
+        x_test : ndarray of shape (m_test, n_x)
             Grid data points (describing variables) as a 2D array containing data with
             float type.
 
@@ -451,14 +451,14 @@ class CKDEOutliersDetection:
         --------
         >>> # Prepare data
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> m_test = 10
         >>> x_train = np.random.normal(0, 1, size=(m_train, n_x))
-        >>> w_train = np.random.normal(0, 1, size=(m_train, n_w))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_train = np.random.normal(0, 1, size=(m_train, n_y))
+        >>> y_star = np.array([0.0] * n_y)
         >>> x_test = np.random.uniform(-3, 3, size=(m_test, n_x))
         >>> # Fit the outliers detector
-        >>> params = (x_train, w_train, w_star)
+        >>> params = (x_train, y_train, y_star)
         >>> outliers_detector = CKDEOutliersDetection().fit(*params, r=0.1)
         >>> # Predict the labels
         >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (10,)
@@ -483,16 +483,16 @@ class CKDEClustering:
     --------
     >>> # Prepare data for two clusters
     >>> m_train = 100
-    >>> n_x, n_w = 1, 1
+    >>> n_x, n_y = 1, 1
     >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-    >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+    >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
     >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-    >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+    >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
     >>> x_train = np.concatenate((x_train1, x_train2))
-    >>> w_train = np.concatenate((w_train1, w_train2))
-    >>> w_star = np.array([0.0] * n_w)
+    >>> y_train = np.concatenate((y_train1, y_train2))
+    >>> y_star = np.array([0.0] * n_y)
     >>> # Fit
-    >>> clustering = CKDEClustering().fit(x_train, w_train, w_star)
+    >>> clustering = CKDEClustering().fit(x_train, y_train, y_star)
     """
 
     def __init__(self):
@@ -502,11 +502,11 @@ class CKDEClustering:
     def fit(
         self,
         x_train: ndarray,
-        w_train: ndarray,
-        w_star: ndarray,
+        y_train: ndarray,
+        y_star: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidth_x: Optional[ndarray] = None,
-        bandwidth_w: Optional[ndarray] = None,
+        bandwidth_y: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
         **kwargs,
     ):
@@ -517,16 +517,16 @@ class CKDEClustering:
         x_train : ndarray of shape (m_train, n_x)
             Data points (describing variables) as an array containing data with float
             type.
-        w_train : ndarray of shape (m_train, n_w)
+        y_train : ndarray of shape (m_train, n_y)
             Data points (conditioning variables) as an array containing data with float
             type.
-        w_star : ndarray of shape (n_w,)
+        y_star : ndarray of shape (n_y,)
             Conditioned value.
         weights_train : ndarray of shape (m_train,), optional
             Weights of data points. If None, all points are equally weighted.
         bandwidth_x : ndarray of shape (n_x,), optional
             Smoothing parameter of describing variables.
-        bandwidth_w : ndarray of shape (n_w,), optional
+        bandwidth_y : ndarray of shape (n_y,), optional
             Smoothing parameter of conditioning variables.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
@@ -542,17 +542,17 @@ class CKDEClustering:
         --------
         >>> # Prepare data for two clusters
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-        >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-        >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> x_train = np.concatenate((x_train1, x_train2))
-        >>> w_train = np.concatenate((w_train1, w_train2))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_train = np.concatenate((y_train1, y_train2))
+        >>> y_star = np.array([0.0] * n_y)
         >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
         >>> # Fit
-        >>> clustering = CKDEClustering().fit(x_train, w_train, w_star, weights_train)
+        >>> clustering = CKDEClustering().fit(x_train, y_train, y_star, weights_train)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
@@ -560,20 +560,20 @@ class CKDEClustering:
         self.m_train = self.x_train.shape[0]
         self.n_x = self.x_train.shape[1]
 
-        if w_train.ndim != 2:
-            raise ValueError("invalid shape of 'w_train' - should be 2d")
-        if w_train.shape[0] != x_train.shape[0]:
-            raise ValueError("invalid size of 'w_train'")
-        self.w_train = w_train
-        self.n_w = self.w_train.shape[1]
+        if y_train.ndim != 2:
+            raise ValueError("invalid shape of 'y_train' - should be 2d")
+        if y_train.shape[0] != x_train.shape[0]:
+            raise ValueError("invalid size of 'y_train'")
+        self.y_train = y_train
+        self.n_y = self.y_train.shape[1]
 
-        if w_star.ndim != 1:
-            raise ValueError("invalid shape of 'w_star' - should be 1d")
-        if w_star.shape[0] != self.n_w:
+        if y_star.ndim != 1:
+            raise ValueError("invalid shape of 'y_star' - should be 1d")
+        if y_star.shape[0] != self.n_y:
             raise ValueError(
-                f"invalid size of 'w_star'- should contain {self.n_w} values"
+                f"invalid size of 'y_star'- should contain {self.n_y} values"
             )
-        self.w_star = w_star
+        self.y_star = y_star
 
         if weights_train is None:
             self.weights_train = np.full(self.m_train, 1 / self.m_train)
@@ -586,8 +586,8 @@ class CKDEClustering:
                 raise ValueError("'weights_train' should be positive")
             self.weights_train = weights_train / weights_train.sum()
 
-        if bandwidth_x is None or bandwidth_w is None:
-            z_train = np.concatenate((self.x_train, self.w_train), axis=1)
+        if bandwidth_x is None or bandwidth_y is None:
+            z_train = np.concatenate((self.x_train, self.y_train), axis=1)
             if bandwidth_method == "normal_reference":
                 bandwidth = normal_reference(z_train, self.kernel_name)
             elif bandwidth_method == "direct_plugin":
@@ -600,26 +600,26 @@ class CKDEClustering:
             else:
                 raise ValueError("invalid 'bandwidth_method'")
             self.bandwidth_x = bandwidth[: self.n_x]
-            self.bandwidth_w = bandwidth[self.n_x :]
+            self.bandwidth_y = bandwidth[self.n_x :]
         else:
             if bandwidth_x.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth_x' - should be 1d")
-            if bandwidth_w.ndim != 1:
-                raise ValueError("invalid shape of 'bandwidth_w' - should be 1d")
+            if bandwidth_y.ndim != 1:
+                raise ValueError("invalid shape of 'bandwidth_y' - should be 1d")
             if bandwidth_x.shape[0] != self.n_x:
                 raise ValueError(
                     f"invalid size of 'bandwidth_x' - should contain {self.n_x} values"
                 )
-            if bandwidth_w.shape[0] != self.n_w:
+            if bandwidth_y.shape[0] != self.n_y:
                 raise ValueError(
-                    f"invalid size of 'bandwidth_w' - should contain {self.n_w} values"
+                    f"invalid size of 'bandwidth_y' - should contain {self.n_y} values"
                 )
             if not (bandwidth_x > 0).all():
                 raise ValueError("'bandwidth_x' should be positive")
-            if not (bandwidth_w > 0).all():
-                raise ValueError("'bandwidth_w' should be positive")
+            if not (bandwidth_y > 0).all():
+                raise ValueError("'bandwidth_y' should be positive")
             self.bandwidth_x = bandwidth_x
-            self.bandwidth_w = bandwidth_w
+            self.bandwidth_y = bandwidth_y
 
         self.fitted = True
         return self
@@ -654,23 +654,23 @@ class CKDEClustering:
         --------
         >>> # Prepare data for two clusters
         >>> m_train = 100
-        >>> n_x, n_w = 1, 1
+        >>> n_x, n_y = 1, 1
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n_x))
-        >>> w_train1 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train1 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n_x))
-        >>> w_train2 = np.random.normal(0, 1, size=(m_train // 2, n_w))
+        >>> y_train2 = np.random.normal(0, 1, size=(m_train // 2, n_y))
         >>> x_train = np.concatenate((x_train1, x_train2))
-        >>> w_train = np.concatenate((w_train1, w_train2))
-        >>> w_star = np.array([0.0] * n_w)
+        >>> y_train = np.concatenate((y_train1, y_train2))
+        >>> y_star = np.array([0.0] * n_y)
         >>> # Fit
-        >>> clustering = CKDEClustering().fit(x_train, w_train, w_star)
+        >>> clustering = CKDEClustering().fit(x_train, y_train, y_star)
         >>> labels_pred = clustering.predict()
         """
         cond_weights_train = compute_d(
-            self.w_train,
+            self.y_train,
             self.weights_train,
-            self.w_star,
-            self.bandwidth_w,
+            self.y_star,
+            self.bandwidth_y,
             self.kernel_name,
         )
 
