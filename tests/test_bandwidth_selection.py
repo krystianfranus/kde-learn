@@ -13,68 +13,78 @@ from kdelearn.bandwidth_selection import (
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
 def test_normal_reference(x_train, kernel_name):
-    bandwidth = normal_reference(x_train, kernel_name)
+    weights_train = None
+    bandwidth = normal_reference(x_train, weights_train, kernel_name)
     assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
 def test_normal_reference_with_invalid_array():
     x_train = np.random.normal(0, 1, size=(100,))
+    weights_train = None
     with pytest.raises(ValueError):
-        normal_reference(x_train, "gaussian")
+        normal_reference(x_train, weights_train, "gaussian")
 
 
 def test_normal_reference_with_invalid_kernel_name(x_train):
+    weights_train = None
     with pytest.raises(ValueError):
-        normal_reference(x_train, "abc")
+        normal_reference(x_train, weights_train, "abc")
 
 
 @pytest.mark.parametrize(
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
 def test_direct_plugin(x_train, kernel_name):
-    bandwidth = direct_plugin(x_train, kernel_name)
+    weights_train = None
+    bandwidth = direct_plugin(x_train, weights_train, kernel_name)
     assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
 def test_direct_plugin_with_invalid_array():
+    weights_train = None
     x_train = np.random.normal(0, 1, size=(100,))
     with pytest.raises(ValueError):
-        direct_plugin(x_train, "gaussian")
+        direct_plugin(x_train, weights_train, "gaussian")
 
 
 def test_direct_plugin_with_invalid_kernel_name(x_train):
+    weights_train = None
     with pytest.raises(ValueError):
-        direct_plugin(x_train, "abc")
+        direct_plugin(x_train, weights_train, "abc")
 
 
 def test_direct_plugin_with_invalid_stage(x_train):
+    weights_train = None
     with pytest.raises(ValueError):
-        direct_plugin(x_train, "gaussian", 4)
+        direct_plugin(x_train, weights_train, "gaussian", 4)
 
     with pytest.raises(ValueError):
-        direct_plugin(x_train, "gaussian", 1.5)
+        direct_plugin(x_train, weights_train, "gaussian", 1.5)
 
 
 @pytest.mark.parametrize(
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
 def test_ste_plugin(x_train, kernel_name):
-    bandwidth = ste_plugin(x_train, kernel_name)
+    weights_train = None
+    bandwidth = ste_plugin(x_train, weights_train, kernel_name)
     assert (bandwidth > 0).all()
     assert x_train.shape[1] == bandwidth.shape[0]
 
 
 def test_ste_plugin_with_invalid_array():
     x_train = np.random.normal(0, 1, size=(100,))
+    weights_train = None
     with pytest.raises(ValueError):
-        ste_plugin(x_train, "gaussian")
+        ste_plugin(x_train, weights_train, "gaussian")
 
 
 def test_ste_plugin_with_invalid_kernel_name(x_train):
+    weights_train = None
     with pytest.raises(ValueError):
-        ste_plugin(x_train, "abc")
+        ste_plugin(x_train, weights_train, "abc")
 
 
 @pytest.mark.parametrize(

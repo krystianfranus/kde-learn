@@ -16,6 +16,7 @@ kernel_properties = {
 
 def normal_reference(
     x_train: ndarray,
+    weights_train: Optional[ndarray] = None,
     kernel_name: str = "gaussian",
 ) -> ndarray:
     """AMISE-optimal bandwidth for the (assuming) gaussian density.
@@ -26,6 +27,8 @@ def normal_reference(
     ----------
     x_train : ndarray of shape (m_train, n)
         Data points as an array containing data with float type.
+    weights_train : ndarray of shape (m_train,), optional
+        Weights of data points. If None, all points are equally weighted.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
@@ -37,7 +40,7 @@ def normal_reference(
     Examples
     --------
     >>> x_train = np.random.normal(0, 1, size=(100, 1))
-    >>> bandwidth = normal_reference(x_train, "gaussian")
+    >>> bandwidth = normal_reference(x_train, kernel_name="gaussian")
 
     References
     ----------
@@ -51,10 +54,13 @@ def normal_reference(
         raise ValueError(f"invalid 'kernel_name' - choose one of {available_kernels}")
 
     m_train = x_train.shape[0]
-    n = x_train.shape[1]
-    std_x = np.std(x_train, axis=0, ddof=1)
+    # Unbiased weighted standard deviation
+    x_mean = np.average(x_train, weights=weights_train, axis=0)
+    x_var = np.average((x_train - x_mean) ** 2, weights=weights_train, axis=0)
+    weighted_std_x = np.sqrt(m_train / (m_train - 1) * x_var)
+
     wk, uk = kernel_properties[kernel_name]
-    zf = n * (n + 2) / (2 ** (n + 2) * np.pi ** (0.5 * n) * std_x**5)
+    zf = 3 / (8 * np.sqrt(np.pi) * weighted_std_x**5)
 
     bandwidth = (wk / (uk**2 * zf * m_train)) ** 0.2
     return bandwidth
@@ -62,6 +68,7 @@ def normal_reference(
 
 def direct_plugin(
     x_train: ndarray,
+    weights_train: Optional[ndarray] = None,
     kernel_name: str = "gaussian",
     stage: int = 2,
 ):
@@ -74,6 +81,8 @@ def direct_plugin(
     ----------
     x_train : ndarray of shape (m_train, n)
         Data points as an array containing data with float type.
+    weights_train : ndarray of shape (m_train,), optional
+        Weights of data points. If None, all points are equally weighted.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
     stage : int, default=2
@@ -87,7 +96,7 @@ def direct_plugin(
     Examples
     --------
     >>> x_train = np.random.normal(0, 1, size=(100, 1))
-    >>> bandwidth = direct_plugin(x_train, "gaussian", 2)
+    >>> bandwidth = direct_plugin(x_train, kernel_name="gaussian", stage=2)
 
     References
     ----------
@@ -107,13 +116,16 @@ def direct_plugin(
         raise ValueError("invalid 'stage' - should be greater than 0 and less than 4")
 
     m_train = x_train.shape[0]
-    n = x_train.shape[1]
-    std_x = np.std(x_train, axis=0, ddof=1)
+    # Unbiased weighted standard deviation
+    x_mean = np.average(x_train, weights=weights_train, axis=0)
+    x_var = np.average((x_train - x_mean) ** 2, weights=weights_train, axis=0)
+    weighted_std_x = np.sqrt(m_train / (m_train - 1) * x_var)
     wk, uk = kernel_properties[kernel_name]
 
     def _psi(r):
         n = (-1) ** (0.5 * r) * np.math.factorial(r)
-        d = (2 * std_x) ** (r + 1) * np.math.factorial(int(0.5 * r)) * np.sqrt(np.pi)
+        tmp = np.math.factorial(int(0.5 * r)) * np.sqrt(np.pi)
+        d = (2 * weighted_std_x) ** (r + 1) * tmp
         return n / d
 
     def _bw(gd, zf, b):
@@ -131,12 +143,13 @@ def direct_plugin(
         bw = _bw(gd_at_zero, zf, r + 2)
         zf = isdd(x_train, bw, r)
 
-    bandwidth = ((n * wk) / (uk**2 * zf * m_train)) ** (1 / (n + 4))
+    bandwidth = (wk / (uk**2 * zf * m_train)) ** 0.2
     return bandwidth
 
 
 def ste_plugin(
     x_train: ndarray,
+    weights_train: Optional[ndarray] = None,
     kernel_name: str = "gaussian",
 ):
     """Solve-the-equation plug-in method.
@@ -147,6 +160,8 @@ def ste_plugin(
     ----------
     x_train : ndarray of shape (m_train, n)
         Data points as an array containing data with float type.
+    weights_train : ndarray of shape (m_train,), optional
+        Weights of data points. If None, all points are equally weighted.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
 
@@ -158,7 +173,7 @@ def ste_plugin(
     Examples
     --------
     >>> x_train = np.random.normal(0, 1, size=(100, 1))
-    >>> bandwidth = ste_plugin(x_train, "gaussian")
+    >>> bandwidth = ste_plugin(x_train, kernel_name="gaussian")
 
     References
     ----------
@@ -172,22 +187,24 @@ def ste_plugin(
         raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
 
     m_train = x_train.shape[0]
-    n = x_train.shape[1]
-    std_x = np.std(x_train, axis=0, ddof=1)
+    # Unbiased weighted standard deviation
+    x_mean = np.average(x_train, weights=weights_train, axis=0)
+    x_var = np.average((x_train - x_mean) ** 2, weights=weights_train, axis=0)
+    weighted_std_x = np.sqrt(m_train / (m_train - 1) * x_var)
     wk, uk = kernel_properties[kernel_name]
 
     def eq(h):
-        a = 0.920 * std_x * m_train ** (-1 / 7)
-        b = 0.912 * std_x * m_train ** (-1 / 9)
+        a = 0.920 * weighted_std_x * m_train ** (-1 / 7)
+        b = 0.912 * weighted_std_x * m_train ** (-1 / 9)
         sda = isdd(x_train, a, 4)
         tdb = -isdd(x_train, b, 6)
 
         alpha2 = 1.357 * (sda / tdb) ** (1 / 7) * h ** (5 / 7)
         sdalpha2 = isdd(x_train, alpha2, 4)
-        return ((n * wk) / (uk**2 * sdalpha2 * m_train)) ** (1 / (n + 4)) - h
+        return (wk / (uk**2 * sdalpha2 * m_train)) ** 0.2 - h
 
     # Solve the equation using secant method
-    bandwidth0 = normal_reference(x_train, kernel_name)
+    bandwidth0 = normal_reference(x_train, weights_train, kernel_name)
     bandwidth = newton(eq, bandwidth0)
     return bandwidth
 
@@ -245,7 +262,7 @@ def ml_cv(
         weights_train = np.full(m_train, 1 / m_train)
 
     # Minimize the equation with nelder-mead method
-    bandwidth0 = normal_reference(x_train, kernel_name)
+    bandwidth0 = normal_reference(x_train, weights_train, kernel_name)
     smallest_pos_num = np.nextafter(0, 1)
 
     def eq(h):
