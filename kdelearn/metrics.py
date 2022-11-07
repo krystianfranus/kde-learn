@@ -173,7 +173,7 @@ def density_silhouette(
 
     # Prepare bandwidths for each cluster
     if share_bandwidth:
-        bandwidth = normal_reference(x_train, kernel_name)
+        bandwidth = normal_reference(x_train, None, kernel_name)
         cluster_bandwidths = np.full((n_clusters, n), bandwidth)
         valid_bandwidths = np.full(n_clusters, True)
     else:
@@ -182,7 +182,9 @@ def density_silhouette(
         for idx, label in enumerate(ulabels):
             if cluster_sizes[idx] != 1:
                 x_train_tmp = x_train[labels_train == label]
-                cluster_bandwidths[idx] = normal_reference(x_train_tmp, kernel_name)
+                cluster_bandwidths[idx] = normal_reference(
+                    x_train_tmp, None, kernel_name
+                )
                 valid_bandwidths[idx] = True
     valid_bandwidths = valid_bandwidths[:, None]
     bandwidth_mean = np.mean(cluster_bandwidths, axis=0, where=valid_bandwidths)

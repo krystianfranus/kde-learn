@@ -131,12 +131,16 @@ class CKDE:
         if bandwidth_x is None or bandwidth_y is None:
             z_train = np.concatenate((self.x_train, self.y_train), axis=1)
             if bandwidth_method == "normal_reference":
-                bandwidth = normal_reference(z_train, self.kernel_name)
+                bandwidth = normal_reference(
+                    z_train, self.weights_train, self.kernel_name
+                )
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                bandwidth = direct_plugin(z_train, self.kernel_name, stage)
+                bandwidth = direct_plugin(
+                    z_train, self.weights_train, self.kernel_name, stage
+                )
             elif bandwidth_method == "ste_plugin":
-                bandwidth = ste_plugin(z_train, self.kernel_name)
+                bandwidth = ste_plugin(z_train, self.weights_train, self.kernel_name)
             elif bandwidth_method == "ml_cv":
                 bandwidth = ml_cv(z_train, self.kernel_name, self.weights_train)
             else:

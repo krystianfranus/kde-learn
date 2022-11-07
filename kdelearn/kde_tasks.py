@@ -141,12 +141,18 @@ class KDEClassification:
 
         if share_bandwidth:
             if self.bandwidth_method == "normal_reference":
-                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+                self.bandwidth = normal_reference(
+                    self.x_train, self.weights_train, self.kernel_name
+                )
             elif self.bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
+                self.bandwidth = direct_plugin(
+                    self.x_train, self.weights_train, self.kernel_name, stage
+                )
             elif self.bandwidth_method == "ste_plugin":
-                self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
+                self.bandwidth = ste_plugin(
+                    self.x_train, self.weights_train, self.kernel_name
+                )
             elif self.bandwidth_method == "ml_cv":
                 self.bandwidth = ml_cv(
                     self.x_train, self.kernel_name, self.weights_train
@@ -482,14 +488,22 @@ class KDEClustering:
 
         if bandwidth is None:
             if bandwidth_method == "normal_reference":
-                self.bandwidth = normal_reference(self.x_train, self.kernel_name)
+                self.bandwidth = normal_reference(
+                    self.x_train, self.weights_train, self.kernel_name
+                )
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                self.bandwidth = direct_plugin(self.x_train, self.kernel_name, stage)
+                self.bandwidth = direct_plugin(
+                    self.x_train, self.weights_train, self.kernel_name, stage
+                )
             elif bandwidth_method == "ste_plugin":
-                self.bandwidth = ste_plugin(self.x_train, self.kernel_name)
+                self.bandwidth = ste_plugin(
+                    self.x_train, self.weights_train, self.kernel_name
+                )
             elif bandwidth_method == "ml_cv":
-                self.bandwidth = ml_cv(self.x_train, self.kernel_name)
+                self.bandwidth = ml_cv(
+                    self.x_train, self.kernel_name, self.weights_train
+                )
             else:
                 raise ValueError("invalid 'bandwidth_method'")
         else:
