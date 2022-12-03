@@ -283,6 +283,7 @@ def compute_unbiased_kde(
 def gradient_ascent(
     double[:, :] x_train,
     double[:] weights_train,
+    double[:, :] x_test,
     double[:] bandwidth,
     double epsilon,
 ):
@@ -290,9 +291,10 @@ def gradient_ascent(
         raise ValueError("invalid value of 'epsilon' - should be positive")
 
     cdef Py_ssize_t m_train = x_train.shape[0]
+    cdef Py_ssize_t m_test = x_test.shape[0]
     cdef Py_ssize_t n = x_train.shape[1]
 
-    x_k = np.copy(x_train)
+    x_k = np.copy(x_test)
     cdef double[:, :] x_k_view = x_k
     cdef double[:] x_k_prev_view
 
@@ -330,6 +332,7 @@ def gradient_ascent(
 def mean_shift(
     double[:, :] x_train,
     double[:] weights_train,
+    double[:, :] x_test,
     double[:] bandwidth,
     double epsilon,
 ):
@@ -337,16 +340,17 @@ def mean_shift(
         raise ValueError("invalid value of 'epsilon' - should be positive")
 
     cdef Py_ssize_t m_train = x_train.shape[0]
+    cdef Py_ssize_t m_test = x_test.shape[0]
     cdef Py_ssize_t n = x_train.shape[1]
 
-    x_k = np.copy(x_train)
+    x_k = np.copy(x_test)
     cdef double[:, :] x_k_view = x_k
     cdef double[:] x_k_prev_view
 
     cdef Py_ssize_t i1, j1, i2, j2
     cdef double numerator, denominator, tmp, dist
 
-    for i1 in range(m_train):
+    for i1 in range(m_test):
         while True:
             x_k_prev_view = np.copy(x_k_view[i1])
 

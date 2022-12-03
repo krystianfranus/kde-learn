@@ -4,13 +4,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import (
-    direct_plugin,
-    kernel_properties,
-    ml_cv,
-    normal_reference,
-    ste_plugin,
-)
+from .bandwidth_selection import direct_plugin, kernel_properties, normal_reference
 from .ckde import CKDE
 from .cutils import assign_labels, compute_d, gradient_ascent, mean_shift
 
@@ -59,6 +53,8 @@ class CKDEClassification:
         labels_train: ndarray,
         weights_train: Optional[ndarray] = None,
         share_bandwidth: bool = False,
+        bandwidths_x: Optional[ndarray] = None,
+        bandwidths_y: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
         prior_prob: Optional[ndarray] = None,
         **kwargs,
@@ -82,6 +78,10 @@ class CKDEClassification:
         share_bandwidth : bool, default=False
             Determines whether all classes should have common bandwidth.
             If False, estimator of each class gets its own bandwidth.
+        bandwidths_x : ndarray of shape (n_classes, n_x), optional
+            Smoothing parameter of describing variables for each class.
+        bandwidths_y : ndarray of shape (n_classes, n_y), optional
+            Smoothing parameter of conditioning variables for each class.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
             Name of bandwidth selection method used to compute smoothing parameter.
@@ -119,21 +119,19 @@ class CKDEClassification:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
         self.m_train = self.x_train.shape[0]
-        self.n_x = self.x_train.shape[1]
+        n_x = self.x_train.shape[1]
 
         if y_train.ndim != 2:
             raise ValueError("invalid shape of 'y_train' - should be 2d")
         if y_train.shape[0] != x_train.shape[0]:
             raise ValueError("invalid size of 'y_train'")
         self.y_train = y_train
-        self.n_y = self.y_train.shape[1]
+        n_y = self.y_train.shape[1]
 
         if y_star.ndim != 1:
             raise ValueError("invalid shape of 'y_star' - should be 1d")
-        if y_star.shape[0] != self.n_y:
-            raise ValueError(
-                f"invalid size of 'y_star'- should contain {self.n_y} values"
-            )
+        if y_star.shape[0] != n_y:
+            raise ValueError(f"invalid size of 'y_star'- should contain {n_y} values")
         self.y_star = y_star
 
         if labels_train.ndim != 1:
@@ -153,32 +151,36 @@ class CKDEClassification:
                 raise ValueError("'weights_train' must be positive")
             self.weights_train = weights_train / weights_train.sum()
 
-        self.bandwidth_x = None
-        self.bandwidth_y = None
-        self.bandwidth_method = bandwidth_method
+        self.ulabels = np.unique(labels_train)  # Sorted unique labels
+        self.n_classes = self.ulabels.shape[0]
 
+        self.bandwidth_method = bandwidth_method
         if share_bandwidth:
-            z_train = np.concatenate((self.x_train, self.y_train), axis=1)
             if self.bandwidth_method == "normal_reference":
-                bandwidth = normal_reference(
-                    z_train, self.weights_train, self.kernel_name
+                bandwidth_y = normal_reference(y_train, weights_train, self.kernel_name)
+                bandwidth_x = normal_reference(
+                    self.x_train, weights_train, self.kernel_name
                 )
             elif self.bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                bandwidth = direct_plugin(
-                    z_train, self.weights_train, self.kernel_name, stage
+                bandwidth_y = direct_plugin(
+                    y_train, weights_train, self.kernel_name, stage
                 )
-            elif self.bandwidth_method == "ste_plugin":
-                bandwidth = ste_plugin(z_train, self.weights_train, self.kernel_name)
-            elif self.bandwidth_method == "ml_cv":
-                bandwidth = ml_cv(z_train, self.kernel_name, self.weights_train)
+                bandwidth_x = direct_plugin(
+                    self.x_train, weights_train, self.kernel_name, stage
+                )
             else:
                 raise ValueError("invalid 'bandwidth_method'")
-            self.bandwidth_x = bandwidth[: self.n_x]
-            self.bandwidth_y = bandwidth[self.n_x :]
+            self.bandwidths_x = np.full((self.n_classes, n_x), bandwidth_x)
+            self.bandwidths_y = np.full((self.n_classes, n_y), bandwidth_y)
+        else:
+            if bandwidths_x is not None and bandwidths_y is not None:
+                self.bandwidths_x = bandwidths_x
+                self.bandwidths_y = bandwidths_y
+            else:
+                self.bandwidths_x = np.full((self.n_classes,), bandwidths_x)
+                self.bandwidths_y = np.full((self.n_classes,), bandwidths_y)
 
-        self.ulabels = np.unique(labels_train)  # Sorted unique labels
-        self.n_classes = self.ulabels.shape[0]
         if prior_prob is None:
             self.prior = self._compute_prior()
         else:
@@ -304,12 +306,12 @@ class CKDEClassification:
                 self.y_train[mask],
                 self.y_star,
                 self.weights_train[mask],
-                self.bandwidth_x,
-                self.bandwidth_y,
+                self.bandwidths_x[idx],
+                self.bandwidths_y[idx],
                 self.bandwidth_method,
                 **self.kwargs,
             )
-            scores[:, idx], _ = ckde.pdf(x_test)
+            scores[:, idx] = ckde.pdf(x_test)
 
         if np.any(np.all(scores == 0, axis=1)):
             warnings.warn(
@@ -419,11 +421,11 @@ class CKDEOutliersDetection:
             bandwidth_method,
             **kwargs,
         )
-        scores, cond_weights_train = self.ckde.pdf(x_train)
+        scores = self.ckde.pdf(x_train)
 
         idx_sorted = np.argsort(scores)
         scores_ord = scores[idx_sorted]
-        cond_weights_train_ord = cond_weights_train[idx_sorted]
+        cond_weights_train_ord = self.ckde.cond_weights_train[idx_sorted]
 
         cond_weights_train_ord_cumsum = np.cumsum(cond_weights_train_ord)
         k = np.where(cond_weights_train_ord_cumsum > r)[0][0] - 1
@@ -473,7 +475,7 @@ class CKDEOutliersDetection:
         if len(x_test.shape) != 2:
             raise ValueError("invalid shape of 'x_test' - should be 2d")
 
-        scores, _ = self.ckde.pdf(x_test)
+        scores = self.ckde.pdf(x_test)
         labels_pred = np.where(scores <= self.threshold, 1, 0)
         return labels_pred
 
@@ -566,7 +568,7 @@ class CKDEClustering:
 
         if y_train.ndim != 2:
             raise ValueError("invalid shape of 'y_train' - should be 2d")
-        if y_train.shape[0] != x_train.shape[0]:
+        if y_train.shape[0] != self.x_train.shape[0]:
             raise ValueError("invalid size of 'y_train'")
         self.y_train = y_train
         self.n_y = self.y_train.shape[1]
@@ -598,13 +600,7 @@ class CKDEClustering:
                 )
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                bandwidth = direct_plugin(
-                    z_train, self.weights_train, self.kernel_name, stage
-                )
-            elif bandwidth_method == "ste_plugin":
-                bandwidth = ste_plugin(z_train, self.weights_train, self.kernel_name)
-            elif bandwidth_method == "ml_cv":
-                bandwidth = ml_cv(z_train, self.kernel_name, self.weights_train)
+                bandwidth = direct_plugin(z_train, self.kernel_name, stage)
             else:
                 raise ValueError("invalid 'bandwidth_method'")
             self.bandwidth_x = bandwidth[: self.n_x]
@@ -634,6 +630,7 @@ class CKDEClustering:
 
     def predict(
         self,
+        x_test: ndarray,
         algorithm: str = "mean_shift",
         epsilon: float = 1e-8,
         delta: float = 1e-3,  # 1e-1
@@ -642,6 +639,9 @@ class CKDEClustering:
 
         Parameters
         ----------
+        x_test : ndarray of shape (m_test, n_x)
+            Grid data points (describing variables) as an array containing data with
+            float type.
         algorithm : {'gradient_ascent', 'mean_shift'}, default='mean_shift'
             Name of clustering algorithm.
         epsilon : float, default=1e-8
@@ -684,11 +684,11 @@ class CKDEClustering:
 
         if algorithm == "gradient_ascent":
             x_k = gradient_ascent(
-                self.x_train, cond_weights_train, self.bandwidth_x, epsilon
+                self.x_train, cond_weights_train, x_test, self.bandwidth_x, epsilon
             )
         elif algorithm == "mean_shift":
             x_k = mean_shift(
-                self.x_train, cond_weights_train, self.bandwidth_x, epsilon
+                self.x_train, cond_weights_train, x_test, self.bandwidth_x, epsilon
             )
         else:
             raise ValueError("invalid 'algorithm'")

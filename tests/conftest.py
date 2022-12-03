@@ -3,19 +3,22 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def x_train():
-    x_train = np.random.normal(0, 1, size=(100, 1))
-    return x_train
+def train_data():
+    m_train, n = 100, 1
+    x_train = np.random.normal(0, 1, size=(m_train, n))
+    weights_train = np.full((m_train,), 1 / m_train)
+    return x_train, weights_train
 
 
 @pytest.fixture(scope="session")
-def x_test():
-    x_test = np.random.normal(0, 1, size=(100, 1))
+def test_data():
+    m_test, n = 100, 1
+    x_test = np.random.normal(0, 1, size=(m_test, n))
     return x_test
 
 
 @pytest.fixture(scope="session")
-def data_classification():
+def classification_data():
     m_train, n = 100, 1
     m_test = m_train
 
@@ -53,7 +56,7 @@ def data_outliers_detection():
 
 
 @pytest.fixture(scope="session")
-def data_clustering():
+def clustering_data():
     m_train, n = 100, 1
     m_train1 = m_train // 2
     x_train1 = np.random.normal(0, 1, size=(m_train1, n))

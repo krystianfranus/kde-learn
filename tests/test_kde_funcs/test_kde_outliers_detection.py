@@ -7,13 +7,15 @@ from kdelearn.kde_tasks import KDEOutliersDetection
 @pytest.mark.parametrize(
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
-@pytest.mark.parametrize(
-    "bandwidth_method", ["normal_reference", "direct_plugin", "ste_plugin", "ml_cv"]
-)
-def test_kde_outliers_detector(x_train, x_test, kernel_name, bandwidth_method):
+@pytest.mark.parametrize("bandwidth_method", ["normal_reference", "direct_plugin"])
+def test_kde_outliers_detector(train_data, test_data, kernel_name, bandwidth_method):
+    x_train, weights_train = train_data
+    x_test = test_data
+
     outliers_detector = KDEOutliersDetection(kernel_name)
     outliers_detector = outliers_detector.fit(
         x_train,
+        weights_train,
         bandwidth_method=bandwidth_method,
     )
     labels_pred = outliers_detector.predict(x_test)
@@ -23,19 +25,12 @@ def test_kde_outliers_detector(x_train, x_test, kernel_name, bandwidth_method):
     assert labels_pred.ndim == 1
 
 
-def test_kde_outliers_detector_with_weights_train(x_train):
-    m_train = x_train.shape[0]
-    weights_train = np.ones((m_train,))
-    outliers_detector = KDEOutliersDetection()
-    outliers_detector.fit(x_train, weights_train=weights_train)
-    assert outliers_detector.fitted
-
-
-def test_kde_outliers_detector_with_fixed_bandwidth(x_train):
+def test_kde_outliers_detector_with_fixed_bandwidth(train_data):
+    x_train, weights_train = train_data
     n = x_train.shape[1]
     bandwidth = np.array([0.5] * n)
     outliers_detector = KDEOutliersDetection()
-    outliers_detector.fit(x_train, bandwidth=bandwidth)
+    outliers_detector.fit(x_train, weights_train, bandwidth=bandwidth)
     assert outliers_detector.fitted
 
 
@@ -44,7 +39,9 @@ def test_kde_outliers_detector_invalid():
         KDEOutliersDetection("abc")
 
 
-def test_kde_outliers_detector_fit_invalid(x_train):
+def test_kde_outliers_detector_fit_invalid(train_data):
+    x_train, _ = train_data
+
     m_train = x_train.shape[0]
     outliers_detector = KDEOutliersDetection()
 
@@ -76,7 +73,10 @@ def test_kde_outliers_detector_fit_invalid(x_train):
         outliers_detector.fit(x_train, r=r)
 
 
-def test_kde_outliers_detector_predict_invalid(x_train, x_test):
+def test_kde_outliers_detector_predict_invalid(train_data, test_data):
+    x_train, weights_train = train_data
+    x_test = test_data
+
     outliers_detector = KDEOutliersDetection()
 
     # No fitting

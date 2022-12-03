@@ -5,17 +5,15 @@ from kdelearn.kde_tasks import KDEClustering
 
 
 @pytest.mark.parametrize("algorithm", ["gradient_ascent", "mean_shift"])
-@pytest.mark.parametrize(
-    "bandwidth_method", ["normal_reference", "direct_plugin", "ste_plugin", "ml_cv"]
-)
-def test_kde_clustering(data_clustering, bandwidth_method, algorithm):
-    x_train, _ = data_clustering
+@pytest.mark.parametrize("bandwidth_method", ["normal_reference", "direct_plugin"])
+def test_kde_clustering(clustering_data, bandwidth_method, algorithm):
+    x_train, _ = clustering_data
     clustering = KDEClustering()
     clustering = clustering.fit(
         x_train,
         bandwidth_method=bandwidth_method,
     )
-    labels_pred = clustering.predict(algorithm)
+    labels_pred = clustering.predict(x_train, algorithm)
     assert clustering.fitted
     assert clustering.bandwidth.ndim == 1
     assert (clustering.bandwidth > 0).all()
@@ -23,8 +21,8 @@ def test_kde_clustering(data_clustering, bandwidth_method, algorithm):
     assert labels_pred.ndim == 1
 
 
-def test_kde_clustering_with_fixed_bandwidth(data_clustering):
-    x_train, _ = data_clustering
+def test_kde_clustering_with_fixed_bandwidth(clustering_data):
+    x_train, _ = clustering_data
     n = x_train.shape[1]
     bandwidth = np.array([0.5] * n)
     clustering = KDEClustering()
@@ -34,8 +32,8 @@ def test_kde_clustering_with_fixed_bandwidth(data_clustering):
     assert (clustering.bandwidth > 0).all()
 
 
-def test_kde_clustering_fit_invalid(data_clustering):
-    x_train, _ = data_clustering
+def test_kde_clustering_fit_invalid(clustering_data):
+    x_train, _ = clustering_data
     n = x_train.shape[1]
     clustering = KDEClustering()
 
@@ -67,14 +65,14 @@ def test_kde_clustering_fit_invalid(data_clustering):
         )
 
 
-def test_kde_clustering_predict_invalid(data_clustering):
-    x_train, _ = data_clustering
+def test_kde_clustering_predict_invalid(clustering_data):
+    x_train, _ = clustering_data
     clustering = KDEClustering()
 
     # No fitting
     with pytest.raises(RuntimeError):
-        clustering.predict("abc")
+        clustering.predict(x_train, "abc")
 
     # Invalid value of algorithm
     with pytest.raises(ValueError):
-        KDEClustering().fit(x_train).predict("abc")
+        KDEClustering().fit(x_train).predict(x_train, "abc")

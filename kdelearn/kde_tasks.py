@@ -4,13 +4,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import (
-    direct_plugin,
-    kernel_properties,
-    ml_cv,
-    normal_reference,
-    ste_plugin,
-)
+from .bandwidth_selection import direct_plugin, kernel_properties, normal_reference
 from .cutils import assign_labels, gradient_ascent, mean_shift
 from .kde import KDE
 
@@ -70,6 +64,7 @@ class KDEClassification:
         weights_train: Optional[ndarray] = None,
         share_bandwidth: bool = False,
         bandwidth_method: str = "normal_reference",
+        bandwidths: Optional[ndarray] = None,
         prior_prob: Optional[ndarray] = None,
         **kwargs,
     ):
@@ -78,17 +73,21 @@ class KDEClassification:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points as an array containing data with float type.
+            Data points containing data with float type for constructing the
+            classifier.
         labels_train : ndarray of shape (m_train,)
-            Labels of data points as an array containing data with int type.
+            Labels of data points containing data with int type.
         weights_train : ndarray of shape (m_train,), default=None
-            Weights for data points. If None, all points are equally weighted.
+            Weights for data points. If None, all data points are equally weighted.
         share_bandwidth : bool, default=False
             Determines whether all classes should have common bandwidth.
             If False, estimator of each class gets its own bandwidth.
+        bandwidths : ndarray of shape (n_classes, n), optional
+            Smoothing parameters for each class.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method used to compute smoothing parameter.
+            Name of bandwidth selection method used to compute `bandwidths` for each
+            class when it is not given explicitly.
         prior_prob : ndarray of shape (n_classes,), default=None
             Prior probabilities of each class. If None, all classes are equally
             probable.
@@ -118,6 +117,7 @@ class KDEClassification:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
         self.m_train = self.x_train.shape[0]
+        n = self.x_train.shape[1]
 
         if labels_train.ndim != 1:
             raise ValueError("invalid shape of 'labels_train' - should be 1d")
@@ -132,36 +132,40 @@ class KDEClassification:
                 raise ValueError("invalid shape of 'weights_train' - should be 1d")
             if weights_train.shape[0] != x_train.shape[0]:
                 raise ValueError("invalid size of 'weights_train'")
-            if not (weights_train > 0).all():
-                raise ValueError("'weights_train' must be positive")
+            if not (weights_train >= 0).all():
+                raise ValueError("'weights_train' should be non negative")
             self.weights_train = weights_train / weights_train.sum()
-
-        self.bandwidth = None
-        self.bandwidth_method = bandwidth_method
-
-        if share_bandwidth:
-            if self.bandwidth_method == "normal_reference":
-                self.bandwidth = normal_reference(
-                    self.x_train, self.weights_train, self.kernel_name
-                )
-            elif self.bandwidth_method == "direct_plugin":
-                stage = kwargs["stage"] if "stage" in kwargs else 2
-                self.bandwidth = direct_plugin(
-                    self.x_train, self.weights_train, self.kernel_name, stage
-                )
-            elif self.bandwidth_method == "ste_plugin":
-                self.bandwidth = ste_plugin(
-                    self.x_train, self.weights_train, self.kernel_name
-                )
-            elif self.bandwidth_method == "ml_cv":
-                self.bandwidth = ml_cv(
-                    self.x_train, self.kernel_name, self.weights_train
-                )
-            else:
-                raise ValueError("invalid 'bandwidth_method'")
 
         self.ulabels = np.unique(labels_train)  # Sorted unique labels
         self.n_classes = self.ulabels.shape[0]
+
+        self.bandwidth_method = bandwidth_method
+        if share_bandwidth:
+            if self.bandwidth_method == "normal_reference":
+                bandwidth = normal_reference(
+                    self.x_train,
+                    self.weights_train,
+                    self.kernel_name,
+                )
+            elif self.bandwidth_method == "direct_plugin":
+                stage = kwargs["stage"] if "stage" in kwargs else 2
+                bandwidth = direct_plugin(
+                    self.x_train,
+                    self.weights_train,
+                    self.kernel_name,
+                    stage,
+                )
+            else:
+                raise ValueError("invalid 'bandwidth_method'")
+            self.bandwidths = np.full((self.n_classes, n), bandwidth)
+        else:
+            if bandwidths is not None:
+                self.bandwidths = bandwidths
+            else:
+                self.bandwidths = np.full(
+                    (self.n_classes,), bandwidths
+                )  # TODO: add validation
+
         if prior_prob is None:
             self.prior = self._compute_prior()
         else:
@@ -185,12 +189,12 @@ class KDEClassification:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Grid data points as an array containing data with float type.
+            Argument of the classifier - data points containing data with float type.
 
         Returns
         -------
         labels_pred : ndarray of shape (m_test,)
-            Predicted labels as an array containing data with int type.
+            Predicted labels containing data with int type.
 
         Examples
         --------
@@ -225,7 +229,7 @@ class KDEClassification:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Grid data points as an array containing data with float type.
+            Argument of the classifier - data points containing data with float type.
 
         Returns
         -------
@@ -273,7 +277,7 @@ class KDEClassification:
             kde = KDE(self.kernel_name).fit(
                 self.x_train[mask],
                 self.weights_train[mask],
-                self.bandwidth,
+                self.bandwidths[idx],
                 self.bandwidth_method,
                 **self.kwargs,
             )
@@ -330,15 +334,15 @@ class KDEOutliersDetection:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points as an array containing data with float type.
+            Data points containing data with float type for constructing the detector.
         weights_train : ndarray of shape (m_train,), default=None
-            Weights for data points. If None is passed, all points are equally weighted.
+            Weights of data points. If None, all data points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
-            Smoothing parameter.
+            Smoothing parameter for scaling the estimator.
         bandwidth_method : {'normal_reference', 'direct_plugin'}, \
                 default='normal_reference'
-            Name of bandwidth selection method used to compute smoothing parameter
-            when `bandwidth` is not given explicitly.
+            Name of bandwidth selection method used to compute `bandwidth` when it is
+            not given explicitly.
         r : float, default=0.1
             Threshold separating outliers and inliers.
 
@@ -376,13 +380,12 @@ class KDEOutliersDetection:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Grid data points as a 2D array containing data with float type.
+            Argument of the detector - data points containing data with float type.
 
         Returns
         -------
         labels_pred : ndarray of shape (m_test,)
-            Predicted labels (0 - inlier, 1 - outlier) as an array containing data
-            with int type.
+            Predicted labels (0 - inlier, 1 - outlier) containing data with int type.
 
         Examples
         --------
@@ -442,15 +445,15 @@ class KDEClustering:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points as an array containing data with float type.
+            Data points containing data with float type for constructing the model.
         weights_train : ndarray of shape (m_train,), optional
-            Weights of data points. If None, all points are equally weighted.
+            Weights of data points. If None, all data points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
-            Smoothing parameter.
+            Smoothing parameter for scaling the estimator.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method used to compute smoothing parameter
-            when `bandwidth` is not given explicitly.
+            Name of bandwidth selection method used to compute `bandwidth` when it is
+            not given explicitly.
 
         Returns
         -------
@@ -472,46 +475,43 @@ class KDEClustering:
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        self.m_train = self.x_train.shape[0]
-        self.n = self.x_train.shape[1]
+        m_train = self.x_train.shape[0]
+        n = self.x_train.shape[1]
 
         if weights_train is None:
-            self.weights_train = np.full(self.m_train, 1 / self.m_train)
+            self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if weights_train.ndim != 1:
                 raise ValueError("invalid shape of 'weights_train' - should be 1d")
             if weights_train.shape[0] != x_train.shape[0]:
                 raise ValueError("invalid size of 'weights_train'")
-            if not (weights_train > 0).all():
-                raise ValueError("'weights_train' must be positive")
+            if not (weights_train >= 0).all():
+                raise ValueError("'weights_train' should be non negative")
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
             if bandwidth_method == "normal_reference":
                 self.bandwidth = normal_reference(
-                    self.x_train, self.weights_train, self.kernel_name
+                    self.x_train,
+                    self.weights_train,
+                    self.kernel_name,
                 )
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
                 self.bandwidth = direct_plugin(
-                    self.x_train, self.weights_train, self.kernel_name, stage
-                )
-            elif bandwidth_method == "ste_plugin":
-                self.bandwidth = ste_plugin(
-                    self.x_train, self.weights_train, self.kernel_name
-                )
-            elif bandwidth_method == "ml_cv":
-                self.bandwidth = ml_cv(
-                    self.x_train, self.kernel_name, self.weights_train
+                    self.x_train,
+                    self.weights_train,
+                    self.kernel_name,
+                    stage,
                 )
             else:
                 raise ValueError("invalid 'bandwidth_method'")
         else:
             if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth' - should be 1d")
-            if bandwidth.shape[0] != self.n:
+            if bandwidth.shape[0] != n:
                 raise ValueError(
-                    f"invalid size of 'bandwidth' - should contain {self.n} values"
+                    f"invalid size of 'bandwidth' - should contain {n} values"
                 )
             if not (bandwidth > 0).all():
                 raise ValueError("'bandwidth' should be positive")
@@ -522,6 +522,7 @@ class KDEClustering:
 
     def predict(
         self,
+        x_test: ndarray,
         algorithm: str = "mean_shift",
         epsilon: float = 1e-8,
         delta: float = 1e-3,  # 1e-1
@@ -530,6 +531,8 @@ class KDEClustering:
 
         Parameters
         ----------
+        x_test : ndarray of shape (m_test, n)
+            Argument of the model - data points containing data with float type.
         algorithm : {'gradient_ascent', 'mean_shift'}, default='mean_shift'
             Name of clustering algorithm.
         epsilon : float, default=1e-8
@@ -544,7 +547,7 @@ class KDEClustering:
         Returns
         -------
         labels_pred : ndarray of shape (m_train,)
-            Predicted labels as an array containing data with int type.
+            Predicted labels containing data with int type.
 
         Examples
         --------
@@ -563,12 +566,22 @@ class KDEClustering:
 
         if algorithm == "gradient_ascent":
             x_k = gradient_ascent(
-                self.x_train, self.weights_train, self.bandwidth, epsilon
+                self.x_train,
+                self.weights_train,
+                x_test,
+                self.bandwidth,
+                epsilon,
             )
         elif algorithm == "mean_shift":
-            x_k = mean_shift(self.x_train, self.weights_train, self.bandwidth, epsilon)
+            x_k = mean_shift(
+                self.x_train,
+                self.weights_train,
+                x_test,
+                self.bandwidth,
+                epsilon,
+            )
         else:
             raise ValueError("invalid 'algorithm'")
-        labels_pred = assign_labels(x_k, delta)
 
+        labels_pred = assign_labels(x_k, delta)
         return labels_pred

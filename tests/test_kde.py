@@ -7,11 +7,16 @@ from kdelearn.kde import KDE
 @pytest.mark.parametrize(
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
-@pytest.mark.parametrize(
-    "bandwidth_method", ["normal_reference", "direct_plugin", "ste_plugin", "ml_cv"]
-)
-def test_kde(x_train, x_test, kernel_name, bandwidth_method):
-    kde = KDE(kernel_name).fit(x_train, bandwidth_method=bandwidth_method)
+@pytest.mark.parametrize("bandwidth_method", ["normal_reference", "direct_plugin"])
+def test_kde(train_data, test_data, kernel_name, bandwidth_method):
+    x_train, weights_train = train_data
+    x_test = test_data
+
+    kde = KDE(kernel_name).fit(
+        x_train,
+        weights_train,
+        bandwidth_method=bandwidth_method,
+    )
     scores = kde.pdf(x_test)
     assert kde.fitted
     assert kde.weights_train.ndim == 1
@@ -24,19 +29,11 @@ def test_kde(x_train, x_test, kernel_name, bandwidth_method):
     assert (scores < 1).all()
 
 
-def test_kde_with_weights_train(x_train):
-    m_train = x_train.shape[0]
-    weights_train = np.ones((m_train,))
-    kde = KDE().fit(x_train, weights_train=weights_train)
-    assert kde.fitted
-    assert kde.weights_train.ndim == 1
-    assert (kde.weights_train > 0).all()
-
-
-def test_kde_with_fixed_bandwidth(x_train):
+def test_kde_with_fixed_bandwidth(train_data):
+    x_train, weights_train = train_data
     n = x_train.shape[1]
     bandwidth = np.array([0.5] * n)
-    kde = KDE().fit(x_train, bandwidth=bandwidth)
+    kde = KDE().fit(x_train, weights_train, bandwidth)
     assert kde.fitted
     assert kde.bandwidth.ndim == 1
     assert (kde.bandwidth > 0).all()
@@ -47,7 +44,9 @@ def test_kde_with_invalid_kernel_name():
         KDE("abc")
 
 
-def test_kde_fit_with_invalid_data(x_train, x_test):
+def test_kde_fit_with_invalid_data(train_data):
+    x_train, _ = train_data
+
     kde = KDE()
     m_train, n = x_train.shape
 
@@ -59,17 +58,17 @@ def test_kde_fit_with_invalid_data(x_train, x_test):
     # Invalid shape of weights_train
     weights_train = np.ones((m_train, 2))
     with pytest.raises(ValueError):
-        kde.fit(x_train, weights_train=weights_train)
+        kde.fit(x_train, weights_train)
 
     # Invalid size of weights_train
     weights_train = np.ones((m_train // 2,))
     with pytest.raises(ValueError):
-        kde.fit(x_train, weights_train=weights_train)
+        kde.fit(x_train, weights_train)
 
     # Invalid values of weights_train
     weights_train = np.full((m_train,), -1)
     with pytest.raises(ValueError):
-        kde.fit(x_train, weights_train=weights_train)
+        kde.fit(x_train, weights_train)
 
     # Invalid shape of bandwidth
     bandwidth = np.array([0.5] * n).reshape(n, 1)
@@ -91,7 +90,10 @@ def test_kde_fit_with_invalid_data(x_train, x_test):
         KDE().fit(x_train, bandwidth_method="abc")
 
 
-def test_kde_pdf_with_invalid_data(x_train, x_test):
+def test_kde_pdf_with_invalid_data(train_data, test_data):
+    x_train, _ = train_data
+    x_test = test_data
+
     kde = KDE()
 
     # Invalid shape of x_test
