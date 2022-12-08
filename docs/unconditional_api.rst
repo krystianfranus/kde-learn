@@ -9,14 +9,14 @@ KDE
 .. autoclass:: kdelearn.kde.KDE
    :members:
 
-KDEClassifier
--------------
+KDEClassification
+-----------------
 
 .. autoclass:: kdelearn.kde_tasks.KDEClassification
    :members:
 
-KDEOutliersDetector
--------------------
+KDEOutliersDetection
+--------------------
 
 .. autoclass:: kdelearn.kde_tasks.KDEOutliersDetection
    :members:

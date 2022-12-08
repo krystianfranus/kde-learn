@@ -31,6 +31,7 @@ def classification_data():
     labels_train2 = np.full(m_train2, 2)
     x_train = np.concatenate((x_train1, x_train2))
     labels_train = np.concatenate((labels_train1, labels_train2))
+    weights_train = np.full((m_train,), 1 / m_train)
 
     # Test data
     m_test1 = m_test // 2
@@ -42,7 +43,7 @@ def classification_data():
     x_test = np.concatenate((x_test1, x_test2))
     labels_test = np.concatenate((labels_test1, labels_test2))
 
-    return x_train, labels_train, x_test, labels_test
+    return x_train, labels_train, weights_train, x_test, labels_test
 
 
 @pytest.fixture(scope="session")

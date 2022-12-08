@@ -24,8 +24,7 @@ class KDE:
     Examples
     --------
     >>> # Prepare data
-    >>> m_train = 100
-    >>> n = 1
+    >>> m_train, n = 100, 1
     >>> x_train = np.random.normal(0, 1, size=(m_train, n))
     >>> # Fit
     >>> kde = KDE("gaussian").fit(x_train)
@@ -58,13 +57,15 @@ class KDE:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points containing data with float type for constructing the estimator.
+            Array containing data points with float type for constructing the
+            estimator.
         weights_train : ndarray of shape (m_train,), optional
             Weights of data points. If None, all data points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
-            Smoothing parameter for scaling the estimator.
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
-                'ml_cv'}, default='normal_reference'
+            Smoothing parameter for scaling the estimator. If None, `bandwidth_method`
+            is used to compute the `bandwidth`.
+        bandwidth_method : {'normal_reference', 'direct_plugin'}, \
+                default='normal_reference'
             Name of bandwidth selection method used to compute `bandwidth` when it is
             not given explicitly.
 
@@ -76,19 +77,17 @@ class KDE:
         Examples
         --------
         >>> # Prepare data
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> x_train = np.random.normal(0, 1, size=(m_train, n))
-        >>> weights_train = np.random.randint(1, 10, size=(m_train,))
-        >>> bandwidth = np.random.uniform(0, 1, size=(n,))
+        >>> weights_train = np.full((m_train,), 1 / m_train)
+        >>> bandwidth = np.full((n,), 1.0)
         >>> # Fit the estimator
         >>> kde = KDE().fit(x_train, weights_train, bandwidth)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        m_train = self.x_train.shape[0]
-        n = self.x_train.shape[1]
+        m_train, n = self.x_train.shape
 
         if weights_train is None:
             self.weights_train = np.full(m_train, 1 / m_train)
@@ -138,24 +137,25 @@ class KDE:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Argument of the estimator - data points containing data with float type.
+            Argument of the estimator - array containing data points with float type.
 
         Returns
         -------
         scores : ndarray of shape (m_test,)
-            Values of the estimator.
+            Computed estimation of probability densities for testing data points
+            `x_test`.
 
         Examples
         --------
         >>> # Prepare data
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
+        >>> m_test = 10
         >>> x_train = np.random.normal(0, 1, (m_train, n))
-        >>> x_test = np.random.uniform(-3, 3, (10, n))
-        >>> # Fit the estimator.
+        >>> x_test = np.linspace(-3, 3, 10).reshape(-1, 1)
+        >>> # Fit the estimator
         >>> kde = KDE().fit(x_train)
         >>> # Compute pdf
-        >>> scores = kde.pdf(x_test)  # scores shape (10,)
+        >>> scores = kde.pdf(x_test)  # shape of scores: (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the estimator first")

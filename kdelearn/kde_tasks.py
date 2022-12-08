@@ -33,8 +33,7 @@ class KDEClassification:
     Examples
     --------
     >>> # Prepare data for two classes
-    >>> m_train = 100
-    >>> n = 1
+    >>> m_train, n = 100, 1
     >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
     >>> labels_train1 = np.full(m_train // 2, 1)
     >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
@@ -42,7 +41,7 @@ class KDEClassification:
     >>> x_train = np.concatenate((x_train1, x_train2))
     >>> labels_train = np.concatenate((labels_train1, labels_train2))
     >>> # Fit
-    >>> classifier = KDEClassification().fit(x_train, labels_train)
+    >>> classifier = KDEClassification("gaussian").fit(x_train, labels_train)
 
     References
     ----------
@@ -62,9 +61,9 @@ class KDEClassification:
         x_train: ndarray,
         labels_train: ndarray,
         weights_train: Optional[ndarray] = None,
-        share_bandwidth: bool = False,
-        bandwidth_method: str = "normal_reference",
         bandwidths: Optional[ndarray] = None,
+        bandwidth_method: str = "normal_reference",
+        share_bandwidth: bool = False,
         prior_prob: Optional[ndarray] = None,
         **kwargs,
     ):
@@ -73,21 +72,22 @@ class KDEClassification:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points containing data with float type for constructing the
+            Array containing data points with float type for constructing the
             classifier.
         labels_train : ndarray of shape (m_train,)
-            Labels of data points containing data with int type.
+            Class labels of `x_train` containing data with int type.
         weights_train : ndarray of shape (m_train,), default=None
             Weights for data points. If None, all data points are equally weighted.
-        share_bandwidth : bool, default=False
-            Determines whether all classes should have common bandwidth.
-            If False, estimator of each class gets its own bandwidth.
         bandwidths : ndarray of shape (n_classes, n), optional
-            Smoothing parameters for each class.
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
-                'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method used to compute `bandwidths` for each
-            class when it is not given explicitly.
+            Smoothing parameters for scaling the estimators of each class. If None,
+            `bandwidth_method` is used to compute the `bandwidth`.
+        bandwidth_method : {'normal_reference', 'direct_plugin'}, \
+                default='normal_reference'
+            Name of bandwidth selection method used to compute `bandwidths` when it
+            is not given explicitly.
+        share_bandwidth : bool, default=False
+            Determines whether all classes should have common bandwidth. If False,
+            estimator of each class gets its own bandwidth.
         prior_prob : ndarray of shape (n_classes,), default=None
             Prior probabilities of each class. If None, all classes are equally
             probable.
@@ -100,15 +100,14 @@ class KDEClassification:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
         >>> labels_train1 = np.full((m_train // 2,), 1)
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
         >>> labels_train2 = np.full((m_train // 2,), 2)
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
-        >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
+        >>> weights_train = np.full((m_train,), 1 / m_train)
         >>> # Fit
         >>> prior_prob = np.array([0.3, 0.7])
         >>> classifier = KDEClassification().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
@@ -140,31 +139,33 @@ class KDEClassification:
         self.n_classes = self.ulabels.shape[0]
 
         self.bandwidth_method = bandwidth_method
-        if share_bandwidth:
-            if self.bandwidth_method == "normal_reference":
-                bandwidth = normal_reference(
-                    self.x_train,
-                    self.weights_train,
-                    self.kernel_name,
-                )
-            elif self.bandwidth_method == "direct_plugin":
-                stage = kwargs["stage"] if "stage" in kwargs else 2
-                bandwidth = direct_plugin(
-                    self.x_train,
-                    self.weights_train,
-                    self.kernel_name,
-                    stage,
-                )
+        if bandwidths is None:
+            if share_bandwidth:
+                if self.bandwidth_method == "normal_reference":
+                    bandwidth = normal_reference(
+                        self.x_train,
+                        self.weights_train,
+                        self.kernel_name,
+                    )
+                elif self.bandwidth_method == "direct_plugin":
+                    stage = kwargs["stage"] if "stage" in kwargs else 2
+                    bandwidth = direct_plugin(
+                        self.x_train,
+                        self.weights_train,
+                        self.kernel_name,
+                        stage,
+                    )
+                else:
+                    raise ValueError("invalid 'bandwidth_method'")
+                self.bandwidths = np.full((self.n_classes, n), bandwidth)
             else:
-                raise ValueError("invalid 'bandwidth_method'")
-            self.bandwidths = np.full((self.n_classes, n), bandwidth)
+                self.bandwidths = np.full((self.n_classes,), None)
         else:
-            if bandwidths is not None:
-                self.bandwidths = bandwidths
-            else:
-                self.bandwidths = np.full(
-                    (self.n_classes,), bandwidths
-                )  # TODO: add validation
+            if bandwidths.ndim != 2:
+                raise ValueError("invalid shape of 'bandwidths' - should be 2d")
+            if not (bandwidths > 0).all():
+                raise ValueError("'bandwidths' should be positive")
+            self.bandwidths = bandwidths
 
         if prior_prob is None:
             self.prior = self._compute_prior()
@@ -189,18 +190,17 @@ class KDEClassification:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Argument of the classifier - data points containing data with float type.
+            Data points to classify - array containing data points with float type.
 
         Returns
         -------
         labels_pred : ndarray of shape (m_test,)
-            Predicted labels containing data with int type.
+            Predicted class labels containing data with int type.
 
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> m_test = 10
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
         >>> labels_train1 = np.full(m_train // 2, 1)
@@ -209,10 +209,10 @@ class KDEClassification:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.random.uniform(-1, 4, size=(m_test, n))
+        >>> x_test = np.linspace(-3, 6, 10).reshape(-1, 1)
         >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Predict labels
-        >>> labels_pred = classifier.predict(x_test)  # labels_pred shape (10,)
+        >>> labels_pred = classifier.predict(x_test)  # shape of labels_pred: (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the model first")
@@ -229,7 +229,8 @@ class KDEClassification:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Argument of the classifier - data points containing data with float type.
+            Argument of each class estimator - array containing data points with float
+            type.
 
         Returns
         -------
@@ -239,8 +240,7 @@ class KDEClassification:
         Examples
         --------
         >>> # Prepare data for two classes
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> m_test = 10
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
         >>> labels_train1 = np.full(m_train // 2, 1)
@@ -249,10 +249,10 @@ class KDEClassification:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.random.uniform(-1, 4, size=(m_test, n))
+        >>> x_test = np.linspace(-3, 6, 10).reshape(-1, 1)
         >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Compute pdf of each class
-        >>> scores = classifier.pdfs(x_test)  # scores shape (10, 2)
+        >>> scores = classifier.pdfs(x_test)  # shape of scores: (10, 2)
         """
         if not self.fitted:
             raise RuntimeError("fit the classifier first")
