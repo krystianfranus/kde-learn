@@ -7,10 +7,11 @@ from kdelearn.kde_tasks import KDEClustering
 @pytest.mark.parametrize("algorithm", ["gradient_ascent", "mean_shift"])
 @pytest.mark.parametrize("bandwidth_method", ["normal_reference", "direct_plugin"])
 def test_kde_clustering(clustering_data, bandwidth_method, algorithm):
-    x_train, _ = clustering_data
+    x_train, weights_train = clustering_data
     clustering = KDEClustering()
     clustering = clustering.fit(
         x_train,
+        weights_train,
         bandwidth_method=bandwidth_method,
     )
     labels_pred = clustering.predict(x_train, algorithm)
