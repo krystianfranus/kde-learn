@@ -133,7 +133,7 @@ class KDE:
         return self
 
     def pdf(self, x_test: ndarray) -> ndarray:
-        """Compute probability density function.
+        """Compute probability density.
 
         Parameters
         ----------
