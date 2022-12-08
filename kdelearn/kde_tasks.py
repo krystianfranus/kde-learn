@@ -110,7 +110,8 @@ class KDEClassification:
         >>> weights_train = np.full((m_train,), 1 / m_train)
         >>> # Fit
         >>> prior_prob = np.array([0.3, 0.7])
-        >>> classifier = KDEClassification().fit(x_train, labels_train, weights_train, prior_prob=prior_prob)  # noqa
+        >>> params = (x_train, labels_train, weights_train)
+        >>> classifier = KDEClassification().fit(*params, prior_prob=prior_prob)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
@@ -209,10 +210,10 @@ class KDEClassification:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.linspace(-3, 6, 10).reshape(-1, 1)
+        >>> x_test = np.linspace(-3, 6, m_test).reshape(-1, 1)
         >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Predict labels
-        >>> labels_pred = classifier.predict(x_test)  # shape of labels_pred: (10,)
+        >>> labels_pred = classifier.predict(x_test)  # shape: (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the model first")
@@ -249,10 +250,10 @@ class KDEClassification:
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> labels_train = np.concatenate((labels_train1, labels_train2))
         >>> # Fit the classifier
-        >>> x_test = np.linspace(-3, 6, 10).reshape(-1, 1)
+        >>> x_test = np.linspace(-3, 6, m_test).reshape(-1, 1)
         >>> classifier = KDEClassification().fit(x_train, labels_train)
         >>> # Compute pdf of each class
-        >>> scores = classifier.pdfs(x_test)  # shape of scores: (10, 2)
+        >>> scores = classifier.pdfs(x_test)  # shape: (10, 2)
         """
         if not self.fitted:
             raise RuntimeError("fit the classifier first")
@@ -306,8 +307,7 @@ class KDEOutliersDetection:
     Examples
     --------
     >>> # Prepare data
-    >>> m_train = 100
-    >>> n = 1
+    >>> m_train, n = 100, 1
     >>> x_train = np.random.normal(0, 1, size=(m_train, n))
     >>> # Fit the outliers detector
     >>> outliers_detector = KDEOutliersDetection("gaussian").fit(x_train)
@@ -334,11 +334,12 @@ class KDEOutliersDetection:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points containing data with float type for constructing the detector.
+            Array containing data points with float type for constructing the detector.
         weights_train : ndarray of shape (m_train,), default=None
             Weights of data points. If None, all data points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
-            Smoothing parameter for scaling the estimator.
+            Smoothing parameter for scaling the estimator. If None, `bandwidth_method`
+            is used to compute the `bandwidth`.
         bandwidth_method : {'normal_reference', 'direct_plugin'}, \
                 default='normal_reference'
             Name of bandwidth selection method used to compute `bandwidth` when it is
@@ -354,10 +355,9 @@ class KDEOutliersDetection:
         Examples
         --------
         >>> # Prepare data
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> x_train = np.random.normal(0, 1, size=(m_train, n))
-        >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
+        >>> weights_train = np.full((m_train,), 1 / m_train)
         >>> # Fit the outliers detector
         >>> params = (x_train, weights_train)
         >>> outliers_detector = KDEOutliersDetection().fit(*params, r=0.1)
@@ -375,12 +375,12 @@ class KDEOutliersDetection:
         return self
 
     def predict(self, x_test: ndarray) -> ndarray:
-        """Predict the labels.
+        """Predict labels.
 
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Argument of the detector - data points containing data with float type.
+            Argument of the detector - array containing data points with float type.
 
         Returns
         -------
@@ -390,15 +390,14 @@ class KDEOutliersDetection:
         Examples
         --------
         >>> # Prepare data
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> m_test = 10
         >>> x_train = np.random.normal(0, 1, size=(m_train, n))
-        >>> x_test = np.random.uniform(-3, 3, size=(m_test, n))
+        >>> x_test = np.linspace(-3, 3, m_test).reshape(-1, 1)
         >>> # Fit the outliers detector
         >>> outliers_detector = KDEOutliersDetection().fit(x_train, r=0.1)
         >>> # Predict the labels
-        >>> labels_pred = outliers_detector.predict(x_test)  # labels_pred shape (10,)
+        >>> labels_pred = outliers_detector.predict(x_test)  # shape: (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the outliers detector first")
@@ -419,8 +418,7 @@ class KDEClustering:
     Examples
     --------
     >>> # Prepare data for two clusters
-    >>> m_train = 100
-    >>> n = 1
+    >>> m_train, n = 100, 1
     >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
     >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
     >>> x_train = np.concatenate((x_train1, x_train2))
@@ -445,13 +443,14 @@ class KDEClustering:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points containing data with float type for constructing the model.
+            Array containing data points with float type for constructing the model.
         weights_train : ndarray of shape (m_train,), optional
             Weights of data points. If None, all data points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
-            Smoothing parameter for scaling the estimator.
-        bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
-                'ml_cv'}, default='normal_reference'
+            Smoothing parameter for scaling the estimator. If None, `bandwidth_method`
+            is used to compute the `bandwidth`.
+        bandwidth_method : {'normal_reference', 'direct_plugin'}, \
+                default='normal_reference'
             Name of bandwidth selection method used to compute `bandwidth` when it is
             not given explicitly.
 
@@ -463,20 +462,18 @@ class KDEClustering:
         Examples
         --------
         >>> # Prepare data for two clusters
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
         >>> x_train = np.concatenate((x_train1, x_train2))
-        >>> weights_train = np.random.uniform(0, 1, size=(m_train,))
+        >>> weights_train = np.full((m_train,), 1 / m_train)
         >>> # Fit
         >>> clustering = KDEClustering().fit(x_train, weights_train)
         """
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        m_train = self.x_train.shape[0]
-        n = self.x_train.shape[1]
+        m_train, n = self.x_train.shape
 
         if weights_train is None:
             self.weights_train = np.full(m_train, 1 / m_train)
@@ -532,7 +529,7 @@ class KDEClustering:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Argument of the model - data points containing data with float type.
+            Data points to be grouped - array containing data points with float type.
         algorithm : {'gradient_ascent', 'mean_shift'}, default='mean_shift'
             Name of clustering algorithm.
         epsilon : float, default=1e-8
@@ -547,19 +544,18 @@ class KDEClustering:
         Returns
         -------
         labels_pred : ndarray of shape (m_train,)
-            Predicted labels containing data with int type.
+            Predicted cluster labels containing data with int type.
 
         Examples
         --------
         >>> # Prepare data for two clusters
-        >>> m_train = 100
-        >>> n = 1
+        >>> m_train, n = 100, 1
         >>> x_train1 = np.random.normal(0, 1, size=(m_train // 2, n))
         >>> x_train2 = np.random.normal(3, 1, size=(m_train // 2, n))
         >>> x_train = np.concatenate((x_train1, x_train2))
         >>> # Fit
         >>> clustering = KDEClustering().fit(x_train)
-        >>> labels_pred = clustering.predict()
+        >>> labels_pred = clustering.predict(x_train)
         """
         if not self.fitted:
             raise RuntimeError("fit the clusterer first")
