@@ -26,11 +26,11 @@ def test_kde_outliers_detector(train_data, test_data, kernel_name, bandwidth_met
 
 
 def test_kde_outliers_detector_with_fixed_bandwidth(train_data):
-    x_train, weights_train = train_data
+    x_train, _ = train_data
     n = x_train.shape[1]
     bandwidth = np.array([0.5] * n)
     outliers_detector = KDEOutliersDetection()
-    outliers_detector.fit(x_train, weights_train, bandwidth=bandwidth)
+    outliers_detector.fit(x_train, bandwidth=bandwidth)
     assert outliers_detector.fitted
 
 
@@ -74,7 +74,7 @@ def test_kde_outliers_detector_fit_invalid(train_data):
 
 
 def test_kde_outliers_detector_predict_invalid(train_data, test_data):
-    x_train, weights_train = train_data
+    x_train, _ = train_data
     x_test = test_data
 
     outliers_detector = KDEOutliersDetection()
