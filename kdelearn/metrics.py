@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -71,16 +71,25 @@ def accuracy_loo(
     return accuracy
 
 
-def pi_kf(x_train: ndarray, labels_train: ndarray) -> float:
+def pi_kf(
+    x_train: ndarray,
+    x_test: ndarray,
+    labels_test: ndarray,
+    weights_train: Optional[ndarray] = None,
+) -> float:
     """Performance index for outliers detection.
 
     Parameters
     ----------
-    x_train : ndarray of shape (m_train, n)
+    x_train : ndarray of shape (m_train, n_x)
         Data points as an array containing data with float type.
-    labels_train : ndarray of shape (m_train,)
+    x_test : ndarray of shape (m_test, n_x)
+        Data points as an array containing data with float type.
+    labels_test : ndarray of shape (m_test,)
         Labels (0 - inlier, 1 - outlier) of data points as an array containing data
         with int type.
+    weights_train : ndarray of shape (m_train,), optional
+        Weights of data points. If None, all points are equally weighted.
 
     Returns
     -------
@@ -96,28 +105,35 @@ def pi_kf(x_train: ndarray, labels_train: ndarray) -> float:
     if x_train.ndim != 2:
         raise ValueError("invalid shape of 'x_train' - should be 2d")
 
-    if labels_train.ndim != 1:
-        raise ValueError("invalid shape of 'labels_train' - should be 1d")
-    if not np.issubdtype(labels_train.dtype, np.integer):
-        raise ValueError("invalid dtype of 'labels_train' - should be of int type")
-    if not np.all(np.isin(labels_train, [0, 1])):
-        raise ValueError("invalid values in 'labels_train' - should contain 0 or 1")
+    if x_test.ndim != 2:
+        raise ValueError("invalid shape of 'x_test' - should be 2d")
 
-    inliers = labels_train == 0
-    outliers = labels_train == 1
+    if labels_test.ndim != 1:
+        raise ValueError("invalid shape of 'labels_test' - should be 1d")
+    if not np.issubdtype(labels_test.dtype, np.integer):
+        raise ValueError("invalid dtype of 'labels_test' - should be of int type")
+    if not np.all(np.isin(labels_test, [0, 1])):
+        raise ValueError("invalid values in 'labels_test' - should contain 0 or 1")
 
-    scores_out = KDE().fit(x_train).pdf(x_train[outliers])
-    n_outliers = scores_out.shape[0]
-    scores_in = KDE().fit(x_train).pdf(x_train[inliers])
-    scores_in = np.sort(scores_in)[:n_outliers]
+    inliers = labels_test == 0
+    outliers = labels_test == 1
+    n_outliers = (outliers == 1).sum()
+
+    kde = KDE().fit(x_train, weights_train, bandwidth_method="direct_plugin")
+    scores = kde.pdf(x_test)
+    scores_out = scores[outliers]
+    idx = np.argsort(scores[inliers])[:n_outliers]
+    scores_in = scores[inliers][idx]
 
     pi = np.sum(scores_out) / np.sum(scores_in)
     return pi
 
 
 def density_silhouette(
-    x_train: ndarray,
-    labels_train: ndarray,
+    x_test: ndarray,
+    labels_test: ndarray,
+    weights_test: Optional[ndarray] = None,
+    weights2: Optional[ndarray] = None,
     kernel_name: str = "gaussian",
     share_bandwidth: bool = False,
 ) -> Tuple[ndarray, float]:
@@ -125,10 +141,14 @@ def density_silhouette(
 
     Parameters
     ----------
-    x_train : ndarray of shape (m_train, n)
+    x_test : ndarray of shape (m_test, n)
         Data points as an array containing data with float type.
-    labels_train : ndarray of shape (m_train,)
+    labels_test : ndarray of shape (m_test,)
         Labels of data points as an array containing data with int type.
+    weights_test : ndarray of shape (m_test,), default=None
+        Weights of data points. If None, all points are equally weighted.
+    weights2 : ndarray of shape (m_test,), default=None
+        Weights of data points. If None, all points are equally weighted.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
     share_bandwidth : bool, default=False
@@ -153,17 +173,17 @@ def density_silhouette(
     [1] Menardi, G. Density-based Silhouette diagnostics for clustering methods.
     Springer, 2010.
     """
-    if x_train.ndim != 2:
+    if x_test.ndim != 2:
         raise ValueError("invalid shape of 'x_train' - should be 2d")
 
-    if labels_train.ndim != 1:
-        raise ValueError("invalid shape of 'labels_train' - should be 1d")
-    if not np.issubdtype(labels_train.dtype, np.integer):
-        raise ValueError("invalid dtype of 'labels_train' - should be of int type")
+    if labels_test.ndim != 1:
+        raise ValueError("invalid shape of 'labels_test' - should be 1d")
+    if not np.issubdtype(labels_test.dtype, np.integer):
+        raise ValueError("invalid dtype of 'labels_test' - should be of int type")
 
-    m_train, n = x_train.shape
+    m_test, n = x_test.shape
     # Sorted unique labels
-    ulabels, cluster_sizes = np.unique(labels_train, return_counts=True)
+    ulabels, cluster_sizes = np.unique(labels_test, return_counts=True)
     n_clusters = ulabels.shape[0]
 
     if ulabels[0] != 0:
@@ -171,9 +191,20 @@ def density_silhouette(
             "invalid values in 'labels_train' - labels should be enumerated from 0"
         )
 
+    if weights_test is None:
+        weights_test = np.full(m_test, 1 / m_test)
+    else:
+        if weights_test.ndim != 1:
+            raise ValueError("invalid shape of 'weights_test' - should be 1d")
+        if weights_test.shape[0] != x_test.shape[0]:
+            raise ValueError("invalid size of 'weights_test'")
+        if not (weights_test >= 0).all():
+            raise ValueError("'weights_test' must be non negative")
+        weights_test = weights_test / weights_test.sum()
+
     # Prepare bandwidths for each cluster
     if share_bandwidth:
-        bandwidth = normal_reference(x_train, None, kernel_name)
+        bandwidth = normal_reference(x_test, None, kernel_name)
         cluster_bandwidths = np.full((n_clusters, n), bandwidth)
         valid_bandwidths = np.full(n_clusters, True)
     else:
@@ -181,7 +212,7 @@ def density_silhouette(
         valid_bandwidths = np.full(n_clusters, False)
         for idx, label in enumerate(ulabels):
             if cluster_sizes[idx] != 1:
-                x_train_tmp = x_train[labels_train == label]
+                x_train_tmp = x_test[labels_test == label]
                 cluster_bandwidths[idx] = normal_reference(
                     x_train_tmp, None, kernel_name
                 )
@@ -190,19 +221,23 @@ def density_silhouette(
     bandwidth_mean = np.mean(cluster_bandwidths, axis=0, where=valid_bandwidths)
 
     # Compute dbs
-    theta = np.empty((n_clusters, m_train))
+    theta = np.empty((n_clusters, m_test))
     for idx, label in enumerate(ulabels):
         cluster_size = cluster_sizes[idx]
         bandwidth = cluster_bandwidths[idx] if cluster_size != 1 else bandwidth_mean
-        kde = KDE(kernel_name).fit(x_train[labels_train == label], bandwidth=bandwidth)
-        scores = kde.pdf(x_train)
-        theta[idx, :] = cluster_size / m_train * scores
+        kde = KDE(kernel_name).fit(
+            x_test[labels_test == label],
+            weights_train=weights_test[labels_test == label],
+            bandwidth=bandwidth,
+        )
+        scores = kde.pdf(x_test)
+        theta[idx, :] = cluster_size / m_test * scores
     theta = theta / theta.sum(axis=0)
 
-    arange = np.arange(m_train)
+    arange = np.arange(m_test)
     # Posterior probability that x_i belongs to its own cluster
-    theta_m0 = theta[labels_train, arange]
-    theta[labels_train, arange] = 0
+    theta_m0 = theta[labels_test, arange]
+    theta[labels_test, arange] = 0
     # Posterior probability that x_i belongs to the nearest cluster
     theta_m1 = np.max(theta, axis=0)
 
@@ -211,6 +246,6 @@ def density_silhouette(
     dbs = (np.log(theta_m0 + e) - np.log(theta_m1 + e)) / np.max(
         np.abs((np.log(theta_m0 + e) - np.log(theta_m1 + e)))
     )
-    dbs_mean = np.mean(dbs)
+    dbs_mean = np.average(dbs, weights=weights2)
 
     return dbs, dbs_mean

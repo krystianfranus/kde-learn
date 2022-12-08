@@ -8,16 +8,14 @@ from kdelearn.kde_tasks import KDEClassification
     "kernel_name", ["gaussian", "uniform", "epanechnikov", "cauchy"]
 )
 @pytest.mark.parametrize("share_bandwidth", [False, True])
-@pytest.mark.parametrize(
-    "bandwidth_method", ["normal_reference", "direct_plugin", "ste_plugin", "ml_cv"]
-)
+@pytest.mark.parametrize("bandwidth_method", ["normal_reference", "direct_plugin"])
 def test_kde_classifier(
-    data_classification,
+    classification_data,
     kernel_name,
     share_bandwidth,
     bandwidth_method,
 ):
-    x_train, labels_train, x_test, labels_test = data_classification
+    x_train, labels_train, x_test, labels_test = classification_data
     classifier = KDEClassification(kernel_name)
     classifier = classifier.fit(
         x_train,
@@ -36,8 +34,8 @@ def test_kde_classifier(
     assert labels_pred.ndim == 1
 
 
-def test_kde_classifier_with_weights_train(data_classification):
-    x_train, labels_train, x_test, labels_test = data_classification
+def test_kde_classifier_with_weights_train(classification_data):
+    x_train, labels_train, x_test, labels_test = classification_data
     m_train = x_train.shape[0]
     weights_train = np.ones((m_train,))
     classifier = KDEClassification()
@@ -47,8 +45,8 @@ def test_kde_classifier_with_weights_train(data_classification):
     assert (classifier.weights_train > 0).all()
 
 
-def test_kde_classifier_with_fixed_prior_prob(data_classification):
-    x_train, labels_train, x_test, labels_test = data_classification
+def test_kde_classifier_with_fixed_prior_prob(classification_data):
+    x_train, labels_train, x_test, labels_test = classification_data
     ulabels = np.unique(labels_train)
     n_classes = ulabels.shape[0]
     prior_prob = np.array([0.5] * n_classes)
@@ -60,8 +58,8 @@ def test_kde_classifier_with_fixed_prior_prob(data_classification):
     assert (classifier.prior > 0).all()
 
 
-def test_kde_classifier_pdfs(data_classification):
-    x_train, labels_train, x_test, labels_test = data_classification
+def test_kde_classifier_pdfs(classification_data):
+    x_train, labels_train, x_test, labels_test = classification_data
     ulabels = np.unique(labels_train)
     n_classes = ulabels.shape[0]
     classifier = KDEClassification()
@@ -79,8 +77,8 @@ def test_kde_classifier_invalid():
         KDEClassification("abc")
 
 
-def test_kde_classifier_fit_invalid(data_classification):
-    x_train, labels_train, x_test, labels_test = data_classification
+def test_kde_classifier_fit_invalid(classification_data):
+    x_train, labels_train, x_test, labels_test = classification_data
     m_train = x_train.shape[0]
     classifier = KDEClassification()
 
@@ -144,8 +142,8 @@ def test_kde_classifier_fit_invalid(data_classification):
         )
 
 
-def test_kde_classifier_predict_invalid(data_classification):
-    x_train, labels_train, x_test, labels_test = data_classification
+def test_kde_classifier_predict_invalid(classification_data):
+    x_train, labels_train, x_test, labels_test = classification_data
     classifier = KDEClassification()
 
     # No fitting
@@ -158,8 +156,8 @@ def test_kde_classifier_predict_invalid(data_classification):
         classifier.fit(x_train, labels_train).predict(x_test_tmp)
 
 
-def test_kde_classifier_pdfs_invalid(data_classification):
-    x_train, labels_train, x_test, labels_test = data_classification
+def test_kde_classifier_pdfs_invalid(classification_data):
+    x_train, labels_train, x_test, labels_test = classification_data
     classifier = KDEClassification()
 
     # No fitting

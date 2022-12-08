@@ -3,13 +3,7 @@ from typing import Optional
 import numpy as np
 from numpy import ndarray
 
-from .bandwidth_selection import (
-    direct_plugin,
-    kernel_properties,
-    ml_cv,
-    normal_reference,
-    ste_plugin,
-)
+from .bandwidth_selection import direct_plugin, kernel_properties, normal_reference
 from .cutils import compute_kde
 
 
@@ -64,15 +58,15 @@ class KDE:
         Parameters
         ----------
         x_train : ndarray of shape (m_train, n)
-            Data points as an array containing data with float type.
+            Data points containing data with float type for constructing the estimator.
         weights_train : ndarray of shape (m_train,), optional
-            Weights of data points. If None, all points are equally weighted.
+            Weights of data points. If None, all data points are equally weighted.
         bandwidth : ndarray of shape (n,), optional
-            Smoothing parameter.
+            Smoothing parameter for scaling the estimator.
         bandwidth_method : {'normal_reference', 'direct_plugin', 'ste_plugin', \
                 'ml_cv'}, default='normal_reference'
-            Name of bandwidth selection method used to compute smoothing parameter
-            when `bandwidth` is not given explicitly.
+            Name of bandwidth selection method used to compute `bandwidth` when it is
+            not given explicitly.
 
         Returns
         -------
@@ -93,46 +87,43 @@ class KDE:
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        self.m_train = self.x_train.shape[0]
-        self.n = self.x_train.shape[1]
+        m_train = self.x_train.shape[0]
+        n = self.x_train.shape[1]
 
         if weights_train is None:
-            self.weights_train = np.full(self.m_train, 1 / self.m_train)
+            self.weights_train = np.full(m_train, 1 / m_train)
         else:
             if weights_train.ndim != 1:
                 raise ValueError("invalid shape of 'weights_train' - should be 1d")
             if weights_train.shape[0] != x_train.shape[0]:
                 raise ValueError("invalid size of 'weights_train'")
-            if not (weights_train > 0).all():
-                raise ValueError("'weights_train' should be positive")
+            if not (weights_train >= 0).all():
+                raise ValueError("'weights_train' should be non negative")
             self.weights_train = weights_train / weights_train.sum()
 
         if bandwidth is None:
             if bandwidth_method == "normal_reference":
                 self.bandwidth = normal_reference(
-                    self.x_train, self.weights_train, self.kernel_name
+                    self.x_train,
+                    self.weights_train,
+                    self.kernel_name,
                 )
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
                 self.bandwidth = direct_plugin(
-                    self.x_train, self.weights_train, self.kernel_name, stage
-                )
-            elif bandwidth_method == "ste_plugin":
-                self.bandwidth = ste_plugin(
-                    self.x_train, self.weights_train, self.kernel_name
-                )
-            elif bandwidth_method == "ml_cv":
-                self.bandwidth = ml_cv(
-                    self.x_train, self.kernel_name, self.weights_train
+                    self.x_train,
+                    self.weights_train,
+                    self.kernel_name,
+                    stage,
                 )
             else:
                 raise ValueError("invalid 'bandwidth_method'")
         else:
             if bandwidth.ndim != 1:
                 raise ValueError("invalid shape of 'bandwidth' - should be 1d")
-            if bandwidth.shape[0] != self.n:
+            if bandwidth.shape[0] != n:
                 raise ValueError(
-                    f"invalid size of 'bandwidth' - should contain {self.n} values"
+                    f"invalid size of 'bandwidth' - should contain {n} values"
                 )
             if not (bandwidth > 0).all():
                 raise ValueError("'bandwidth' should be positive")
@@ -147,12 +138,12 @@ class KDE:
         Parameters
         ----------
         x_test : ndarray of shape (m_test, n)
-            Grid data points as an array containing data with float type.
+            Argument of the estimator - data points containing data with float type.
 
         Returns
         -------
         scores : ndarray of shape (m_test,)
-            Values of kernel density estimator.
+            Values of the estimator.
 
         Examples
         --------
