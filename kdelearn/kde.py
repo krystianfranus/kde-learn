@@ -1,3 +1,5 @@
+from __future__ import annotations  # Needed in type annotation of return in fit method
+
 from typing import Optional
 
 import numpy as np
@@ -37,7 +39,7 @@ class KDE:
     [2] Wand, M. P., Jones M.C. Kernel Smoothing. Chapman and Hall, 1995.
     """
 
-    def __init__(self, kernel_name: str = "gaussian"):
+    def __init__(self, kernel_name: str = "gaussian") -> None:
         if kernel_name not in kernel_properties:
             available_kernels = list(kernel_properties.keys())
             raise ValueError(f"invalid 'kernel_name' - try one of {available_kernels}")
@@ -51,7 +53,7 @@ class KDE:
         bandwidth: Optional[ndarray] = None,
         bandwidth_method: str = "normal_reference",
         **kwargs,
-    ):
+    ) -> KDE:
         """Fit the estimator.
 
         Parameters
