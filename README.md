@@ -19,6 +19,7 @@ pip install -e .
 black {source_file_or_directory}
 flake8 {source_file_or_directory}
 isort {source_file_or_directory}
+mypy {source_file_or_directory} - this one have to be executed manually (it is not included in CI and pre-commit)
 ```
 
 They are also executed as a pre-commit hooks. See more in `.pre-commit-config.yaml`.
