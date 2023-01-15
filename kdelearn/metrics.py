@@ -122,8 +122,7 @@ def pi_kf(
     kde = KDE().fit(x_train, weights_train, bandwidth_method="direct_plugin")
     scores = kde.pdf(x_test)
     scores_out = scores[outliers]
-    idx = np.argsort(scores[inliers])[:n_outliers]
-    scores_in = scores[inliers][idx]
+    scores_in = np.sort(scores[inliers])[:n_outliers]
 
     pi = np.sum(scores_out) / np.sum(scores_in)
     return pi
