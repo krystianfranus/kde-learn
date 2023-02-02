@@ -44,7 +44,7 @@ class CKDE:
         weights_train: Optional[ndarray] = None,
         bandwidth_x: Optional[ndarray] = None,
         bandwidth_y: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         **kwargs,
     ):
         """Fit the estimator.

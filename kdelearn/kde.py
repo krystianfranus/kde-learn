@@ -51,7 +51,7 @@ class KDE:
         x_train: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         **kwargs,
     ) -> KDE:
         """Fit the estimator.

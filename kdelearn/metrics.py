@@ -73,9 +73,9 @@ def accuracy_loo(
 
 def pi_kf(
     x_train: ndarray,
-    x_test: ndarray,
-    labels_test: ndarray,
+    labels_pred: ndarray,
     weights_train: Optional[ndarray] = None,
+    bandwidth: Optional[ndarray] = None,
 ) -> float:
     """Performance index for outliers detection.
 
@@ -83,13 +83,13 @@ def pi_kf(
     ----------
     x_train : ndarray of shape (m_train, n_x)
         Data points as an array containing data with float type.
-    x_test : ndarray of shape (m_test, n_x)
-        Data points as an array containing data with float type.
-    labels_test : ndarray of shape (m_test,)
+    labels_pred : ndarray of shape (m_test,)
         Labels (0 - inlier, 1 - outlier) of data points as an array containing data
         with int type.
     weights_train : ndarray of shape (m_train,), optional
         Weights of data points. If None, all points are equally weighted.
+    bandwidth : ndarray of shape (n,), optional
+        Smoothing parameter for scaling the estimator.
 
     Returns
     -------
@@ -105,22 +105,19 @@ def pi_kf(
     if x_train.ndim != 2:
         raise ValueError("invalid shape of 'x_train' - should be 2d")
 
-    if x_test.ndim != 2:
-        raise ValueError("invalid shape of 'x_test' - should be 2d")
+    if labels_pred.ndim != 1:
+        raise ValueError("invalid shape of 'labels_pred' - should be 1d")
+    if not np.issubdtype(labels_pred.dtype, np.integer):
+        raise ValueError("invalid dtype of 'labels_pred' - should be of int type")
+    if not np.all(np.isin(labels_pred, [0, 1])):
+        raise ValueError("invalid values in 'labels_pred' - should contain 0 or 1")
 
-    if labels_test.ndim != 1:
-        raise ValueError("invalid shape of 'labels_test' - should be 1d")
-    if not np.issubdtype(labels_test.dtype, np.integer):
-        raise ValueError("invalid dtype of 'labels_test' - should be of int type")
-    if not np.all(np.isin(labels_test, [0, 1])):
-        raise ValueError("invalid values in 'labels_test' - should contain 0 or 1")
-
-    inliers = labels_test == 0
-    outliers = labels_test == 1
+    inliers = labels_pred == 0
+    outliers = labels_pred == 1
     n_outliers = (outliers == 1).sum()
 
-    kde = KDE().fit(x_train, weights_train, bandwidth_method="direct_plugin")
-    scores = kde.pdf(x_test)
+    kde = KDE().fit(x_train, weights_train, bandwidth=bandwidth)
+    scores = kde.pdf(x_train)
     scores_out = scores[outliers]
     scores_in = np.sort(scores[inliers])[:n_outliers]
 

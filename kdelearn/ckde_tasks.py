@@ -55,7 +55,7 @@ class CKDEClassification:
         share_bandwidth: bool = False,
         bandwidths_x: Optional[ndarray] = None,
         bandwidths_y: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         prior_prob: Optional[ndarray] = None,
         **kwargs,
     ):
@@ -361,7 +361,7 @@ class CKDEOutliersDetection:
         weights_train: Optional[ndarray] = None,
         bandwidth_x: Optional[ndarray] = None,
         bandwidth_y: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         r: float = 0.1,
         **kwargs,
     ):
@@ -513,7 +513,7 @@ class CKDEClustering:
         weights_train: Optional[ndarray] = None,
         bandwidth_x: Optional[ndarray] = None,
         bandwidth_y: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         **kwargs,
     ):
         """Fit the model.

@@ -62,7 +62,7 @@ class KDEClassification:
         labels_train: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidths: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         share_bandwidth: bool = False,
         prior_prob: Optional[ndarray] = None,
         **kwargs,
@@ -325,7 +325,7 @@ class KDEOutliersDetection:
         x_train: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         r: float = 0.1,
         **kwargs,
     ):
@@ -435,7 +435,7 @@ class KDEClustering:
         x_train: ndarray,
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
-        bandwidth_method: str = "normal_reference",
+        bandwidth_method: str = "direct_plugin",
         **kwargs,
     ):
         """Fit the model.
