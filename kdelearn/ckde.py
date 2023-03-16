@@ -124,7 +124,9 @@ class CKDE:
                 bandwidth = normal_reference(z_train, weights_train, self.kernel_name)
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                bandwidth = direct_plugin(z_train, self.kernel_name, stage)
+                bandwidth = direct_plugin(
+                    z_train, weights_train, self.kernel_name, stage
+                )
             else:
                 raise ValueError("invalid 'bandwidth_method'")
             self.bandwidth_x = bandwidth[:n_x]

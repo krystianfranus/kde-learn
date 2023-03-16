@@ -326,7 +326,7 @@ class KDEOutliersDetection:
         weights_train: Optional[ndarray] = None,
         bandwidth: Optional[ndarray] = None,
         bandwidth_method: str = "direct_plugin",
-        r: float = 0.1,
+        r: float = 0.05,
         **kwargs,
     ):
         """Fit the outliers detector.
@@ -344,7 +344,7 @@ class KDEOutliersDetection:
                 default='normal_reference'
             Name of bandwidth selection method used to compute `bandwidth` when it is
             not given explicitly.
-        r : float, default=0.1
+        r : float, default=0.05
             Threshold separating outliers and inliers.
 
         Returns

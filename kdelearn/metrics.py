@@ -126,10 +126,10 @@ def pi_kf(
 
 
 def density_silhouette(
-    x_test: ndarray,
-    labels_test: ndarray,
-    weights_test: Optional[ndarray] = None,
-    weights2: Optional[ndarray] = None,
+    x_train: ndarray,
+    labels_train: ndarray,
+    cond: ndarray,
+    weights_train: Optional[ndarray] = None,
     kernel_name: str = "gaussian",
     share_bandwidth: bool = False,
 ) -> Tuple[ndarray, float]:
@@ -137,13 +137,11 @@ def density_silhouette(
 
     Parameters
     ----------
-    x_test : ndarray of shape (m_test, n)
+    x_train : ndarray of shape (m_train, n)
         Data points as an array containing data with float type.
-    labels_test : ndarray of shape (m_test,)
+    labels_train : ndarray of shape (m_train,)
         Labels of data points as an array containing data with int type.
-    weights_test : ndarray of shape (m_test,), default=None
-        Weights of data points. If None, all points are equally weighted.
-    weights2 : ndarray of shape (m_test,), default=None
+    weights_train : ndarray of shape (m_train,), default=None
         Weights of data points. If None, all points are equally weighted.
     kernel_name : {'gaussian', 'uniform', 'epanechnikov', 'cauchy'}, default='gaussian'
         Name of kernel function.
@@ -169,17 +167,17 @@ def density_silhouette(
     [1] Menardi, G. Density-based Silhouette diagnostics for clustering methods.
     Springer, 2010.
     """
-    if x_test.ndim != 2:
+    if x_train.ndim != 2:
         raise ValueError("invalid shape of 'x_train' - should be 2d")
 
-    if labels_test.ndim != 1:
-        raise ValueError("invalid shape of 'labels_test' - should be 1d")
-    if not np.issubdtype(labels_test.dtype, np.integer):
-        raise ValueError("invalid dtype of 'labels_test' - should be of int type")
+    if labels_train.ndim != 1:
+        raise ValueError("invalid shape of 'labels_train' - should be 1d")
+    if not np.issubdtype(labels_train.dtype, np.integer):
+        raise ValueError("invalid dtype of 'labels_train' - should be of int type")
 
-    m_test, n = x_test.shape
+    m_train, n = x_train.shape
     # Sorted unique labels
-    ulabels, cluster_sizes = np.unique(labels_test, return_counts=True)
+    ulabels, cluster_sizes = np.unique(labels_train, return_counts=True)
     n_clusters = ulabels.shape[0]
 
     if ulabels[0] != 0:
@@ -187,20 +185,20 @@ def density_silhouette(
             "invalid values in 'labels_train' - labels should be enumerated from 0"
         )
 
-    if weights_test is None:
-        weights_test = np.full(m_test, 1 / m_test)
+    if weights_train is None:
+        weights_train = np.full(m_train, 1 / m_train)
     else:
-        if weights_test.ndim != 1:
-            raise ValueError("invalid shape of 'weights_test' - should be 1d")
-        if weights_test.shape[0] != x_test.shape[0]:
-            raise ValueError("invalid size of 'weights_test'")
-        if not (weights_test >= 0).all():
-            raise ValueError("'weights_test' must be non negative")
-        weights_test = weights_test / weights_test.sum()
+        if weights_train.ndim != 1:
+            raise ValueError("invalid shape of 'weights_train' - should be 1d")
+        if weights_train.shape[0] != x_train.shape[0]:
+            raise ValueError("invalid size of 'weights_train'")
+        if not (weights_train >= 0).all():
+            raise ValueError("'weights_train' must be non negative")
+        weights_train = weights_train / weights_train.sum()
 
     # Prepare bandwidths for each cluster
     if share_bandwidth:
-        bandwidth = normal_reference(x_test, None, kernel_name)
+        bandwidth = normal_reference(x_train, None, kernel_name)
         cluster_bandwidths = np.full((n_clusters, n), bandwidth)
         valid_bandwidths = np.full(n_clusters, True)
     else:
@@ -208,7 +206,7 @@ def density_silhouette(
         valid_bandwidths = np.full(n_clusters, False)
         for idx, label in enumerate(ulabels):
             if cluster_sizes[idx] != 1:
-                x_train_tmp = x_test[labels_test == label]
+                x_train_tmp = x_train[labels_train == label]
                 cluster_bandwidths[idx] = normal_reference(
                     x_train_tmp, None, kernel_name
                 )
@@ -216,18 +214,21 @@ def density_silhouette(
     valid_bandwidths = valid_bandwidths[:, None]
     bandwidth_mean = np.mean(cluster_bandwidths, axis=0, where=valid_bandwidths)
 
+    x_test = x_train[cond]
+    labels_test = labels_train[cond]
+    m_test = x_test.shape[0]
     # Compute dbs
     theta = np.empty((n_clusters, m_test))
     for idx, label in enumerate(ulabels):
         cluster_size = cluster_sizes[idx]
         bandwidth = cluster_bandwidths[idx] if cluster_size != 1 else bandwidth_mean
         kde = KDE(kernel_name).fit(
-            x_test[labels_test == label],
-            weights_train=weights_test[labels_test == label],
+            x_train[labels_train == label],
+            weights_train=weights_train[labels_train == label],
             bandwidth=bandwidth,
         )
         scores = kde.pdf(x_test)
-        theta[idx, :] = cluster_size / m_test * scores
+        theta[idx, :] = cluster_size / m_train * scores
     theta = theta / theta.sum(axis=0)
 
     arange = np.arange(m_test)
@@ -242,6 +243,6 @@ def density_silhouette(
     dbs = (np.log(theta_m0 + e) - np.log(theta_m1 + e)) / np.max(
         np.abs((np.log(theta_m0 + e) - np.log(theta_m1 + e)))
     )
-    dbs_mean = np.average(dbs, weights=weights2)
+    dbs_mean = np.mean(dbs)
 
     return dbs, dbs_mean

@@ -144,3 +144,12 @@ kdelearn/*.c
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
+
+# Extra
+thesis/*.aux
+thesis/phd_thesis.out
+thesis/phd_thesis.pdf
+thesis/phd_thesis.synctex.gz
+thesis/phd_thesis.toc
+thesis/phd_thesis.bbl
+thesis/phd_thesis.blg
