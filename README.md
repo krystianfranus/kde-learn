@@ -34,7 +34,7 @@ Basic pytest usage:
 pytest tests/
 ```
 
-with coverage
+with coverage (it created hidden file .coverage)
 ```
 pytest tests/ --cov=kdelearn/ --cov-report term-missing
 ```
