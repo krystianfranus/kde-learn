@@ -128,7 +128,6 @@ def pi_kf(
 def density_silhouette(
     x_train: ndarray,
     labels_train: ndarray,
-    cond: ndarray,
     weights_train: Optional[ndarray] = None,
     kernel_name: str = "gaussian",
     share_bandwidth: bool = False,
@@ -214,11 +213,8 @@ def density_silhouette(
     valid_bandwidths = valid_bandwidths[:, None]
     bandwidth_mean = np.mean(cluster_bandwidths, axis=0, where=valid_bandwidths)
 
-    x_test = x_train[cond]
-    labels_test = labels_train[cond]
-    m_test = x_test.shape[0]
     # Compute dbs
-    theta = np.empty((n_clusters, m_test))
+    theta = np.empty((n_clusters, m_train))
     for idx, label in enumerate(ulabels):
         cluster_size = cluster_sizes[idx]
         bandwidth = cluster_bandwidths[idx] if cluster_size != 1 else bandwidth_mean
@@ -227,14 +223,14 @@ def density_silhouette(
             weights_train=weights_train[labels_train == label],
             bandwidth=bandwidth,
         )
-        scores = kde.pdf(x_test)
+        scores = kde.pdf(x_train)
         theta[idx, :] = cluster_size / m_train * scores
     theta = theta / theta.sum(axis=0)
 
-    arange = np.arange(m_test)
+    arange = np.arange(m_train)
     # Posterior probability that x_i belongs to its own cluster
-    theta_m0 = theta[labels_test, arange]
-    theta[labels_test, arange] = 0
+    theta_m0 = theta[labels_train, arange]
+    theta[labels_train, arange] = 0
     # Posterior probability that x_i belongs to the nearest cluster
     theta_m1 = np.max(theta, axis=0)
 
@@ -243,6 +239,6 @@ def density_silhouette(
     dbs = (np.log(theta_m0 + e) - np.log(theta_m1 + e)) / np.max(
         np.abs((np.log(theta_m0 + e) - np.log(theta_m1 + e)))
     )
-    dbs_mean = np.mean(dbs)
+    dbs_mean = np.average(dbs, weights=weights_train)
 
     return dbs, dbs_mean

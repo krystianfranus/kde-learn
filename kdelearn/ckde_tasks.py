@@ -600,7 +600,9 @@ class CKDEClustering:
                 )
             elif bandwidth_method == "direct_plugin":
                 stage = kwargs["stage"] if "stage" in kwargs else 2
-                bandwidth = direct_plugin(z_train, self.kernel_name, stage)
+                bandwidth = direct_plugin(
+                    z_train, self.weights_train, self.kernel_name, stage
+                )
             else:
                 raise ValueError("invalid 'bandwidth_method'")
             self.bandwidth_x = bandwidth[: self.n_x]
@@ -674,7 +676,7 @@ class CKDEClustering:
         >>> clustering = CKDEClustering().fit(x_train, y_train, y_star)
         >>> labels_pred = clustering.predict()
         """
-        cond_weights_train = compute_d(
+        self.cond_weights_train = compute_d(
             self.y_train,
             self.weights_train,
             self.y_star,
@@ -684,11 +686,11 @@ class CKDEClustering:
 
         if algorithm == "gradient_ascent":
             x_k = gradient_ascent(
-                self.x_train, cond_weights_train, x_test, self.bandwidth_x, epsilon
+                self.x_train, self.cond_weights_train, x_test, self.bandwidth_x, epsilon
             )
         elif algorithm == "mean_shift":
             x_k = mean_shift(
-                self.x_train, cond_weights_train, x_test, self.bandwidth_x, epsilon
+                self.x_train, self.cond_weights_train, x_test, self.bandwidth_x, epsilon
             )
         else:
             raise ValueError("invalid 'algorithm'")

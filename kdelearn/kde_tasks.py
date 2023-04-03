@@ -360,7 +360,7 @@ class KDEOutliersDetection:
         >>> weights_train = np.full((m_train,), 1 / m_train)
         >>> # Fit the outliers detector
         >>> params = (x_train, weights_train)
-        >>> outliers_detector = KDEOutliersDetection().fit(*params, r=0.1)
+        >>> outliers_detector = KDEOutliersDetection().fit(*params, r=0.05)
         """
         if r < 0 or r > 1:
             raise ValueError("invalid value of 'r' - should be in range [0, 1]")
