@@ -145,11 +145,12 @@ kdelearn/*.c
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-# Extra
+# Latex
 thesis/*.aux
-thesis/phd_thesis.out
-thesis/phd_thesis.pdf
-thesis/phd_thesis.synctex.gz
-thesis/phd_thesis.toc
-thesis/phd_thesis.bbl
-thesis/phd_thesis.blg
+thesis/*.out
+thesis/*.pdf
+thesis/*.synctex.gz
+thesis/*.toc
+thesis/*.bbl
+thesis/*.blg
+thesis/*.log
