@@ -100,49 +100,254 @@ Warszawa, \textcolor{red}{2023}
 %\addcontentsline{toc}{section}{Przedmowa}
 %\section*{Przedmowa}
 
-\include{intro}
+\chapter{Wprowadzenie}
 
-\include{kde}
-
-\chapter{Wykrywanie elementów nietypowych 0}
-
-\section{Wstęp 0}
-
-Element nietypowy to obserwacja lub punkt danych, który znacznie różni się od innych obserwacji w zbiorze danych. Jest to wartość znacznie wykraczająca poza oczekiwany zakres wartości oparty na innych punktach danych. Innymi słowy, jest to obserwacja, która tak bardzo odbiega od innych obserwacji, że budzi podejrzenie, iż została wygenerowana przez innych mechanizm \cite{Hawkins_1980}. Obserwacje odosobnione mogą być spowodowane różnymi czynnikami, takimi jak błędy pomiaru, błędy wprowadzania danych lub nietypowe okoliczności, które nie są reprezentatywne dla pozostałych danych. Tego typu obserwacje mogą mieć znaczący wpływ na analizę statystyczną, dlatego ważne jest ich wykrywanie i przetwarzanie. Jeśli elementy nietypowe nie zostaną zidentyfikowane i odpowiednio uwzględnione, mogą zniekształcić wyniki analiz i prowadzić do błędnych wniosków. Na przykład obserwacje odosobnione mogą mieć nieproporcjonalny wpływ na miary tendencji centralnej, takie jak średnia czy mediana, prowadząc do wypaczonych lub obciążonych szacunków.
-
-Wykrywanie elementów nietypowych jest ważnym krokiem w analizie danych, ponieważ może pomóc w zapewnieniu dokładności i ważności modeli statystycznych, a tym samym w wyciąganych na ich podstawie wnioskach. Zagadnienie wykrywania elementów nietypowych znajduje zastosowanie w wielu różnych dziedzinach życia, między innymi w finansach, opiece zdrowotnej i naukach o środowisku, gdzie obserwacje odosobnione mogą mieć znaczący wpływ na proces podejmowania decyzji:
-\begin{itemize}
-\item \textbf{Oszustwa finansowe:} Wykrywanie elementów nietypowych jest szeroko stosowane w finansach do identyfikowania nieuczciwych transakcji, które często rozpoznawane są jako nietypowe pod względem kwot lub częstotliwości transakcji. Wykorzystując metody wykrywania obserwacji odosobnionych do identyfikowania nietypowych wzorców lub zachowań, instytucje finansowe mogą podejmować odpowiednie działania w celu zapobiegania oszustwom i ochrony aktywów swoich klientów.
-\item \textbf{Diagnostyka medyczna:} Wykrywanie elementów nietypowych jest stosowane w diagnostyce medycznej w celu identyfikacji rzadkich lub nietypowych schorzeń. Na przykład w genomice wykrywanie obserwacji odosobnionych można wykorzystać do identyfikacji pacjentów z rzadkimi mutacjami genetycznymi, które są związane z określoną chorobą. Informacje te mogą pomóc pracownikom służby zdrowia w stawianiu dokładniejszych diagnoz i opracowywaniu skuteczniejszych planów leczenia.
-\item \textbf{Monitorowanie środowiska:} Wykrywanie elementów nietypowych jest używane w monitorowaniu środowiska do identyfikowania nieprawidłowych lub nieoczekiwanych odczytów w czujnikach środowiskowych. Na przykład w monitorowaniu jakości powietrza wykrywanie obserwacji odosobnionych może być wykorzystywane do identyfikowania nagłych skoków stężeń zanieczyszczeń, które mogą być spowodowane zdarzeniami środowiskowymi, takimi jak pożary lasów lub wypadki przemysłowe. Informacje te mogą pomóc naukowcom zajmującym się środowiskiem w śledzeniu zmian w środowisku i podejmowaniu odpowiednich działań w celu złagodzenia skutków zagrożeń środowiskowych.
-\end{itemize}
-
-Jednym z największych wyzwań w procesie wykrywania elementów nietypowych jest to, że nie ma uniwersalnego podejścia, a odpowiednia metoda wykrywania elementów nietypowych może różnić się w zależności od charakteru danych i postawionego pytania badawczego. Kolejnym wyzwaniem jest to, że obserwacje odosobnione mogą być trudne do wykrycia, szczególnie w dużych i złożonych zbiorach danych, i mogą wymagać specjalistycznych technik. Ponadto ustalenie, czy obserwacja jest naprawdę elementem nietypowym, czy też prawidłowym punktem danych, może być trudne. Na przykład w niektórych przypadkach obserwacja odosobniona może reprezentować rzadkie, ale ważne zdarzenie, które jest przedmiotem zainteresowania analityka danych, a nie błąd pomiaru lub błędne wprowadzanie danych. Dlatego ważne jest, aby dokładnie rozważyć kontekst danych i postawione pytanie badawcze podczas identyfikowania i postępowania z obserwacjami odosobnionymi.
-
-Znanych jest wiele podejść do wykrywania elementów nietypowych, które można ogólnie podzielić na dwie kategorie: nienadzorowane (ang. \textit{unsupervised}) i nadzorowane (ang. \textit{supervised}). Obie kategorie dodatkowo złożone są z różnych klas metod, co całościowo prezentuje się w następujący sposób:
-\begin{enumerate}
-\item Nienadzorowane podejścia nie wymagają oznaczonych danych tzn. brak jest informacji czy dana obserwacja jest typowa czy nietypowa -- taka informacja jest po prostu nieznana z założenia. Dodatkowo opierają się na założeniu, że obserwacje odosobnione to punkty danych, które znacznie różnią się od większości danych. Niektóre popularne podejścia nienadzorowane to:
-\begin{itemize}
-\item Metody statystyczne: Metody te opierają się na właściwościach statystycznych danych, takich jak średnia, wariancja i korelacja. Elementy nietypowe identyfikowane są jako punkty danych, które znacznie odbiegają od oczekiwanych właściwości statystycznych.
-\item Metody odległościowe: Metody te identyfikują elementy nietypowe jako punkty danych, które położone są daleko od reszty danych. Typowe metody oparte na odległości to k-nearest neighbor (k-NN) and Local Outlier Factor (LOF).
-\item Metody gęstościowe: Metody te identyfikują elementy nietypowe jako punkty danych położone w obszarach o małym zagęszczeniu przestrzeni. Powszechnymi metodami opartymi na gęstości są DBSCAN i MeanShift.
-\item Metody klasteryzacyjne: Metody te najpierw grupują dane, a następnie identyfikują elementy nietypowe jako punkty danych, które nie należą do żadnego klastra lub należą do małych klastrów.
-\end{itemize}
-\item Nadzorowane podejścia wymagają oznaczonych danych przy użyciu specjalnej etykiety, określającej czy dana obserwacja jest typowa czy nietypowa, i opierają się na założeniu, że obserwacje odosobnione to punkty danych należące do innej klasy niż większość danych. Niektóre popularne podejścia nadzorowane to:
-\begin{itemize}
-\item Metody oparte na klasyfikacji: Metody te dopasowują klasyfikator w zakresie rozróżniania normalnych (typowych) i odosobnionych (nietypowych) punktów danych. Powszechnymi metodami opartymi na klasyfikacji są One-Class SVM i Random Forest.
-\item Metody oparte na regresji: Metody te dopasowują model regresji, tak aby przewidywać zmienną objaśnianą (zależną) i identyfikować elementy nietypowe jako punkty danych z dużymi błędami prognozy.
-\end{itemize}
+Rozwój technologiczny i informacyjny, zapoczątkowany w XX wieku, doprowadził do wytworzenia ogromnej ilości danych, które to nieustannie trwa do dziś, a ich ilość rośnie w~tempie wykładniczym. Sytuacja ta wymusiła powstanie nowych dziedzin nauki i inżynierii, zajmujących się przechowywaniem oraz przetwarzaniem tak licznych zbiorów danych (ang. \textit{big data}). W celu przeprowadzenia analizy i eksploracji danych oraz tworzenia, opartych o nie,  modeli statystycznych, sukcesywanie wykorzystywane są procedury statystyki matematycznej (opracowane już przed rewolucją informacyjną \cite{Robertson_1990}) na nieznaną wcześniej skalę. Wśród nich wyróżnia się:
+\begin{enumerate}[label=(\alph*)] % (a), (b), (c), ...
+\item \label{a} wykrywanie elementów nietypowych \cite{Aggarwal_2017, Barnett_1978} -- identyfikacja obserwacji (elementów zbioru danych), które znacznie różnią się od pozostałych,
+\item klasteryzacja \cite{Xu_2008} -- grupowanie obserwacji w stosunkowo jednorodne podgrupy,
+\item \label{c} klasyfikacja \cite{Duda_2000} -- przypisanie testowej obserwacji do jednej z wyróżnionych klas.
 \end{enumerate}
-Do zagadnienia wykrywania elementów nietypowych można podejść z różnych punktów widzenia, a wybór metody zależy od specyfiki danych i postawionego problemu. Metody nienadzorowane są częściej stosowane w praktyce, ponieważ oznaczone dane są często niedostępne i mogą być skuteczne w identyfikowaniu szerokiego zakresu typów obserwacji odosobnionych. Metody nadzorowane mogą być przydatne, gdy dostępne są dane oznaczone etykietami, i mogą być skuteczne w identyfikowaniu obserwacji odosobnionych, które w określony sposób różnią się od większości danych. Powyższa lista metod wykrywania elementów nietypowych jest niewyczerpująca i ujęta w sposób skrótowy, gdyż nie jest kluczowa z punktu widzenia niniejszej rozprawy, a jedynie stanowi poglądowy ich przegląd. Dogłębne rozszerzenie powyższej listy wraz z szczegółowym opisem zawarte jest w pracach \cite{Aggarwal_2017, Hawkins_1980, Hodge_2004, Rousseeuw_2011}.
+Powyższe procedury są fundamentalnymi zagadnieniami w większości praktycznych zastosowań analizy i eksploracji danych \cite{Nisbet_2018}. Ponadto w wielu zastosowaniach procedury te stanowią dogodny szkielet koncepcyjny projektowanego rozwiązania \cite{Aggarwal_2015}. Wykrywanie elementów nietypowych pozwala na oczyszczenie danych z elementów odstających i~elementów obciążonych błędami grubymi, a w konsekwencji wprowadzających fałszywą informację \cite{Zieba_2013}. Klasteryzacja umożliwia podział danych na podzbiory podobnych elementów, dzięki czemu dalsza analiza przeprowadzana oddzielnie na jednorodnych podzbiorach staje się bardziej wydajna lub w ogóle możliwa. Z kolei klasyfikacja umożliwia przypisanie elementu -- będącego przedmiotem zainteresowania -- do jednej z wcześniej zdefiniowanych klas i dzięki temu wykorzystania tego elementu do wcześniej przygotowanej operacji, specyficznej względem owej klasy \cite{Kulczycki_2007}. Oczywiście każdy praktyczny problem wymaga zastosowania dodatkowych działań i indywidualnego podejścia \cite{Larose_2014}, jednakże procedury opisane w punktach \ref{a}--\ref{c} często stanowią istotne ramy wypracowanego rozwiązania. Ilustracja ich rezultatów, otrzymanych dla przykładowych danych syntetycznych w przestrzeni dwuwymiarowej, przedstawiona została na rysunku \ref{fig:intro}.
 
-W przedłożonej rozprawie zaprezentowana została metoda gęstościowa oparta o estymację gęstości przy użyciu estymatora jądrowego (zdefiniowanego w rozdziale \ref{chap:kde}) rozszerzona o ujęcie warunkowe, co stanowi fundament tego rozdziału. Nie rozróżnia się tutaj szumu od anomalii -- obie kategorie stanowią jedną wspólną kategorię obserwacji odosobnionych tj. rzadko występujących w sensie zagęszczenia przestrzeni. Owe zagęszczenie badane jest za pomocą jądrowego estymatora gęstości. Dodatkowo przyjmuje się, iż dane są na tyle surowe, że pozbawione są etykiet określających czy dana obserwacja jest typowa lub nietypowa. Innymi słowy badane zagadnienie traktuje się w pełni jako nienadzorowane.
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.45]{intro}
+    \vspace{-0.5cm} 
+    \caption{Ilustracja przykładowych rezultatów procedur \ref{a}--\ref{c}.}
+    \label{fig:intro}
+\end{figure}
 
-\textcolor{red}{Ten rozdział jest zorganizowany w następujący sposób. W sekcji 1.2 omówiono znaczenie modelowania danych w analizie wartości odstających. W sekcji 1.3 przedstawiono podstawowe modele wartości odstających do wykrywania wartości odstających. Zespoły odstające przedstawiono w sekcji 1.4. W sekcji 1.5 omówiono podstawowe typy danych wykorzystywane do analizy. Sekcja 1.6 wprowadza koncepcję nadzorowanego modelowania wartości odstających do analizy danych. Metody oceny algorytmów wykrywania wartości odstających omówiono w sekcji 1.7. Wnioski przedstawiono w punkcie 1.8.}
+W wielu zadaniach praktycznych informacje zawarte w danych mogą zostać dodatkowo uściślone poprzez pomiar i wprowadzenie do modelu bieżących wartości czynników mających istotny wpływ na badane zjawisko. Takim czynnikiem może być na przykład aktualna temperatura w zagadnieniach inżynierskich lub dzień tygodnia w zagadnieniach marketingowych. Z formalnego punktu widzenia cel ten można osiągnąć przez zastosowanie probabilistycznego podejścia warunkowego \cite{Casella_2002}. Wówczas podstawowe atrybuty, nazywane objaśniajacymi, zależą od wartości warunkowych, których zmierzone i wprowadzone wartości mogą w znaczący sposób uściślić informacje dotyczące rozpatrywanego obiektu. \textbf{Takie podejście, zastosowane do procedur wykrywania elementów nietypowych, klasteryzacji i klasyfikacji, stanowi przedmiot niniejszej rozprawy}.
 
-\noindent \textcolor{red}{Wskaźniki jakości.}
+W celu określenia charakterystyk danych wykorzystana została nieparametryczna metoda estymatorów jądrowych \cite{Kulczycki_2005, Wand_1995}, która uwalnia badane procedury od założeń dotyczących postaci rozkładów prawdopodobieństwa charakteryzujących zarówno objaśniające, jak i warunkowe atrybuty. Koncepcja ta została wykorzystana w przypadku wszystkich trzech procedur \ref{a}--\ref{c}. Uzyskana w ten sposób jednorodność metodologii okazuje się bardzo cenna w praktycznych zastosowaniach. Uproszcza zrozumienie, interpretację, implementację i zgodność z indywidualnymi warunkami badawczymi, co jest warte szczególnego podkreślenia, zwłaszcza w kontekście współczesnych złożonych i interdyscyplinarnych zastosowań.
 
-\chapter{Wykrywanie elementów nietypowych}
+\textcolor{red}{Rozdział XXX niniejszej pracy przedstawia główne pojęcia teorii estymacji, natomiast wstępne zagadnienia matematyczne dotyczące statystycznych estymatorów jądrowych przedstawione zostały w rozdziale XXX. Procedury identyfikacji elementów nietypowych, klasteryzacji i klasyfikacji w podejściu warunkowym zostały opisane odpowiednio w rozdziałach XXX, XXX i XXX. Rozdział XXX prezentuje wyniki testów empirycznych, najpierw dla ilustracyjnych, sztucznie wygenerowanych danych (podrozdział XXX), a następnie dla zagadnień poczucia szczęścia (podrozdział XXX) i wreszcie dla badań z zakresu zanieczyszczeń środowiska (podrozdział XXX). Na zakończenie umieszczono uwagi końcowe oraz podsumowanie ninejszej pracy odpowiednio w rozdziałach XXX i XXX.}
+
+\chapter{Statystyczny estymator jądrowy} \label{chap:kde}
+
+\textcolor{red}{Rozkład gęstości prawdopobieństwa $f_X(x)$ zmiennej losowej $X$ jest nieodłączonym elementem działu nauki, jakim jest statystyka matematyczna. Przybliża nas do lepszego zrozumienia badanej populacji, opisanej przez tę zmienną. Najcześciej jednak jest on nieznany, z czego wynika potrzeba jego estymacji $\hat{f}_X(x)$, wyznaczanej na podstawie próby z tejże populacji.}
+
+\textcolor{red}{Podstawowym podziałem metod estymacji rozkładów gęstości jest podział na metody parametryczne, w których zakłada się a priori zadany rozkład (którego parametry należy dopasować) oraz metody nieparametryczne, w których nie stosuje się założeń odnośnie rozkładu - krzywa gęstości może przyjmować dowolny kształt.}
+
+W niniejszym rozdziale przedstawiona została nieparametryczna metoda estymacji rozkładu, nazywana jądrowym estymatorem gęstości \textcolor{red}{[referencja]}. Jej ujęcie bezwarunkowe opisane zostało w podrozdziale \ref{sec:kde}. Istotnym zagadnieniem tego rodzaju estymacji są metody wyznaczania parametru wygładzania, którym poświęcono miejsce w podrozdziale \ref{subsec:bandwidth_selection}. Ostatni podrozdział \ref{sec:ckde} uzupełnia temat estymatora jądrowego o estymację gęstości w ujęciu warunkowym, która stanowi matematyczny fundament niniejszej rozprawy.
+
+\section{Estymacja gęstości w ujęciu bezwarunkowym} \label{sec:kde}
+
+Dany jest $m$-elementowy zbiór obserwacji -- będący realizacjami zmiennej losowej $X$ -- w postaci $n$-wymiarowych wektorów:
+\begin{equation} \label{eq:kde_dataset}
+x_1, x_2, ..., x_m \in \mathbb{R}^n.
+\end{equation}
+Dla tak określonego zbioru, wzór ważonego estymatora jądrowego przyjmuje postać
+\begin{equation} \label{eq:kde1}
+\hat{f}_X(x) = \sum_{i=1}^m w_i \mathcal{K} (x,x_i,h),
+\end{equation}
+gdzie $w_i$ oznacza nieujemną wagę $i$-tej obserwacji przy założeniu $\sum_{i=1}^m w_i=1$, natomiast dodatnia stała $h \in \mathbb{R}^n$ jest czynnikiem skalującym, zwanym parametrem wygładzania (opisanym poniżej w podrozdziale \ref{subsec:bandwidth_selection}). Jednowymiarowe funkcje $K_j:\mathbb{R} \rightarrow [0,\infty)$  (nazywane jądrami) wchodzą w skład jądra produktowego
+\begin{equation}\label{eq:product_kernel}
+\mathcal{K}(x,x_i,h) = \prod_{j=1}^n \frac{1}{h_j} K_j \left( \frac{x_j-x_{i,j}}{h_j} \right).
+\end{equation}
+W praktyce jednak stosuje się jedną, wspólną postać jądra dla każdej współrzędnej $j$, a~zatem $K_j(x) \equiv K(x)$. W dalszej części rozprawy, oznaczenie estymatora jądrowego $\hat{f}_X(x)$ zapisywane jest w uproszczonej postaci $\hat{f}(x)$. Uwzględniając powyższe uwagi, estymator jądrowy przyjmuje ostateczną postać
+\begin{equation} \label{eq:kde2}
+\hat{f}(x) = \sum_{i=1}^m w_i \prod_{j=1}^n \frac{1}{h_j} K \left( \frac{x_j-x_{i,j}}{h_j} \right).
+\end{equation}
+Zakłada się ponadto, iż jądro $K(x)$:
+\begin{itemize}
+\item jest symetryczne względem zera
+\begin{equation} \label{eq:kernel_cond1}
+K(x) = K(-x),
+\end{equation}
+\item ma słabe maksimum globalne w zerze
+\begin{equation} \label{eq:kernel_cond2}
+K(0) \geq K(x),
+\end{equation}
+\item spełnia warunek jednostkowości całki
+\begin{equation} \label{eq:kernel_cond3}
+\int_\mathbb{R} K(x) \mathrm{d}x = 1.
+\end{equation}
+\end{itemize}
+Z rozważań teoretycznych \textcolor{red}{[referencja]} wynika, iż wybór jądra nie ma istotnego znaczenia w sensie dokładności estymacji rozkładu. Najczęściej wybór ten zdeterminowany jest przez właściwości pożądanego estymatora lub aspekty obliczeniowe, korzystne z punktu widzenia rozważanego zagadnienia. Za podstawowe jądro uważa się jądro normalne, którego jedną z najważniejszych właściwości jest istnienie pochodnej dowolnego rzędu w całej dziedzinie. Więcej na temat jąder w książkach \textcolor{red}{[referencje]}.
+Wzory wybranych jąder, spełniających założenia \eqref{eq:kernel_cond1}-\eqref{eq:kernel_cond3}, podane są w tabeli \ref{table:kernels}, natomiast ich wykresy zilustrowane są na rysunku \ref{fig:kernels}.
+\begin{table}[H]
+\caption{Wzory wybranych jąder.}
+\centering
+\begin{tabular}{ ll }
+\toprule
+\textbf{Nazwa jądra} & \textbf{Formuła} \\ 
+\toprule
+\addlinespace[0.2cm]
+Normalne & $K(x) = \frac{1}{\sqrt{2 \pi}} \exp \left( \frac{x^2}{2} \right)$ \\
+\addlinespace[0.2cm]
+Jednorodne & $K(x) = \begin{cases} 0.5 & \text{dla } |x| \leq 1 \\ 0 & \text{dla } |x| > 1  \end{cases}$ \\ 
+\addlinespace[0.2cm]
+Epanechnikowa & $K(x) = \begin{cases} \frac{3}{4} (1 - x^2) & \text{dla } |x| \leq 1 \\ 0 & \text{dla } |x| > 1  \end{cases}$ \\ 
+\addlinespace[0.2cm]
+Cauchy'ego & $K(x) = \frac{2}{\pi (x^2 + 1)^2}$ \\
+\addlinespace[0.1cm]
+\bottomrule
+\end{tabular}
+\label{table:kernels}
+\end{table}
+\textcolor{red}{Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń Pusta przestrzeń}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.65]{kernels}
+    \vspace{-0.5cm} 
+    \caption{Wykresy wybranych jąder.}
+    \label{fig:kernels}
+\end{figure}
+
+\begin{exmp} \label{exmp:kde_construction}
+Konstrukcja estymatora jądrowego dla $9$-elementowego zbioru jednowymarowych obserwacji o równych wagach, przedstawiona jest na rysunku \ref{fig:kde_construction}. Do konstrukcji wykorzystane zostało jądro normalne oraz arbitralnie ustalona wartość parametru wygładzania $h = 0.7$. Interpretacja wzoru \eqref{eq:kde2} jest następująca: dla pojedynczej obserwacji $x_i$ funkcja $K$ przesunięta o wektor $x_i$ i przeskalowana przez współczynnik $h$ reprezentuje oszacowanie rozkładu przy ustalonej wartości $x_i$. Dla $m$ niezależnych obserwacji $x_1, x_2, ..., x_m$ estymator gęstości prawdopodobieństwa przyjmuje formę sumy takich szacunków. Tak określona suma jest dodatkowo unormowana, aby zapewnić warunek $\int_\mathbb{R} \hat{f}(x) \mathrm{d}x = 1$.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.65]{kde_construction}
+    \vspace{-0.5cm} 
+    \caption{Przykład konstrukcji estymatora jądrowego na zbiorze równoważnych obserwacji.}
+    \label{fig:kde_construction}
+\end{figure}
+\end{exmp}
+
+\begin{exmp}
+Podobna konstrukcja estymatora jądrowego, zbudowanego na zbiorze obserwacji o różnych wagach, zaprezentowana została na rysunku \ref{fig:kde_construction_weighted}. Do konstrukcji estymatora wykorzystany został zbiór obserwacji z przykładu \ref{exmp:kde_construction}, jednak wzmocnione zostały dwie obserwacje najbardziej wysunięte na prawo (zwiększenie wag w stosunku $1:2:3$), z czego wynika zmieniony kształt otrzymanej krzywej gęstości $\hat{f}(x)$, w porównaniu do krzywej z przykładu \ref{exmp:kde_construction}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.65]{kde_construction_weighted}
+    \vspace{-0.5cm} 
+    \caption{Przykład konstrukcji estymatora jądrowego na zbiorze nierównoważnych obserwacji.}
+    \label{fig:kde_construction_weighted}
+\end{figure}
+\end{exmp}
+
+\subsection{Wyznaczanie parametru wygładzania} \label{subsec:bandwidth_selection}
+
+\textcolor{red}{(Opis i interpretacja) Kryterium scałkowanego błędu średniokwadratowego
+\begin{equation} \label{eq:mise}
+MISE = \int_{\mathbb{R}^n} \mathbb{E}[(\hat{f}(x) - f(x))^2] \mathrm{d}x
+\end{equation}
+Optymalizacja takiego kryterium względem $h$ daje (dla 1d)}
+\begin{equation} \label{eq:opt_bandwidth1}
+h_o = \left( \frac{R(K)}{U(K)^2 R(f^{\prime\prime}) m} \right)^\frac{1}{5},
+\end{equation}
+gdzie $U(g) = \int_{-\infty}^\infty x^2 g(x) \mathrm{d}x$ oraz $R(g) = \int_{-\infty}^\infty g(x)^2\mathrm{d}x$.
+
+Bezpośrednie zastosowanie powyższych wzorów nie jest możliwe, gdyż nieznany jest rozkład $f$, a tym samym niemożliwe jest wyznaczenie $R(f^{\prime\prime})$. Wzory te jednak stanowią podstawę dla dogodnych metod suboptymalnych, takich jak:
+\begin{enumerate}
+\item metoda przybliżona \textcolor{red}{[referencja]}
+\item metoda podstawień (\textcolor{red}{direct}) \textcolor{red}{[referencja]}
+\item metoda podstawień (\textcolor{red}{solve-the-equation})
+\item metoda \textcolor{red}{likelihood cross-validation}
+\end{enumerate}
+Powyższe metody stosowane są do zagadnień jednowymiarowych, a także do zagadnień wielowymiarowych, gdy używane jest jądro produktowe - wówczas obliczenia przeprowadza się wielokrotnie, odrębnie dla poszczególnych wspołrzędnych.
+
+\subsection*{Metoda przybliżona}
+
+Najłatwiejszym rozwiązaniem problemu nieznanego rozkładu $f$ jest arbitralne założenie, iż~$f$~jest rozkładem normalnym z odchyleniem standardowym oszacowanym na podstawie rozważanego zbioru obserwacji. Wówczas $R(f^{\prime\prime}) = \frac{3}{8 \sqrt{\pi} \hat{\sigma}^5}$, a wzór \eqref{eq:opt_bandwidth1} przyjmuje postać
+\begin{equation} \label{eq:normal_reference}
+\hat{h}_{pr} = \left( \frac{8 \pi^{1/2} R(K)}{3 U(K)^2 m} \right)^\frac{1}{5} \hat{\sigma},
+\end{equation}
+przy ważonym estymatorze odchylenia standardowego
+\begin{equation}
+\hat{\sigma} = \sqrt{\frac{m}{m-1} \sum_{i=1}^m w_i (x_i - \sum_{i=1}^m w_i x_i)^2}.
+\end{equation}
+
+\subsection*{Metoda podstawień (\textcolor{red}{direct})}
+
+Metoda podstawień (\textcolor{red}{direct}) polega na idei "podstawienia" estymatora $\hat{\psi}_4$ nieznanej wielkości $R(f^{\prime\prime})$ we wzorze \eqref{eq:opt_bandwidth1}, wówczas wzór ten przyjmuje postać
+\begin{equation} \label{eq:opt_bandwidth_modified}
+\hat{h}_{po} = \left( \frac{R(K)}{U(K)^2 \hat{\psi}_4(g) m} \right)^\frac{1}{5},
+\end{equation}
+przy
+\begin{equation} \label{eq:psi}
+\hat{\psi}_r(g) = \frac{1}{m^2 g^{r+1}} \sum_{i=1}^m \sum_{j=1}^m \tilde K^{(r)} \left( \frac{x_i - x_j}{g} \right),
+\end{equation}
+gdzie $g$ jest parametrem wygładzania innym niż $h$, a jądro $\tilde K$ również może przyjmować inną postać niż $K$. W praktyce dogodnym wyborem $\tilde K$ jest jądro normalne, którego pożądaną cechą tutaj jest istnienie pochodnej dowolnego rzędu w całej dziedzinie. Symbol $^{(r)}$ oznacza pochodną funkcji rzędu $r$.
+
+Łatwo zauważyć, że podstawienie wzoru \eqref{eq:psi} do wzoru \eqref{eq:opt_bandwidth_modified} nie jest wystarczające do wyliczenia $\hat{h}_{po}$, gdyż nieznany jest parametr $g$. W analogiczny sposób należy go wyznaczyć, podstawiając $\hat{\psi}_6$ za nieznaną wówczas wielkość $R(f^{(3)})$, napotykając na nieznany parametr $g_2$ na kolejnym poziomie zagnieżdzenia. W celu zatrzymania tak skonstruowanej nieskończonej pętli obliczeń, należy podstawić arbitralną wartość parametru wygładzania (np. wykorzystując wzór \eqref{eq:normal_reference} metody przybliżonej) na wybranym poziomie zagnieżdzenia. Stąd wynika pełna nazwa metody: metoda podstawień  (\textcolor{red}{direct}) $l$-tego poziomu.
+
+Warto odnotować, iż przy $l=0$ metoda podstawień tożsama jest z metodą przybliżoną, a rozważania teoretyczne wskazują, aby wartość $l$ była równa conajmniej~$2$ (ze wskazaniem na $2$). Więcej na ten temat w \textcolor{red}{[referencje]}. \textcolor{red}{Złożoność kwadratowa.}
+
+\begin{exmp}
+Porównanie powyższych metod, zilustrowane zostało na rysunku \ref{fig:bandwidth_selection}. Po~lewej stronie rysunku przedstawione zostało porównanie metody przybliżonej z metodą podstawień rzędu 2, zastosowanych do konstrukcji estymatora jądrowego na jednowymiarowych danych wygenerowanych ze standardowego rozkładu normalnego $X \sim N(0,1)$, natomiast po prawej stronie rysunku zaprezentowane zostało podobne porównanie, uzupełnione o metodę podstawień rzędu 3, zastosowane na jednowymiarowych danych wygenerowanych z mieszaniny rozkładów normalnych \textcolor{red}{$X \sim 0.7 N(0,1) + 0.3 N(3,1)$}, reprezentującej rozkład dwumodalny. W obu zestawieniach wykorzystane zostało jądro normalne, a liczności zbiorów obserwacji równe są $m=100$. Przykład ten ilustruje przewagę metody przybliżonej nad metodą podstawień, gdy badany zbiór obserwacji pochodzi z rozkładu jednomodalnego. W przypadku rozkładów wielomodalnych, lepszej jakości estymację gęstości uzyskuje się przy wykorzystaniu metody podstawień.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{bandwidth_selection}
+    \vspace{-0.5cm} 
+    \caption{Porównanie metody przybliżonej do metody podstawień na przykładowych zbiorach obserwacji wygenerowanych z rozkładu: a) jednomodalnego, b) dwumodalnego.}
+    \label{fig:bandwidth_selection}
+\end{figure}
+\end{exmp}
+
+\subsection*{Metoda podstawień (solve-the-equation)}
+
+\subsection*{Metoda likelihood cross-validation}
+
+\section{Estymacja gęstości w ujęciu warunkowym} \label{sec:ckde}
+Podstawowa koncepcja estymatora jądrowego \eqref{eq:kde1} zostanie teraz uogólniona do ujęcia warunkowego. Niech zatem podstawowe (objaśniające) atrybuty dane będą w postaci $n_X$-wymiarowej zmiennej $X$, natomiast atrybuty warunkowe reprezentowane będą przez $n_Y$-wymiarową zmienną $Y$. Ich kompozycja tworzy $(n_X+n_Y)$-wymiarową zmienną, której realizacje reprezentowne są przez $m$-elementowy zbiór obserwacji:
+\begin{equation}\label{eq:ckde_dataset}
+\begin{bmatrix}
+x_1 \\
+y_1
+\end{bmatrix},
+\begin{bmatrix}
+x_2 \\
+y_2
+\end{bmatrix},
+...,
+\begin{bmatrix}
+x_m \\
+y_m
+\end{bmatrix} \in \mathbb{R}^{n_X+n_Y},
+\end{equation}
+będący rozszerzeniem zbioru \eqref{eq:kde_dataset} o zmienną warunkową. Poszczególne elementy zbioru \eqref{eq:ckde_dataset} można interpretować jako wartości objaśniające $x_i$ przyjmowane w pomiarach, gdy wartości warunkowe przyjmują odpowiednie wartości $y_i$.
+
+Przyjmując dodatkowo arbitralną wartość zmiennej warunkującej
+\begin{equation}
+y^* \in \mathbb{R}^{n_Y},
+\end{equation}
+estymator jądrowy warunkowego rozkładu zmiennej $X$ dla powyższej wartości warunkującej $y^*$ można zdefiniować przy pomocy funkcji $\hat{f}_{X \mid Y}(x \mid y^*):\mathbb{R}^{n_X} \rightarrow [0,\infty)$ określonej wzorem
+\begin{equation} \label{eq:ckde}
+\hat{f}_{X \mid Y}(x \mid y^*) = \frac{\hat{f}_{X,Y}(x,y^*)}{\hat{f}_Y(y)},
+\end{equation}
+gdzie $\hat{f}_{X,Y}$ jest bezwarunkowym estymatorem jądrowym łącznego rozkładu zmiennych $X$~oraz $Y$, natomiast $\hat{f}_Y$ jest bezwarunkowym estymatorem jądrowym zmiennej~$Y$, do~konstrukcji którego wykorzystuje się dodatnio określone jądro (np. jądro normalne), w celu zapewnienia warunku dodatniej wartości mianownika we wzorze \eqref{eq:ckde}. Gęstość warunkową, można zatem traktować jako gęstość "standardową" (bezwarunkową), której postać jest doprecyzowana przez wartość warunkującą $y^*$, adekwatną w badanym zagadnieniu.
+
+W wyniku połączenia wzorów \eqref{eq:kde2} i \eqref{eq:ckde}, otrzymuje się warunkowy estymator jądrowy wyrażony wzorem
+\begin{equation} \label{eq:ckde2}
+\hat{f}_{X \mid Y}(x \mid y^*) = \frac{\sum_{i=1}^m w_i \prod_{j=1}^{n_X} \frac{1}{h_j} K \left( \frac{x_j-x_{i,j}}{h_j} \right) \prod_{j=1}^{n_Y} \frac{1}{h_{j+n_X}} K \left( \frac{y^*_j-y_{i,j}}{h_{j+n_X}} \right)}
+{\sum_{i=1}^m w_i \prod_{j=1}^{n_Y} \frac{1}{h_{j+n_X}} K \left( \frac{y^*_j-y_{i,j}}{h_{j+n_X}} \right)}.
+\end{equation}
+Warto odnotować, iż uwagi dotyczące doboru jądra $K$ oraz wyznaczania parametru wygładzania $h \in \mathbb{R}^{n_X+n_Y}$, opisane odpowiednio w sekcji \ref{sec:kde} oraz \ref{subsec:bandwidth_selection}, mają swoje zastosowanie również tutaj.
+W dalszej części rozprawy, oznaczenie estymatora $\hat{f}_{X \mid Y}(x \mid y^*)$ zapisywane będzie w uproszczonej postaci $\hat{f}(x \mid y^*)$.
+
+Wykorzystując następnie unormowany parametr
+\begin{equation} \label{eq:d}
+d_i = \frac{d_i^\prime}{\sum_{i=1}^m d_i^\prime},
+\end{equation}
+gdzie
+\begin{equation} \label{eq:d_prim}
+d_i^\prime = w_i \prod_{j=1}^{n_Y} K \left( \frac{y^*_j-y_{i,j}}{h_{j+n_X}} \right),
+\end{equation}
+można skonstruować uproszczone wyrażenie warunkowego estymatora jądrowego
+\begin{equation} \label{eq:ckde3}
+\hat{f}(x \mid y^*) = \sum_{i=1}^m d_i \prod_{j=1}^{n_X} \frac{1}{h_j} K \left( \frac{x_j-x_{i,j}}{h_j} \right).
+\end{equation}
+Każda wartość parametru $d_i$ charakteryzuje "odległość" wartości warunkującej $y^*$ od~wartości $y_i$, czyli tej wartości wektora warunkowego, dla którego uzyskano $i$-ty element zbioru \eqref{eq:ckde_dataset}. Owa "odległość" jest swego rodzaju uzupełnieniem wag $w_i$ poszczególnych obserwacji badanego zbioru, co uwidocznione jest w wizualnym podobieństwie wzoru warunkowego estymatora \eqref{eq:ckde3} oraz wzoru bezwarunkowego estymatora \eqref{eq:kde2}.
+
+\begin{exmp}
+Konstrukcja warunkowego estymatora jądrowego dla zbioru równoważnych obserwacji (przy parametrach $m=50, n_X=1, n_Y=1, y^*=1$) przedstawiona jest na rysunku \ref{fig:ckde_construction}. Do konstrukcji wykorzystane zostało jądro normalne oraz metoda przybliżona \eqref{eq:normal_reference} jako metoda wyznaczania parametru wygładzania. \textcolor{red}{(Interpretacja?) (z jakiego rozkładu losowano dane?)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{ckde_construction}
+    \vspace{-0.5cm} 
+    \caption{Przykład konstrukcji warunkowego estymatora jądrowego przy $y^*=1$.}
+    \label{fig:ckde_construction}
+\end{figure}
+\end{exmp}
+
+\chapter{Wykrywanie elementów nietypowych OLD}
 
 \section{Wstęp}
 
@@ -177,11 +382,49 @@ W przedłożonej rozprawie zaprezentowana została metoda gęstościowa oparta o
 
 \textcolor{red}{Ten rozdział jest zorganizowany w następujący sposób. W sekcji 1.2 omówiono znaczenie modelowania danych w analizie wartości odstających. W sekcji 1.3 przedstawiono podstawowe modele wartości odstających do wykrywania wartości odstających. Zespoły odstające przedstawiono w sekcji 1.4. W sekcji 1.5 omówiono podstawowe typy danych wykorzystywane do analizy. Sekcja 1.6 wprowadza koncepcję nadzorowanego modelowania wartości odstających do analizy danych. Metody oceny algorytmów wykrywania wartości odstających omówiono w sekcji 1.7. Wnioski przedstawiono w punkcie 1.8.}
 
+\chapter{Wykrywanie elementów nietypowych} \label{chap:outliers_detection}
+
+\section{Wstęp}
+
+Element nietypowy to obserwacja lub punkt danych, który znacznie różni się od innych obserwacji w zbiorze danych. Jest to wartość znacznie wykraczająca poza oczekiwany zakres wartości oparty na innych punktach danych. Innymi słowy, jest to obserwacja, która tak bardzo odbiega od innych obserwacji, że budzi podejrzenie, iż została wygenerowana przez innych mechanizm \cite{Hawkins_1980}. Obserwacje odosobnione mogą być spowodowane różnymi czynnikami, takimi jak błędy pomiaru, błędy wprowadzania danych lub nietypowe okoliczności, które nie są reprezentatywne dla pozostałych danych. Tego typu obserwacje mogą mieć znaczący wpływ na analizę statystyczną, dlatego ważne jest ich wykrywanie i przetwarzanie. Jeśli nie zostaną zidentyfikowane i odpowiednio uwzględnione, mogą zniekształcić wyniki analiz i prowadzić do błędnych wniosków. Na przykład obserwacje odosobnione mogą mieć nieproporcjonalny wpływ na miary tendencji centralnej, takie jak średnia, prowadząc do wypaczonych lub obciążonych szacunków. Wykrywanie elementów nietypowych jest ważnym krokiem w analizie danych, ponieważ może pomóc w zapewnieniu dokładności i ważności modeli statystycznych, a tym samym w wyciąganych na ich podstawie wnioskach.
+
+Zagadnienie wykrywania elementów nietypowych znajduje zastosowanie w wielu różnych dziedzinach życia, między innymi w finansach, opiece zdrowotnej i naukach o środowisku, gdzie obserwacje odosobnione mogą mieć znaczący wpływ na proces podejmowania decyzji:
+\begin{itemize}
+\item \textbf{Oszustwa finansowe:} Wykrywanie elementów nietypowych jest szeroko stosowane w finansach do identyfikowania nieuczciwych transakcji, które często rozpoznawane są jako nietypowe pod względem kwot lub częstotliwości transakcji. Wykorzystując metody wykrywania obserwacji odosobnionych do identyfikowania nietypowych wzorców lub zachowań, instytucje finansowe mogą podejmować odpowiednie działania w celu zapobiegania oszustwom i ochrony aktywów swoich klientów.
+\item \textbf{Diagnostyka medyczna:} Wykrywanie elementów nietypowych jest stosowane w diagnostyce medycznej w celu identyfikacji rzadkich lub nietypowych schorzeń. Na przykład w genomice wykrywanie obserwacji odosobnionych można wykorzystać do identyfikacji pacjentów z rzadkimi mutacjami genetycznymi, które są związane z określoną chorobą. Informacje te mogą pomóc pracownikom służby zdrowia w stawianiu dokładniejszych diagnoz i opracowywaniu skuteczniejszych planów leczenia.
+\item \textbf{Monitorowanie środowiska:} Wykrywanie elementów nietypowych jest używane w monitorowaniu środowiska do identyfikowania nieprawidłowych lub nieoczekiwanych odczytów w czujnikach środowiskowych. Na przykład w monitorowaniu jakości powietrza wykrywanie obserwacji odosobnionych może być wykorzystywane do identyfikowania nagłych skoków stężeń zanieczyszczeń, które mogą być spowodowane zdarzeniami środowiskowymi, takimi jak pożary lasów lub wypadki przemysłowe. Informacje te mogą pomóc naukowcom zajmującym się środowiskiem w śledzeniu zmian w środowisku i podejmowaniu odpowiednich działań w celu złagodzenia skutków zagrożeń środowiskowych.
+\end{itemize}
+
+Jednym z największych wyzwań w procesie wykrywania elementów nietypowych jest to, że nie ma uniwersalnego podejścia, a odpowiednia metoda wykrywania elementów nietypowych może różnić się w zależności od charakteru danych i postawionego pytania badawczego. Kolejnym wyzwaniem jest to, że obserwacje odosobnione mogą być trudne do wykrycia, szczególnie w dużych i złożonych zbiorach danych, i mogą wymagać specjalistycznych technik. Ponadto ustalenie, czy obserwacja jest naprawdę elementem nietypowym, czy też prawidłowym punktem danych, może być trudne. Na przykład w niektórych przypadkach obserwacja odosobniona może reprezentować rzadkie, ale ważne zdarzenie, które jest przedmiotem zainteresowania analityka danych, a nie stanowi o błędzie pomiaru lub błędnie wprowadzonych danych. Dlatego ważne jest, aby dokładnie rozważyć kontekst danych i postawione pytanie badawcze podczas przetwarzania wykrytych elementów nietypowych.
+
+Znanych jest wiele podejść do wykrywania elementów nietypowych, które można ogólnie podzielić na dwie kategorie: nienadzorowane (ang. \textit{unsupervised}) i nadzorowane (ang. \textit{supervised}). Obie kategorie dodatkowo złożone są z różnych rodzin metod. Całość można skrótowo przedstawić w następujący sposób:
+\begin{itemize}
+\item Nienadzorowane podejścia nie wymagają oznaczonych danych tzn. brak jest informacji czy dana obserwacja jest typowa czy nietypowa -- taka informacja jest po prostu nieznana z założenia. Dodatkowo opierają się na założeniu, że obserwacje odosobnione to punkty danych, które znacznie różnią się od większości danych. Niektóre popularne podejścia nienadzorowane to:
+\begin{itemize}
+\item Metody statystyczne: Metody te opierają się na właściwościach statystycznych danych, takich jak średnia, wariancja i korelacja. Elementy nietypowe identyfikowane są jako punkty danych, które znacznie odbiegają od oczekiwanych właściwości statystycznych.
+\item Metody odległościowe: Metody te identyfikują elementy nietypowe jako punkty danych, które położone są daleko od reszty danych. Typowe metody oparte na odległości to k-nearest neighbor (k-NN) and Local Outlier Factor (LOF).
+\item Metody gęstościowe: Metody te identyfikują elementy nietypowe jako punkty danych położone w obszarach o małym zagęszczeniu przestrzeni. Powszechnymi metodami opartymi na gęstości są DBSCAN i MeanShift.
+\item Metody klasteryzacyjne: Metody te najpierw grupują dane, a następnie identyfikują elementy nietypowe jako punkty danych, które nie należą do żadnego klastra lub należą do małych klastrów.
+\end{itemize}
+\item Nadzorowane podejścia wymagają oznaczonych danych przy użyciu specjalnej etykiety, określającej czy dana obserwacja jest typowa czy nietypowa, i opierają się na założeniu, że obserwacje odosobnione to punkty danych należące do innej klasy niż większość danych. Niektóre popularne podejścia nadzorowane to:
+\begin{itemize}
+\item Metody oparte na klasyfikacji: Metody te dopasowują klasyfikator w zakresie rozróżniania normalnych (typowych) i odosobnionych (nietypowych) punktów danych. Powszechnymi metodami opartymi na klasyfikacji są One-Class SVM i Random Forest.
+\item Metody oparte na regresji: Metody te dopasowują model regresji, tak aby przewidywać zmienną objaśnianą (zależną) i identyfikować elementy nietypowe jako punkty danych z dużymi błędami prognozy.
+\end{itemize}
+\end{itemize}
+Do zagadnienia wykrywania elementów nietypowych można podejść z różnych punktów widzenia, a wybór metody zależy od specyfiki danych i postawionego problemu. Metody nienadzorowane są częściej stosowane w praktyce, ponieważ oznaczone dane są często niedostępne i mogą być skuteczne w identyfikowaniu szerokiego zakresu typów obserwacji odosobnionych. Metody nadzorowane mogą być przydatne, gdy dostępne są dane oznaczone etykietami, i mogą być skuteczne w identyfikowaniu obserwacji odosobnionych, które w określony sposób różnią się od większości danych. Powyższa lista metod wykrywania elementów nietypowych jest niewyczerpująca i ujęta w sposób skrótowy, gdyż nie jest kluczowa z punktu widzenia niniejszej rozprawy, a jedynie stanowi poglądowy ich przegląd. Dogłębne rozszerzenie powyższej listy wraz z szczegółowym opisem zawarte jest w pracach \cite{Aggarwal_2017, Hawkins_1980, Hodge_2004, Rousseeuw_2011}.
+
+W przedłożonej rozprawie zaprezentowana została metoda gęstościowa oparta o estymację gęstości przy użyciu estymatora jądrowego (zdefiniowanego w rozdziale \ref{chap:kde}) rozszerzona o ujęcie warunkowe, co stanowi fundament tego rozdziału. Nie rozróżnia się tutaj szumu od anomalii -- obie kategorie stanowią jedną wspólną kategorię obserwacji odosobnionych tj. rzadko występujących w sensie zagęszczenia przestrzeni. Owe zagęszczenie badane jest za pomocą jądrowego estymatora gęstości. Dodatkowo przyjmuje się, iż dane są na tyle surowe, że pozbawione są etykiet określających czy dana obserwacja jest typowa lub nietypowa. Innymi słowy badane zagadnienie traktuje się w pełni jako nienadzorowane.
+
+\textcolor{red}{Ten rozdział jest zorganizowany w następujący sposób. W sekcji 1.2 omówiono znaczenie modelowania danych w analizie wartości odstających. W sekcji 1.3 przedstawiono podstawowe modele wartości odstających do wykrywania wartości odstających. Zespoły odstające przedstawiono w sekcji 1.4. W sekcji 1.5 omówiono podstawowe typy danych wykorzystywane do analizy. Sekcja 1.6 wprowadza koncepcję nadzorowanego modelowania wartości odstających do analizy danych. Metody oceny algorytmów wykrywania wartości odstających omówiono w sekcji 1.7. Wnioski przedstawiono w punkcie 1.8.}
+
+\textcolor{red}{Powyższe dwa akapity może warto przenieść nad Wstęp}
+
 \section{Procedura w ujęciu bezwarunkowym}  \label{sec:outliers_unconditional_procedure}
 
 Fundamentalną ideą prezentowanej tutaj procedury wykrywania elementów nietypowych jest uznanie obserwacji za nietypową (odosobnioną), jeżeli położona jest w rzadkim obszarze zagęszczenia przestrzeni, co ocenia się przy użyciu bezwarunkowego jądrowego estymatora gęstości \eqref{eq:kde2} skonstruowanego na podstawie wcześniej zgromadzonych danych dotyczących badanego zjawiska. Naturalnie jeżeli obserwacja położona jest w gęstym obszarze, to uznaje się ją za typową. Granicę między obszarem słabo zagęszczonym, a silnie zagęszczonym określa \textit{wartość graniczna} (tzw. próg), która została zdefiniowana poniżej, przy okazji wyszczególnionych kroków rzeczonej procedury.
 
-Biorąc zatem zbiór \eqref{eq:kde_dataset} oraz oznaczając element testowy, będący przedmiotem zainteresowania, jako $x_{test} \in \mathbb{R}^{n_X}$, proponuje się kolejne kroki niniejszej procedury w następujący sposób:
+Biorąc zatem zbiór \eqref{eq:kde_dataset} oraz element testowy, będący przedmiotem zainteresowania, oznaczony jako $x_{test} \in \mathbb{R}^{n_X}$, proponuje się kolejne kroki niniejszej procedury:
 \begin{enumerate}
 \item Pierwszym zadaniem jest wyznaczenie zbioru wartości jądrowego estymatora gęstości $\hat{f}(x)$ dla wszystkich obserwacji \eqref{eq:kde_dataset}. Wyznaczony w ten sposób zbiór oznaczony jest jako $V_1=\{\hat{f}(x_1),\hat{f}(x_2), ..., \hat{f}(x_m)\}$.
 \item Następnie należy obliczyć wartość graniczną $\hat{q}_r$, która zdefiniowana jest przez estymator kwantyla \cite{Hyndman_1996, Walker_1958} rzędu $r$ zbioru $V_1$.
@@ -189,13 +432,13 @@ Biorąc zatem zbiór \eqref{eq:kde_dataset} oraz oznaczając element testowy, b�
 \end{enumerate}
 Parametr $r$ stanowi o \textit{czułości} procedury: czym większa jego wartość, tym większą wartość przyjmuje próg $\hat{q}_r$, a tym samem wzrasta szansa, że obserwacja testowa zostanie uznana za nietypową. Aby wyznaczyć wartość graniczną $\hat{q}_r$, najpierw należy ustalić czułość procedury, daną w postaci stałej $r \in (0; 0.5)$, określającą pożądaną proporcję elementów nietypowych do elementów typowych, a dokładniej udział elementów nietypowych w zbiorze \eqref{eq:kde_dataset}. Dla uzasadnienia powyższego założenia należy zwrócić uwagę, że dla $r \geq 0.5$ elementy uznawane za nietypowe stają  się typowymi. W praktyce powszechnie używane są trzy wartości $r \in \{0.01,0.05,0.1\}$, ze szczególnym wskazaniem na drugą z nich.
 
-Testując zbiorowo tak zdefiniowaną procedurę wykrywania elementów nietypowych, na wszystkich elementach zbioru \eqref{eq:kde_dataset}, uzyskuje się jasny podział zbioru na obserwacje typowe i nietypowe. Wówczas krok z punktu \ref{outliers_step_3} aplikuje się $m$--krotnie dla wszystkich elementów $x_{test}=x_i$, gdzie $i=1,2,...,m$.
+Testując zbiorowo tak zdefiniowaną procedurę wykrywania elementów nietypowych, na wszystkich elementach zbioru \eqref{eq:kde_dataset}, uzyskuje się klarowny podział zbioru na obserwacje typowe i nietypowe. Wówczas krok z punktu \ref{outliers_step_3} aplikuje się $m$--krotnie dla wszystkich elementów  tj. $x_{test} = x_i$, gdzie $i=1,2,...,m$.
 
 \begin{exmp}
 Wyniki opisanej procedury, zastosowanej dla przykładowych danych syntetycznych wygenerowanych z mieszaniny rozkładów Gaussa $X \sim 0.7 N(0,1) + 0.3 N(5,1)$ przy liczności próby $m=100$ oraz wymiarowości $n=1$, przedstawione zostały na rysunku~\ref{fig:outliers_detection_example}. Czułość procedury została ustalona na wartości $r=0.05$. Ponadto do konstrukcji estymatora jądrowego $\hat{f}(x)$ wykorzystane zostało jądro normalne, a parametr wygładzania wyznaczony został za pomocą metody podstawień rzędu $2$. Jak widać na rysunku, obserwacje nietypowe wykryte zostały na obrzeżach estymowanej gęstości oraz pomiędzy modami, czyli tam gdzie wartości estymatora wpadają poniżej wartości progu $\hat{q}_{0.05}$.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.7]{outliers_detection_example}
+    \includegraphics[scale=0.65]{outliers_detection_example}
     \vspace{-0.5cm} 
     \caption{Wyniki procedury wykrywania elementów nietypowych dla przykładowych danych syntetycznych w ujęciu bezwarunkowym przy czułości procedury $r=0.05$.}
     \label{fig:outliers_detection_example}
@@ -204,7 +447,7 @@ Wyniki opisanej procedury, zastosowanej dla przykładowych danych syntetycznych 
 
 \section{Procedura w ujęciu warunkowym}
 
-Procedura wykrywania elementów nietypowych przedstawiona w podrozdziale \ref{sec:outliers_unconditional_procedure} zostanie teraz rozszerzona do ujęcia warunkowego, które jest kluczowe z punktu widzenia niniejszej rozprawy. Ogólna idea pozostaje zachowana: obserwacje uznawane są jako odosobnione, jeżeli położone są w rzadkich obszarach zagęszczenia przestrzeni, co zdeterminowane jest przez wyznaczoną wartość graniczną rozdzielającą obszary słabo i silnie zagęszczone. Owe zagęszczenie, tym razem jednak, oceniane jest za pomocą warunkowego estymatora jądrowego \eqref{eq:ckde3}, a wartość graniczna dostosowana jest do warunkowej postaci zagadnienia. Oznacza to, iż przedmiotem zainteresowania w przypadku niniejszej procedury jest charakterystyka elementów zbioru (ich typowość/nietypowość) przy ustalonym uwarunkowaniu $y^*$.
+Procedura wykrywania elementów nietypowych przedstawiona w podrozdziale \ref{sec:outliers_unconditional_procedure} została tutaj rozszerzona do ujęcia warunkowego, które jest kluczowe z punktu widzenia niniejszej rozprawy. Ogólna idea pozostaje zachowana: obserwacje uznawane są jako odosobnione, jeżeli położone są w rzadkich obszarach zagęszczenia przestrzeni, co zdeterminowane jest przez wyznaczoną wartość graniczną rozdzielającą obszary słabo i silnie zagęszczone. Owe zagęszczenie, tym razem jednak, oceniane jest za pomocą warunkowego estymatora jądrowego \eqref{eq:ckde3}, a wartość graniczna dostosowana jest do warunkowej postaci zagadnienia. Oznacza to, iż przedmiotem zainteresowania w przypadku niniejszej procedury jest charakterystyka elementów zbioru (ich typowość/nietypowość) przy ustalonym uwarunkowaniu $y^*$.
 
 Dany jest zatem zbiór obserwacji \eqref{eq:ckde_dataset}, a obserwacją podlegającą ocenie jest punkt testowy $x_{test}$ rozważany przy ustalonej wartości warunkowej $y^*$. Ostatecznie kroki procedury wykrywania elementów nietypowych dopasowanej do ujęcia warunkowego wyglądają następująco:
 \begin{enumerate}
@@ -222,26 +465,26 @@ Aby opisać wielkości występujące we wzorze \eqref{eq:conditional_quantile} n
 \end{enumerate}
 Wszystkie uwagi dotyczące czułości procedury (zdeterminowanej przez parametr $r$), poczynione w podrozdziale \ref{sec:outliers_unconditional_procedure}, pozostają w mocy również tutaj, w warunkowym ujęciu wykrywania elementów nietypowych.
 
-Warto odnotować, że w przypadku zbiorowego testowania procedury na zbiorze \eqref{eq:ckde_dataset}, naturalną wartością warunkującą $y^*$ staję się $y_i$ dla kolejnych elementów zbioru tzn. $y^*=y_i$ dla $i=1,2,...,m$.
+Warto odnotować, że w przypadku zbiorowego testowania procedury na zbiorze \eqref{eq:ckde_dataset}, naturalną wartością warunkującą $y^*$ staję się $y_i$ dla kolejnych elementów zbioru tzn. $y^* = y_i$ dla $i=1,2,...,m$.
 
 \begin{exmp} \label{exmp:outliers_detection_example2}
-Wyniki opisanej procedury, zastosowanej dla syntetycznych danych, wygenerowanych z mieszaniny rozkładów Gaussa $X \sim 0.5 N(\mu_1,\Sigma_1) + 0.5 N(\mu_2,\Sigma_2)$, gdzie $\mu_1=\begin{bmatrix} 0 \\ 0 \end{bmatrix}$, $\Sigma_1=\begin{bmatrix} 1 & -0.5 \\ -0.5 & 1 \end{bmatrix}$, $\mu_2=\begin{bmatrix} 4 \\ 0 \end{bmatrix}$, $\Sigma_2=\begin{bmatrix} 1 & 0.5 \\ 0.5 & 1 \end{bmatrix}$, przy liczności próby $m=500$ oraz wymiarowości $n_X=1, x_Y=1$, przedstawione zostały na rysunku~\ref{fig:outliers_detection_example2}. Czułość procedury została ustalona na wartości $r=0.05$. Ponadto do konstrukcji estymatora jądrowego $\hat{f}(x)$ wykorzystane zostało jądro normalne, a parametr wygładzania wyznaczony został za pomocą metody podstawień rzędu $2$. Kluczowy jest tutaj fakt, że każdy $i$-ty element zbioru analizowany jest pod szczególnym dla niego warunkiem $y^*=y_i$, co ma swoje odzwierciedlenie w obliczanych wartościach granicznych $\hat{q}_{r=0.05 \mid y^*=y_i}$.
+Wyniki opisanej procedury, zastosowanej dla syntetycznych danych, wygenerowanych z mieszaniny rozkładów Gaussa $X \sim 0.5 N(\mu_1,\Sigma_1) + 0.5 N(\mu_2,\Sigma_2)$, gdzie $\mu_1=\begin{bmatrix} 0 \\ 0 \end{bmatrix}$, $\Sigma_1=\begin{bmatrix} 1 & -0.5 \\ -0.5 & 1 \end{bmatrix}$, $\mu_2=\begin{bmatrix} 4 \\ 0 \end{bmatrix}$, $\Sigma_2=\begin{bmatrix} 1 & 0.5 \\ 0.5 & 1 \end{bmatrix}$, przy liczności próby $m=500$ oraz wymiarowości $n_X=1, x_Y=1$, przedstawione zostały na rysunku~\ref{fig:outliers_detection_example2}. Czułość procedury została ustalona na wartości $r=0.05$. Ponadto do konstrukcji estymatora jądrowego $\hat{f}(x \mid y)$ wykorzystane zostało jądro normalne, a parametr wygładzania wyznaczony został za pomocą metody podstawień rzędu $2$. Ważny jest tutaj fakt, że każdy $i$-ty element zbioru analizowany jest pod szczególnym dla niego warunkiem $y^* = y_i$, co ma swoje odzwierciedlenie w obliczanych wartościach granicznych $\hat{q}_{r=0.05 \mid y^*=y_i}$.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.69]{outliers_detection_example2}
+    \includegraphics[scale=0.65]{outliers_detection_example2}
     \vspace{-0.5cm} 
-    \caption{Rezultaty procedury wykrywania elementów nietypowych zastosowanej na przykładowych danych syntetycznych w ujęciu warunkowym przy $r=0.05$ oraz $y^*=y_i$.}
+    \caption{Rezultaty procedury wykrywania elementów nietypowych zastosowanej na przykładowych danych syntetycznych w ujęciu warunkowym przy $y^*=y_i$ oraz $r=0.05$.}
     \label{fig:outliers_detection_example2}
 \end{figure}
 \end{exmp}
 
 \begin{exmp}
-Inaczej niż w przykładzie \ref{exmp:outliers_detection_example2}, niniejszą procedurę można stosować również przy jednej, ustalonej wartości warunkującej $y^*$. I tak, w przykładzie tym zaprezentowane zostały przykładowe wyniki dla $y^*=1$. Dane i inne niezbędne parametry (z wyjątkiem $y^*$) powielone zostały z przykładu \ref{exmp:outliers_detection_example2}. Istotne jest tutaj, że estymator $\hat{f}(x \mid y^*)$ konstruowany jest w oparciu o wszystkie elementy zbioru, natomiast sam krok testowania aplikowany jest tylko na elementach położonych wokół wartości $y^*$.
+Inaczej niż w przykładzie \ref{exmp:outliers_detection_example2}, niniejszą procedurę można stosować również przy jednej, arbitralnie ustalonej wartości warunkującej $y^*$. I tak, w przykładzie tym zaprezentowane zostały przykładowe wyniki dla $y^*=1$. Dane i inne niezbędne parametry (z wyjątkiem $y^*$) powielone zostały z przykładu \ref{exmp:outliers_detection_example2}. Istotne jest tutaj, że estymator $\hat{f}(x \mid y^*)$ konstruowany jest w oparciu o wszystkie elementy zbioru, natomiast sam krok testowania aplikowany jest tylko na elementach położonych wokół wartości $y^*$.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.69]{outliers_detection_example3}
+    \includegraphics[scale=0.6]{outliers_detection_example3}
     \vspace{-0.5cm} 
-    \caption{Rezultaty procedury wykrywania elementów nietypowych zastosowanej na przykładowych danych syntetycznych w ujęciu warunkowym przy $r=0.05$ oraz $y^*=1$.}
+    \caption{Rezultaty procedury wykrywania elementów nietypowych zastosowanej na przykładowych danych syntetycznych w ujęciu warunkowym przy $y^*=1$ oraz $r=0.05$. W punkcie a) przedstawiony jest estymator jądrowy $\hat{f}(x \mid y^*)$, a rezultaty oparte o kształt tak estymowanej gęstości widoczne są w punkcie b).}
     \label{fig:outliers_detection_example3}
 \end{figure}
 \end{exmp}
@@ -268,7 +511,7 @@ Własność takiego wskaźnika jest następująca: czym mniejsza jego wartość,
     \centering
     \includegraphics[scale=0.6]{outliers_detection_example_eval}
     \vspace{-0.5cm} 
-    \caption{Opis.}
+    \caption{\textcolor{red}{Opis.}}
 %    \label{fig:ckde_construction}
 \end{figure}
 \end{exmp}
@@ -281,9 +524,84 @@ Własność takiego wskaźnika jest następująca: czym mniejsza jego wartość,
 
 \section{Wyniki w postaci rozmytej i intuicjonistycznej}
 
-\chapter{Klasteryzacja}
+\chapter{Klasteryzacja} \label{chap:clustering}
 
-\section{Procedura}
+\section{Wstęp}
+
+Klasteryzacja to technika stosowana w analizie danych i uczeniu maszynowym, której celem jest grupowanie podobnych punktów danych na podstawie ich cech lub atrybutów. Ogólną ideą klasteryzacji jest identyfikacja naturalnych grup lub wzorców w danych, które mogą nie być od razu widoczne, umożliwiając głębsze zrozumienie struktury danych i relacji. Technika ta należy do rodziny zagadnień nienadzorowanych (ang. \textit{unsupervised}), co oznacza, że nie opiera się na oznaczonych danych ani predefiniowanych kategoriach/klasach. Zamiast tego algorytm sam odkrywa takie grupy, często używając miary podobieństwa lub odległości między punktami danych.
+
+Zagadnienie klasteryzacji danych ma wiele zastosowań w różnych dziedzinach świata rzeczywistego. Oto kilka ważnych przykładów:
+\begin{itemize}
+\item \textbf{Segmentacja klientów:} Firmy wykorzystują klasteryzację do segmentacji swoich klientów na podstawie zachowań zakupowych, danych demograficznych lub preferencji. Pomaga im to lepiej zrozumieć grupę docelową, dostosować strategie marketingowe i opracować spersonalizowane rekomendacje produktów lub promocje.
+\item \textbf{Wykrywanie anomalii:} Klastrowanie może identyfikować wartości odstające lub nietypowe punkty danych, które nie należą do żadnego klastra. Jest to przydatne w wykrywaniu oszustw, włamań do sieci, wad produkcyjnych lub rzadkich schorzeń.
+\item \textbf{Segmentacja obrazu:} W wizji komputerowej grupowanie jest używane do podziału obrazu na odrębne regiony na podstawie koloru piksela, intensywności lub tekstury. Może to pomóc w rozpoznawaniu obiektów, odejmowaniu tła lub wykrywaniu krawędzi.
+\end{itemize}
+
+Główną motywacją stosowania procedur klasteryzacyjnych jest sposobność wykrycia ukrytej struktury, wzorców lub relacji w danych, które mogą nie być od razu widoczne, co może prowadzić do nowych spostrzeżeń, głębszego zrozumienia danych i podejmowania bardziej świadomych decyzji. Inną ważną motywacją może być redukcja szumu w danych oraz identyfikacja wartości odstających, dzięki czemu jakość danych ulega poprawie. Klastrowanie może również służyć do tworzenia nowych atrybutów danych dla zadań nadzorowanych, takich jak klasyfikacja lub regresja. Włączając członkostwo do poszczególnych klastrów w sensie dodatkowej cechy danych, modele mogą lepiej uchwycić złożone wzorce i relacje w nich zawarte.
+
+Pomimo swojego znaczenia klasteryzacja nie jest wolna od wyzwań i otwartych problemów. Wiele algorytmów grupowania wymaga predefiniowanej liczby klastrów jako danych wejściowych. Jednak wyznaczenie optymalnej wartości jest często nietrywialne i może wymagać wiedzy domenowej lub dodatkowych technik ewaluacyjnych. Innym problemem jest skalowalność związana z ograniczeniami obliczeniowymi lub pamięciowymi. Opracowywanie wydajnych, skalowalnych algorytmów, które mogą obsługiwać takie zbiory danych, jest aktywnym obszarem badań. Kolejnym problemem jest obecność szumu lub wartości odstających, co może znacząco wpłynąć na wydajność algorytmów grupowania, prowadząc do nieprawidłowych lub niestabilnych grupowań. Opracowanie metod bardziej odpornych na takie zakłócenia ma kluczowe znaczenie dla zastosowań w świecie rzeczywistym. Nie mniej istotnymi problemami są problemy związane z interpretacją oraz ewaluacją wyników, co wynika z nienadzorowanej natury zagadnienia.
+
+Istnieją różne algorytmy grupowania, każdy z innym podejściem i założeniami dotyczącymi danych. Niektóre popularne algorytmy grupowania to:
+\begin{itemize}
+\item \textbf{Metoda $k$-średnich (ang. \textit{k-means}):} Algorytm ten próbuje znaleźć z góry określoną liczbę $k$ klastrów przez iteracyjne przypisanie każdego punktu danych do najbliższego środka ciężkości i aktualizację środków ciężkości na podstawie średniej z przypisanych punktów danych. Proces ten jest powtarzany aż do osiągnięcia konwergencji lub spełnienia kryterium zatrzymania procedury.
+\item \textbf{Hierarchiczne grupowanie:} Algorytm ten tworzy drzewiastą strukturę zagnieżdżonych klastrów, zaczynając od każdego punktu danych jako własnego klastra i sukcesywnie łącząc najbliższe pary klastrów (podejście aglomeracyjne) lub rozpoczynając od jednego dużego klastra zawierającego wszystkie punkty danych i sukcesywnie dzieląc klastry na mniejsze (podejście dzielące).
+\item \textbf{Metoda DBSCAN (ang. \textit{Density-Based Spatial Clustering of Applications with Noise}):} Algorytm ten grupuje ściśle upakowane punkty danych na podstawie progu gęstości i metryki odległości, jednocześnie identyfikując i oddzielając punkty danych reprezentujące szum.
+\item \textbf{Metoda Mean-Shift:} Algorytm ten działa poprzez iteracyjne przesuwanie punktów danych w kierunku najgęstszych regionów w ich sąsiedztwie, skutecznie tworząc klastry wokół modów (szczytów) lokalnej funkcji gęstości.
+\end{itemize}
+W praktyce często nie ma jednej uniwersalnej metody rozwiązania dla zagadnienia klasteryzacji. Powszechne jest eksperymentowanie z wieloma algorytmami, dostrajanie ich parametrów i porównywanie ich wydajności w celu określenia najbardziej odpowiedniego algorytmu dla konkretnego problemu. Ponadto wykorzystanie wiedzy domenowej i wkładu ekspertów może pomóc w dokonaniu wyboru i poprawić jakość wyników grupowania. Powyższa lista metod klasteryzacyjnych jest niewyczerpująca i ujęta w sposób skrótowy, gdyż nie jest kluczowa z punktu widzenia niniejszej rozprawy, a jedynie stanowi poglądowy ich przegląd. Dogłębne rozszerzenie powyższej listy wraz z szczegółowym opisem zawarte jest w pracach \cite{Jain_1999, Xu_2005, Xu_2008}.
+
+W przedłożonej rozprawie zaprezentowana została metoda gęstościowa oparta o estymację gęstości przy użyciu estymatora jądrowego (zdefiniowanego w rozdziale \ref{chap:kde}) rozszerzona o ujęcie warunkowe, co stanowi fundament tego rozdziału. \textcolor{red}{Taki mean-shift.}
+
+\section{Procedura w ujęciu bezwarunkowym}
+
+Fundamentalną ideą prezentowanej tutaj procedury klasteryzacji jest utożsamienie potencjalnie występujących klastrów w badanym zbiorze danych z najbardziej zagęszczonymi regionami funkcji gęstości, która estymowana jest za pomocą bezwarunkowego jądrowego estymatora gęstości \eqref{eq:kde2}. Polega to na iteracyjnym przesuwaniu punktów danych w kierunku najgęstszych regionów w ich sąsiedztwie, tworząc klastry wokół modów (szczytów) estymowanej gęstości rozkładu. Zasadniczo procedura klasteryzacji składa się z dwóch kroków:
+\begin{enumerate}
+\item Przesunięcie wszystkich punktów zbioru w kierunku swoich najbliższych ekstremów lokalnych estymowanej funkcji gęstości. Wyróżnia się tutaj dwie metody:
+\begin{itemize}
+\item gradient ascent -- metoda gradientowa
+\begin{equation}
+x_i^{t+1} = x_i^t + b \frac{\nabla \hat{f}(x_i^t)}{\hat{f}(x_i^t)},
+\end{equation}
+gdzie parametr $b$ określa tempo przesuwania punktu $x_i$, a jego wartość wyliczana jest przy użyciu formuły $b = \frac{1}{n+2} h^2$, natomiast parametr $t$ oznacza kolejny krok owego przesuwania.
+\item oparta o punkt stały (fixed point theorem)
+\begin{equation}
+x_i^{t+1} = \frac{\sum_{i^{'}=1}^m w_i K(x_i^t,x_{i^{'}},h) x_{i^{'}}}{\sum_{i^{'}=1}^m w_i K(x_i^t,x_{i^{'}},h)}
+\end{equation}
+gdzie $K(x)$ to jądro gaussowskie
+\end{itemize}
+W obu przypadkach proces iteracyjny przerywany zostaje w momencie, gdy odległość euklidesowa między $x_i^t$ i $x_i^{t+1}$ jest mniejsza od $\epsilon = 10^{-8}$.
+\item Przypisanie punktów zbioru do zidentyfikowanych klastrów poprzez przypisanie odpowiednich etykiet. Procedura wygląda następująco:
+\begin{enumerate}
+\item Stworzenie pustej tablicy $rep$, do której dopisywani będą tzw. reprezentanci klastrów
+\item Dopisanie pierwszego punktu $x_1$ do tablicy $rep$ uznając go za reprezentanta pierwszego klastra
+\item Iterując (w podwójnej pętli) po pozostałych punktach $x_i$, gdzie $i=2,3,...,m$ oraz po elementach (reprezentantach) z tablicy $rep$ (indeks $j$), należy sprawdzić czy odległość euklidesowa między punktem $x_i$ i reprezentantem $j$-tego klastra $rep_j$ jest mniejsza od $\delta=10^{-3}$. Jeśli tak, to punkty $x_i$ zostaje przypisany do klastra $j$ (dostaje etykietę tego klastra) i wówczas należy przejść do kolejnego punktu zbioru. Jeśli warunek ten nie jest spełniony względem żadnego reprezentanta $rep_j$, to punkt $x_i$ nie zostaje przypisany do żadnego klastra i zostaje dopisany do tablicy $rep$, stając się reprezentantem nowego klastra, dotychczas niedostępnego w tablicy $rep$.
+\end{enumerate}
+W ten sposób przypisane zostają etykiety klastrów do wszystkich punktów zbioru danych będącego przedmiotem analizy.
+\end{enumerate}
+\begin{exmp} \label{exmp:clustering_example}
+Wyniki opisanej procedury, zastosowanej dla przykładowych danych syntetycznych wygenerowanych z mieszaniny rozkładów Gaussa $X \sim 0.7 N(0,1) + 0.3 N(5,1)$ przy liczności próby $m=100$ oraz wymiarowości $n=1$, przedstawione zostały na rysunku~\ref{fig:clustering_example}. \textcolor{red}{Metoda przesuwania punktów danych to mean\_shift, parametry $\epsilon = 10^{-8}$ i $\delta = 10^{-3}$}. Ponadto do konstrukcji estymatora jądrowego $\hat{f}(x)$ wykorzystane zostało jądro normalne, a parametr wygładzania wyznaczony został za pomocą metody podstawień rzędu $2$. Jak widać na rysunku, zgodnie z oczekiwaniami, estymowana funkcja gęstości przyjmuje charakter dwumodalny, a w konsekwancji zidentyfikowane zostały dwa klastry.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.65]{clustering_example}
+    \vspace{-0.5cm} 
+    \caption{Wyniki procedury klasteryzacji dla przykładowych danych syntetycznych w ujęciu bezwarunkowym.}
+    \label{fig:clustering_example}
+\end{figure}
+\end{exmp}
+
+\section{Procedura w ujęciu warunkowym}
+
+\textcolor{red}{Wszystko jak w ujęciu bezwarunkowym oprócz tego, że analizujemy przypadek przy ustalonym arbitralnie warunku $y^*$ tzn. budujemy estymator jądrowy $\hat{f}(x \mid y^*)$, a otrzymane klastry traktujemy jako sensowne tylko dla punktów w otoczeniu tego warunku $y^*$.}
+\begin{exmp}
+Wyniki opisanej procedury w ujęciu warunkowym przy arbitralnie ustalonej wartości warunkowej $y^*=1$, zastosowanej dla syntetycznych danych, wygenerowanych z mieszaniny rozkładów Gaussa $X \sim 0.5 N(\mu_1,\Sigma_1) + 0.5 N(\mu_2,\Sigma_2)$, gdzie $\mu_1=\begin{bmatrix} 0 \\ 0 \end{bmatrix}$, $\Sigma_1=\begin{bmatrix} 1 & -0.5 \\ -0.5 & 1 \end{bmatrix}$, $\mu_2=\begin{bmatrix} 4 \\ 0 \end{bmatrix}$, $\Sigma_2=\begin{bmatrix} 1 & 0.5 \\ 0.5 & 1 \end{bmatrix}$, przy liczności próby $m=500$ oraz wymiarowości $n_X=1, x_Y=1$, przedstawione zostały na rysunku~\ref{fig:clustering_example2}. \textcolor{red}{Metoda przesuwania punktów danych to mean\_shift, parametry $\epsilon = 10^{-8}$ i $\delta = 10^{-3}$}. Ponadto do konstrukcji estymatora jądrowego $\hat{f}(x \mid y)$ wykorzystane zostało jądro normalne, a parametr wygładzania wyznaczony został za pomocą metody podstawień rzędu $2$. Podobnie jak w przykładzie \ref{exmp:clustering_example}, estymowana gęstość rozkładu przyjmuje charakter dwumodalny, co w konsekwencji prowadzi do wyodrębnienia dwóch klastrów.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{clustering_example2}
+    \vspace{-0.5cm} 
+    \caption{Wyniki procedury klasteryzacji dla przykładowych danych syntetycznych w ujęciu warunkowym przy $y^*=1$. W punkcie a) przedstawiony jest estymator jądrowy $\hat{f}(x \mid y^*)$, a rezultaty oparte o jego kształt widoczne są w punkcie b).}
+    \label{fig:clustering_example2}
+\end{figure}
+\end{exmp}
 
 \section{Wskaźnik jakości}
 
@@ -291,7 +609,7 @@ Własność takiego wskaźnika jest następująca: czym mniejsza jego wartość,
 
 \section{Wyniki w postaci rozmytej i intuicjonistycznej}
 
-\chapter{Klasyfikacja}
+\chapter{Klasyfikacja} \label{chap:classification}
 
 \textcolor{red}{Wstęp}
 
@@ -388,11 +706,13 @@ Liczenie wskaźnika: wyciągamy $i$-tą obserwację $x_i$ ze zbioru danych użyt
 
 \chapter{Weryfikacja numeryczna}
 
+W niniejszym rozdziale zaprezentowane zostały wyniki weryfikacji numerycznej opracowanych procedur wykrywania elementów nietypowych (rozdział \ref{chap:outliers_detection}), klasteryzacji (rozdział \ref{chap:clustering}) oraz klasyfikacji (rozdział \ref{chap:classification}), zastosowanych do przygotowanych uprzednio danych syntetycznych oraz do publicznie dostępnych danych benchmarkowych. W każdym przypadku zestawione zostały wyniki ujęcia bezwarunkowego z wynikami ujęcia warunkowego.
+
 \section{Dane syntetyczne}
 
-Parametry mieszaniny rozkładów Gaussa ($m=1000$):
+Przygotowane tutaj dane syntetyczne to zbiór wylosowanych punktów w przestrzeni dwuwymiarowej o liczności $m=1000$, złożony z punktów wygenerowanych z czterech członów, reprezentujących rozkłady normalne o parametrach przedstawionych w tabeli \ref{table:synthetic_data_params}.
 \begin{table}[H]
-\caption{\textcolor{red}{Podpis tabeli.}}
+\caption{Parametry rozkładów normalnych dla danych syntetycznych.}
 \centering
 \begin{tabular}{ clll }
 \toprule
@@ -409,170 +729,130 @@ $4$ & $m_4 = 0.1m$ & $E_4 = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$ & $Cov_4 = \be
 \addlinespace[0.1cm]
 \bottomrule
 \end{tabular}
-%\label{table:1}
+\label{table:synthetic_data_params}
 \end{table}
-
+\noindent Wizualizacja wygenerowanego zbioru przedstawiona została na rysunku \ref{fig:synthetic_data}. Punkty pochodzące z członów $1$--$3$ trakuje się jako normalne, natomiast punkty pochodzące z członu $4$ reprezentują szum (oznaczony kolorem czerwonym), który stanowi $10\%$ liczności zbioru. Dalej w przeprowadzanych eksperymentach zmienną $X$ oraz $Y$, traktuje się odpowiednio jako zmienną objaśniającą oraz warunkową, co przekłada się na estymację gęstości postaci $\hat{f}(x)$ w ujęciu bezwarunkowym oraz $\hat{f}(x \mid y)$ w ujęciu warunkowym.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.7]{synthetic_data}
+    \includegraphics[scale=0.65]{synthetic_data}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Podpis rysunku.}}
+    \caption{Wygenerowane dane syntetyczne pochodzące z rozkładów normalnych o parametrach przedstawionych w tabeli \ref{table:synthetic_data_params}.}
     \label{fig:synthetic_data}
 \end{figure}
 
-Dane z członu 4 traktowane są jako szum. \textcolor{red}{wypełnienie wypełnienie wypełnienie wypełnienie wypełnienie wypełnienie wypełnienie wypełnienie wypełnienie wypełnienie}
-
 \subsection*{Wykrywanie elementów nietypowych}
 
-\subsubsection*{Ujęcie bezwarunkowe vs warunkowe przy $r=0.05$}
-
+Na rysunku \ref{fig:synthetic_data_outliers} przedstawione zostały rezultaty procedury wykrywania elementów nietypowych w ujęciu bezwarunkowym oraz w ujęciu warunkowym dla eksperymentu przeprowadzonego na zbiorze punktów zilustrowanych na rysunku \ref{fig:synthetic_data}. Do konstrukcji estymatora jądrowego wykorzystane zostało jądro normalne oraz wartości parametru wygładzania $h_x=0.426$ i $h_y=0.284$, wyznaczone metodą podstawień rzędu $2$, natomiast do samej procedury zastosowano domyślną wartość czułości procedury $r=0.05$. Wykryte elementy nietypowe oznaczone zostały kolorem czerwonym.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.6]{synthetic_data_outliers_kde_and_ckde}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie bezwarunkowe (lewa strona) vs warunkowe (prawa strona) ($y^*=y_i$) przy $r=0.05$.}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Wizualizacja rezultatów procedury wykrywania elementów nietypowych zastosowanej do danych syntetycznych w ujęciu: a) bezwarunkowym, b) warunkowym.}
+    \label{fig:synthetic_data_outliers}
 \end{figure}
-Komentarz do ujęcia bezwarunkowego:
-\begin{itemize}
-\item (Pojedynczy ekperyment) Wskaźnik: $0.346233$
-\item (100 ekperymentów) Wskaźnik: $0.433190 \pm 0.045132$
-\end{itemize}
-Komentarz do ujęcia warunkowego:
-\begin{itemize}
-\item (Pojedynczy ekperyment) Wskaźnik: $0.661282$
-\item (100 ekperymentów) Wskaźnik: $0.572255 \pm 0.059012$
-\end{itemize}
-
-\newpage
-\subsubsection*{Dopasowanie parametrów (mnożnika h oraz r) - bezwarunkowe i warunkowe}
-Siatka dla:
-\begin{itemize}
-\item mnożników $h$: [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0] (11 punktów)
-\item $r$: [0.01, 0.02, ..., 0.2] (20 punktów)
-\end{itemize} 
+\begin{table}[H]
+\caption{\textcolor{red}{Podpis.}}
+\centering
+\begin{tabular}{ lcccc }
+\toprule
+\textbf{Ujęcie} & \textbf{Wskaźnik} & \textbf{Średni wskaźnik} & \textbf{Wskaźnik*} & \textbf{Średni wskaźnik*} \\ 
+\toprule
+\addlinespace[0.2cm]
+Bezwarunkowe & $0.346$ & $0.433 \pm 0.045$ & $0.328$ & $0.314 \pm 0.056$ \\
+\addlinespace[0.2cm]
+Warunkowe & $0.661$ & $0.572 \pm 0.059$ & $0.393$ & $0.411 \pm 0.083$ \\
+\addlinespace[0.1cm]
+\bottomrule
+\end{tabular}
+\label{table:synthetic_data_outliers}
+\end{table}
+\noindent W tabeli \ref{table:synthetic_data_outliers} umieszczone zostały wartości wskaźnika jakości procedury dla niniejszego pojedynczego eksperymentu, jak również średnie wartości owego wskaźnika dla $100$ niezależnych eksperymentów. Ponadto, w podobny sposób przedstawione zostały tam wyniki dla powtórzonych eksperymentów o optymalnych wartościach mnożnika parametru wygładzania $m_h^*$, takiego że $h^*=m_h^*h$ oraz optymalnych wartościach czułości procedury~$r^*$. Wielkości dodatkowo oznaczane znakiem * wskazują na wyniki optymalne. Optymalizacja przeprowadzona została metodą siatki dla wartości mnożnika $m_{h_x}$ danych przez $[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]$ oraz dla wartości czułości procedury $r$ danych przez $[0.01, 0.02, ..., 0.2]$, co w sumie daje $220$ punktów na siatce. Wizualizacja rezultatów pojedynczego eksperymentu z optymalnymi parametrami $m_{h_x}^*=1.0$ i $r^*=0.04$ dla ujęcia bezwarunkowego oraz $m_{h_x}^*=1.8$, $m_{h_y}^*=1.8$ i $r^*=0.01$ \textcolor{red}{(tutaj mniejsza siatka: dla $h_x$ oraz $h_y$ (0.5, 0.75, 1.0, 1.5, 2.0), a dla $r$ (0.01, 0.05, 0.1, 0.15, 0.2))} dla ujęcia warunkowego przedstawiona została na rysunku \ref{fig:synthetic_data_outliers2}.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.6]{synthetic_data_outliers_kde_and_ckde2}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie bezwarunkowe i warunkowe po optymalizacji.}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Wizualizacja rezultatów procedury wykrywania elementów nietypowych  o optymalnych parametrach zastosowanej do danych syntetycznych w ujęciu: a) bezwarunkowym, b) warunkowym.}
+	\label{fig:synthetic_data_outliers2}
 \end{figure}
-Komentarz do ujęcia bezwarunkowego:
-\begin{itemize}
-\item (Pojedynczy eksperyment) Mnożnik $h$: $1.0$, $r$: $0.04$, wskaźnik: $0.327785$
-\item (100 eksperymentów) Wskaźnik: $0.313737 \pm 0.055668$
-\end{itemize}
-Komentarz do ujęcia warunkowego:
-\begin{itemize}
-\item (Pojedynczy eksperyment) Mnożnik $h_x$: $1.8$, $h_y$: $1.8$, $r$: $0.01$, wskaźnik: $0.393446$
-\item (100 eksperymentów) Wskaźnik: $0.411079 \pm 0.083287$ (tutaj mniejsza siatka: dla $h_x$ oraz $h_y$ (0.5, 0.75, 1.0, 1.5, 2.0), a dla $r$ (0.01, 0.05, 0.1, 0.15, 0.2))
-\end{itemize}
-
+W ujęciu warunkowym $i$-ty punkt zbioru danych rozważany jest przez pryzmat estymowanej gęstości $\hat{f}(x_i \mid y_i)$ i w ten sposób wyszukiwane są elementy nietypowe w całym zbiorze. Można jednak podejść do sprawy inaczej, mianowicie można szukać elementów nietypowych wokół otoczenia ustalonej arbitralnie wartości warunkowej $y^*$. Na rysunkach \ref{fig:synthetic_data_outliers3}, \ref{fig:synthetic_data_outliers4}, \ref{fig:synthetic_data_outliers5} przedstawione zostały rezultaty eksperymentów dla trzech różnych arbitralnie ustalonych wartości warunkowych odpowiednio $y^*=-2$, $y^*=0$, $y^*=2$ przy czułości procedury kolejno $r=0.01$, $r=0.05$, $r=0.1$. Punkty danych mocno oddalone od ustalonego warunku $y^*$ zostały oznaczone mniej wyraźnymi kolorami, gdyż tak przygotowana procedura ma sens tylko dla punktów położonych w otoczeniu wartości $y^*$.
 \newpage
-\subsubsection*{Ustalone $y^*=-2,0,2$}
-
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.45]{synthetic_data_outliers_ckde_extra1}
+    \includegraphics[width=0.95\textwidth]{synthetic_data_outliers_ckde_extra1}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie warunkowe przy $y^*=-2$ i $r=[0.01, 0.05, 0.1]$}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Ujęcie warunkowe przy $y^*=-2$ oraz kolejno $r=0.01$, $r=0.05$, $r=0.1$}
+    \label{fig:synthetic_data_outliers3}
 \end{figure}
-
+\vspace{-0.5cm} 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.45]{synthetic_data_outliers_ckde_extra2}
+    \includegraphics[width=0.95\textwidth]{synthetic_data_outliers_ckde_extra2}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie warunkowe przy $y^*=0$ i $r=[0.01, 0.05, 0.1]$}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Ujęcie warunkowe przy $y^*=0$ oraz kolejno $r=0.01$, $r=0.05$, $r=0.1$}
+    \label{fig:synthetic_data_outliers4}
 \end{figure}
-
+\vspace{-0.5cm} 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.45]{synthetic_data_outliers_ckde_extra3}
+    \includegraphics[width=0.95\textwidth]{synthetic_data_outliers_ckde_extra3}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie warunkowe przy $y^*=2$ i $r=[0.01, 0.05, 0.1]$}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Ujęcie warunkowe przy $y^*=2$ oraz kolejno $r=0.01$, $r=0.05$, $r=0.1$}
+    \label{fig:synthetic_data_outliers5}
 \end{figure}
 
 \subsection*{Klasteryzacja}
 
-Ujęcie bezwarunkowe
+Na rysunkach \ref{fig:kde_synthetic_data_clustering} oraz \ref{fig:ckde_synthetic_data_clustering} przedstawione zostały rezultaty procedury klasteryzacji odpowiednio w ujęciu bezwarunkowym oraz w ujęciu warunkowym dla eksperymentu przeprowadzonego na zbiorze punktów zilustrowanych na rysunku \ref{fig:synthetic_data}. W przypadku ujęcia warunkowego zaprezentowane zostały trzy przykłady dla arbitralnie wybranych wartości warunkowych $y^*=-2$, $y^*=0$ oraz $y^*=2$. Do konstrukcji estymatora jądrowego wykorzystane zostało jądro normalne oraz wartości parametru wygładzania $h_x=0.426$ i $h_y=0.284$, wyznaczone metodą podstawień rzędu $2$, natomiast do samej procedury zastosowano algorytm \textit{mean\_shift}. Punkty danych przypisane do poszczególnych klastrów oznaczone zostały innymi kolorami.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.7]{synthetic_data_clustering_kde}
+    \includegraphics[scale=0.65]{synthetic_data_clustering_kde}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie bezwarunkowe.}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Wizualizacja rezultatów procedury klasteryzacji zastosowanej do danych syntetycznych w ujęciu bezwarunkowym.}
+    \label{fig:kde_synthetic_data_clustering}
 \end{figure}
-
-\noindent Ujęcie warunkowe ($y^*=-2,0,2$)
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.5]{synthetic_data_clustering_ckde}
+    \includegraphics[width=0.95\textwidth]{synthetic_data_clustering_ckde}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie warunkowe przy $y^*=[-2,0,2]$.}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Wizualizacja rezultatów procedury klasteryzacji zastosowanej do danych syntetycznych w ujęciu warunkowym dla: a) $y^*=-2$, b) $y^*=0$, c) $y^*=2$.}
+    \label{fig:ckde_synthetic_data_clustering}
 \end{figure}
-
-\newpage
-\subsubsection*{Dopasowanie parametrów}
-
-Ujęcie bezwarunkowe
+\noindent W tabeli \ref{table:synthetic_data_clustering} umieszczone zostały wartości wskaźnika jakości procedury dla niniejszego pojedynczego eksperymentu, jak również średnie wartości owego wskaźnika dla $100$ niezależnych eksperymentów. Ponadto, w podobny sposób przedstawione zostały tam wyniki dla powtórzonych eksperymentów o optymalnych wartościach mnożnika parametru wygładzania $m_h^*$, takiego że $h^*=m_h^*h$. Wielkości dodatkowo oznaczane znakiem * wskazują na wyniki optymalne. Optymalizacja przeprowadzona została metodą siatki dla wartości mnożnika $m_{h_x}$ danych przez $[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]$, co daje $11$ punktów na siatce. Wizualizacja rezultatów pojedynczego eksperymentu z optymalnymi parametrami $m_{h_x}^*=0.7$ w przypadku ujęcia bezwarunkowego oraz $m_{h_x}^*=2.0$, $m_{h_y}^*=1.4$ dla $y^*=-2$, $m_{h_x}^*=0.9$, $m_{h_y}^*=0.7$ dla $y^*=0$, $m_{h_x}^*=1.8$, $m_{h_y}^*=0.5$ dla $y^*=2$ w przypadku ujęcia warunkowego, przedstawiona została odpowiednio na rysunkach \ref{fig:kde_synthetic_data_clustering2} oraz \ref{fig:ckde_synthetic_data_clustering2}.
+\begin{table}[H]
+\caption{\textcolor{red}{Podpis.}}
+\centering
+\begin{tabular}{ lcccc }
+\toprule
+\textbf{Ujęcie} & \textbf{Wskaźnik} & \textbf{Średni wskaźnik} & \textbf{wsk*} & \textbf{Średni wsk*} \\ 
+\toprule
+\addlinespace[0.2cm]
+Bezwarunkowe & $0.202$ & $0.264 \pm 0.104$ & $0.377$ & $0.370 \pm 0.064$ \\
+\addlinespace[0.2cm]
+Warunkowe ($y^*=-2$) & $0.191$ & $0.217 \pm 0.135$ & \textcolor{red}{$1.000$} & \textcolor{red}{XXX} \\
+\addlinespace[0.2cm]
+Warunkowe ($y^*=0$) & $0.086$ & $0.169 \pm 0.104$ & $0.476$ & \textcolor{red}{XXX} \\
+\addlinespace[0.2cm]
+Warunkowe ($y^*=2$) & $0.370$ & $0.229 \pm 0.124$ & $0.426$ & \textcolor{red}{XXX} \\
+\addlinespace[0.1cm]
+\bottomrule
+\end{tabular}
+\label{table:synthetic_data_clustering}
+\end{table}
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.7]{synthetic_data_clustering_kde2}
+    \includegraphics[scale=0.65]{synthetic_data_clustering_kde2}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie bezwarunkowe po optymalizacji.}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Wizualizacja rezultatów procedury klasteryzacji o optymalnych parametrach zastosowanej do danych syntetycznych w ujęciu bezwarunkowym.}
+    \label{fig:kde_synthetic_data_clustering2}
 \end{figure}
-
-\noindent Ujęcie warunkowe ($y^*=-2,0,2$)
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{synthetic_data_clustering_ckde2}
     \vspace{-0.5cm} 
-    \caption{\textcolor{red}{Ujęcie warunkowe przy $y^*=[-2,0,2]$ po optymalizacji.}}
-%    \label{fig:kde_construction_weighted}
+    \caption{Wizualizacja rezultatów procedury klasteryzacji o optymalnych parametrach zastosowanej do danych syntetycznych w ujęciu warunkowym dla: a) $y^*=-2$, b) $y^*=0$, c) $y^*=2$.}
+    \label{fig:ckde_synthetic_data_clustering2}
 \end{figure}
 
-\newpage
-\noindent Komentarz do ujęcia bezwarunkowego:
-\begin{itemize}
-\item (Pojedynczy eksperyment) Wskaźnik: $0.201591$
-\item (Po optymalizacji) Wskaźnik: $0.151635$ (mnożnik h: $0.9$)
-\end{itemize}
-Komentarz do ujęcia warunkowego:
-\begin{itemize}
-\item (Pojedynczy eksperyment, $y^*=-2$) Wskaźnik: $0.295941$
-\item (Po optymalizacji) Wskaźnik: $0.165905$ ($h_x=1.6, h_y=1.4$)
-\item (Pojedynczy eksperyment, $y^*=0$) Wskaźnik: $0.111545$
-\item (Po optymalizacji) Wskaźnik: $0.067874$ ($h_x=1.2, h_y=0.6$)
-\item (Pojedynczy eksperyment, $y^*=2$) Wskaźnik: $0.339541$
-\item (Po optymalizacji) Wskaźnik: $0.115576$ ($h_x=0.6, h_y=0.5$)
-\end{itemize}
-
-\subsubsection*{Wielokrotne eksperymenty (100 eksperymentów)}
-
-Siatka dla mnożników h: [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0] \\
-
-\noindent Komentarz do ujęcia bezwarunkowego:
-\begin{itemize}
-\item Wskaźnik: $0.263886 \pm 0.104383$
-\item (Po optymalizacji) Wskaźnik: $0.122456 \pm 0.049968$ (średni mnożnik h: $1.104000 \pm 0.531022$)
-\end{itemize}
-Komentarz do ujęcia warunkowego:
-\begin{itemize}
-\item ($y^*=-2$) Wskaźnik: $0.389832 \pm 0.097703$
-\item ($y^*=-2$) (Po optymalizacji) Wskaźnik: $0.175500 \pm 0.055812$ (średnie mnożniki $h_x$: $0.959000 \pm 0.471613$, $h_y$: $1.049000 \pm 0.572101$)
-\item ($y^*=0$) Wskaźnik: $0.239593 \pm 0.116329$
-\item ($y^*=0$) (Po optymalizacji) Wskaźnik: $0.094464 \pm 0.035832$ (średnie mnożniki $h_x$: $1.193000 \pm 0.400813$, $h_y$: $1.029000 \pm 0.490570$)
-\item ($y^*=2$) Wskaźnik: $0.349648 \pm 0.088935$
-\item ($y^*=-2$) (Po optymalizacji) Wskaźnik: $0.132762 \pm 0.034459$ (średnie mnożniki $h_x$: $0.974000 \pm 0.489820$, $h_y$: $1.010000 \pm 0.517591$)
-\end{itemize}
-
-\newpage
 \subsection*{Klasyfikacja}
 
 Te same dane co na rysunku \ref{fig:synthetic_data}, ale bez szumu (czwarty czynnik).
