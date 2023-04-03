@@ -93,8 +93,8 @@ class CKDE:
         if x_train.ndim != 2:
             raise ValueError("invalid shape of 'x_train' - should be 2d")
         self.x_train = x_train
-        m_train = self.x_train.shape[0]
-        n_x = self.x_train.shape[1]
+        m_train = x_train.shape[0]
+        n_x = x_train.shape[1]
 
         if y_train.ndim != 2:
             raise ValueError("invalid shape of 'y_train' - should be 2d")
@@ -119,7 +119,7 @@ class CKDE:
             weights_train = weights_train / weights_train.sum()
 
         if bandwidth_x is None or bandwidth_y is None:
-            z_train = np.concatenate((self.x_train, y_train), axis=1)
+            z_train = np.concatenate((x_train, y_train), axis=1)
             if bandwidth_method == "normal_reference":
                 bandwidth = normal_reference(z_train, weights_train, self.kernel_name)
             elif bandwidth_method == "direct_plugin":
@@ -150,7 +150,7 @@ class CKDE:
                 raise ValueError("'bandwidth_y' should be positive")
             self.bandwidth_x = bandwidth_x
 
-        self.cond_weights_train = compute_d(
+        self.c_weights_train = compute_d(
             y_train,
             weights_train,
             y_star,
@@ -193,7 +193,7 @@ class CKDE:
         >>> # Fit the estimator.
         >>> ckde = CKDE().fit(x_train, y_train, y_star)
         >>> # Compute pdf
-        >>> scores, d = ckde.pdf(x_test)  # scores shape (10,)
+        >>> scores = ckde.pdf(x_test)  # scores shape (10,)
         """
         if not self.fitted:
             raise RuntimeError("fit the estimator first")
@@ -203,7 +203,7 @@ class CKDE:
 
         scores = compute_kde(
             self.x_train,
-            self.cond_weights_train,
+            self.c_weights_train,
             x_test,
             self.bandwidth_x,
             self.kernel_name,
