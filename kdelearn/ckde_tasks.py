@@ -425,7 +425,7 @@ class CKDEOutliersDetection:
 
         idx_sorted = np.argsort(scores)
         scores_ord = scores[idx_sorted]
-        cond_weights_train_ord = self.ckde.cond_weights_train[idx_sorted]
+        cond_weights_train_ord = self.ckde.c_weights_train[idx_sorted]
 
         cond_weights_train_ord_cumsum = np.cumsum(cond_weights_train_ord)
         k = np.where(cond_weights_train_ord_cumsum > r)[0][0] - 1

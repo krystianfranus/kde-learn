@@ -154,3 +154,5 @@ thesis/*.toc
 thesis/*.bbl
 thesis/*.blg
 thesis/*.log
+
+data/

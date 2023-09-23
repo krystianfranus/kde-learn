@@ -115,11 +115,15 @@ def pi_kf(
     inliers = labels_pred == 0
     outliers = labels_pred == 1
     n_outliers = (outliers == 1).sum()
+    # n_inliers = (outliers == 0).sum()  # new line
 
     kde = KDE().fit(x_train, weights_train, bandwidth=bandwidth)
     scores = kde.pdf(x_train)
     scores_out = scores[outliers]
     scores_in = np.sort(scores[inliers])[:n_outliers]
+    # tmp = int(np.ceil(0.01 * (n_inliers + n_outliers)))
+    # scores_out = np.sort(scores[outliers])[-tmp:]
+    # scores_in = np.sort(scores[inliers])[:tmp]
 
     pi = np.sum(scores_out) / np.sum(scores_in)
     return pi
